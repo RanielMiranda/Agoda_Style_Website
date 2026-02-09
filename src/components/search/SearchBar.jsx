@@ -180,7 +180,7 @@ export default function SearchBar() {
                 {["Solo Traveler", "Couple", "Family", "Group"].map((type) => (
                   <button
                     key={type}
-                    className={`text-left px-4 py-2 rounded hover:bg-gray-100 ${
+                    className={`text-left px-4 py-2 rounded hover:bg-blue-100 ${
                       guestType === type ? "bg-white-200 font-medium" : ""
                     }`}
                     onClick={() => handleGuestTypeChange(type)}

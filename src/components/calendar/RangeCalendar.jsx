@@ -69,12 +69,11 @@ export default function RangeCalendar({ startDate, endDate, onChange, activeDrop
                     onChange(startDate, date);
                   }
                 }}
-                className={`
-                  h-10 flex items-center justify-center rounded-lg text-sm
-                  ${isStart || isEnd ? "bg-blue-600 text-white font-semibold" : ""}
-                  ${inRange ? "bg-blue-100" : ""}
-                  hover:bg-blue-50
-                `}
+              className={`
+                h-10 flex items-center justify-center rounded-lg text-sm
+                ${isStart || isEnd ? "bg-blue-600 text-white font-semibold hover:bg-blue-300" : ""}
+                ${inRange ? "bg-blue-100" : ""}
+              `}
               >
                 {date.getDate()}
               </button>
@@ -86,7 +85,7 @@ export default function RangeCalendar({ startDate, endDate, onChange, activeDrop
   }
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl flex p-4 gap-4">
+    <div className="bg-white shadow-xl rounded-bl-2xl rounded-br-2xl flex p-4 gap-4">
       {renderMonth(baseMonth)}
       {renderMonth(addMonths(baseMonth, 1))}
     </div>
