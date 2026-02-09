@@ -4,8 +4,8 @@ export function Card({ className = "", children, ...props }) {
   return (
     <div
       className={`
-        rounded-2xl
-        border
+        rounded-bl-xl 
+        rounded-tl-xl
         bg-white
         shadow-sm
         p-4
