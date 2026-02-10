@@ -10,6 +10,14 @@ export const resorts = [
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
     details: "Example details about the resort",
+    facilities: [
+      "Swimming Pool",
+      "Restaurant",
+      "Free Wifi",
+      "Parking",
+      "Spa",
+      "Bar"
+      ],    
     tags: ["Has Wifi", "Free Parking", "Hot Spring", "Family Friendly"],
     rooms: [
       {
@@ -53,6 +61,14 @@ export const resorts = [
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
     details: "Example details about the resort",
+    facilities: [
+      "Swimming Pool",
+      "Restaurant",
+      "Free Wifi",
+      "Parking",
+      "Spa",
+      "Bar"
+      ],    
     tags: ["Pool", "Restaurant", "Aircon Rooms"],
     rooms: [
       {
@@ -78,6 +94,14 @@ export const resorts = [
     contactEmail: "name@example.com",
     details: "Example details about the resort",    
     tags: ["Pool", "Restaurant", "Aircon Rooms", "Room Service", "Bar"],
+    facilities: [
+      "Swimming Pool",
+      "Restaurant",
+      "Free Wifi",
+      "Parking",
+      "Spa",
+      "Bar"
+      ],
     rooms: [
       {
         id: 1,
