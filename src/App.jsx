@@ -18,7 +18,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-        <TopBar />
+        <TopBar />  
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/resort/:name" element={<ResortDetailPage />} />
