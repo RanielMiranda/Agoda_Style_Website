@@ -49,6 +49,15 @@ const navigate = useNavigate();
                 </div>
         </div>
 
+        {/* Tags */}
+        <div className="mb-6">
+            <p className="font-medium mb-2">Tags</p>
+            <div className="flex flex-col gap-2 text-sm">
+            <label><input type="checkbox" /> Wifi </label>
+            <label><input type="checkbox" /> Kitchen </label>
+            </div>
+        </div>
+
         {/* Rating */}
         <div className="mb-6">
             <p className="font-medium mb-2">Star Rating</p>
@@ -65,14 +74,6 @@ const navigate = useNavigate();
             <div className="flex flex-col gap-2 text-sm">
             <label><input type="checkbox" /> 300+ reviews</label>
             <label><input type="checkbox" /> 200+ reviews</label>
-            </div>
-        </div>
-
-        {/* Distance */}
-        <div>
-            <p className="font-medium mb-2">Distance</p>
-            <div className="flex flex-col gap-2 text-sm">
-            <label><input type="checkbox" /> Nearest First</label>
             </div>
         </div>
 

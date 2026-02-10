@@ -24,8 +24,8 @@ export default function App() {
           <Route path="/resort/:name" element={<ResortDetailPage />} />
         </Routes>
 
-        <div className="bg-gray-900 text-gray-400 text-sm text-center py-6">
-          © 2026 
+        <div id = "about" className="bg-gray-900 text-gray-400 text-sm text-center py-6">
+          © 2026 Prototype Website
         </div>
 
       </div>

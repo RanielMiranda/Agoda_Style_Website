@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 
 function startOfMonth(date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);    
+  // Return the first day of the month in UTC
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 }
 
 function addMonths(date, count) {
-  return new Date(date.getFullYear(), date.getMonth() + count, 1);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + count, 1));
 }
 
 function isSameDay(a, b) {
   if (!a || !b) return false;
-  return a.getFullYear() === b.getFullYear() &&
-         a.getMonth() === b.getMonth() &&
-         a.getDate() === b.getDate();
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
 }
 
 function isBetween(date, start, end) {
@@ -22,60 +25,73 @@ function isBetween(date, start, end) {
 
 export default function RangeCalendar({ startDate, endDate, onChange, activeDropdown }) {
   const today = new Date();
-  const [baseMonth] = useState(startOfMonth(today));
+  const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+
+  const [baseMonth] = useState(startOfMonth(todayUTC));
 
   function renderMonth(monthDate) {
     const start = startOfMonth(monthDate);
-    const month = start.getMonth();
-    const year = start.getFullYear();
+    const month = start.getUTCMonth();
+    const year = start.getUTCFullYear();
 
     const days = [];
-    const firstDay = start.getDay();
+    const firstDay = start.getUTCDay();
 
     for (let i = 0; i < firstDay; i++) days.push(null);
 
-    let d = new Date(year, month, 1);
-    while (d.getMonth() === month) {
+    let d = new Date(Date.UTC(year, month, 1));
+    while (d.getUTCMonth() === month) {
       days.push(new Date(d));
-      d.setDate(d.getDate() + 1);
+      d.setUTCDate(d.getUTCDate() + 1);
     }
 
     return (
       <div className="w-[200px]">
+        {/* Month Header */}
         <div className="font-semibold mb-2 text-center">
           {start.toLocaleString("default", { month: "long" })} {year}
         </div>
+
+        {/* Weekdays */}
         <div className="grid grid-cols-7 gap-1 text-sm text-center font-medium mb-2">
-          {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => (
+          {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
             <div key={d} className="h-8 flex items-center justify-center">{d}</div>
           ))}
         </div>
+
+        {/* Dates */}
         <div className="grid grid-cols-7 gap-1 text-center">
           {days.map((date, i) => {
             if (!date) return <div key={i} className="h-10" />;
+
             const isStart = isSameDay(date, startDate);
             const isEnd = isSameDay(date, endDate);
             const inRange = isBetween(date, startDate, endDate);
+
+            const isPast = date < todayUTC;
 
             return (
               <button
                 key={i}
                 onClick={() => {
+                  if (isPast) return; // prevent past dates
                   if (!startDate || (startDate && endDate)) {
-                    onChange(date, null); // Start new range
+                    onChange(date, null); // start new range
                   } else if (activeDropdown === "end" && date < startDate) {
                     onChange(date, startDate); // swap if end < start
                   } else {
                     onChange(startDate, date);
                   }
                 }}
-              className={`
-                h-10 flex items-center justify-center rounded-lg text-sm
-                ${isStart || isEnd ? "bg-blue-600 text-white font-semibold hover:bg-blue-300" : ""}
-                ${inRange ? "bg-blue-100" : ""}
-              `}
+                className={`
+                  h-10 flex items-center justify-center rounded-lg text-sm
+                  ${isPast ? "text-gray-300 cursor-not-allowed" : "hover:bg-blue-100"}
+                  ${isStart || isEnd ? "bg-blue-600 text-white font-semibold hover:bg-blue-300" : ""}
+                  ${inRange ? "bg-blue-100" : ""}
+                `}
+                disabled={isPast}
               >
-                {date.getDate()}
+                {date.getUTCDate()}
               </button>
             );
           })}

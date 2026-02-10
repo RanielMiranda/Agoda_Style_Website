@@ -25,13 +25,16 @@ export default function TopBar() {
             </HashLink>
 
             {/* About scroll */}
-            <HashLink
-              smooth
-              to="/#about"
-              className="hover:text-blue-600 transition"
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                const element = document.getElementById("about");
+                if (element) element.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               About
-            </HashLink>
+            </a>
 
             {/* Contact Modal */}
             <button
