@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HeroBanner from "./components/homepage/hero/HeroBanner";
-import ResortList from "./components/HomePage/resort/ResortList";
+import ResortList from "./components/homepage/resort/ResortList";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
 import TopBar from "./components/ui/TopBar";
 
