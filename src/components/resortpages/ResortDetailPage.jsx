@@ -154,15 +154,15 @@ export default function ResortDetailPage() {
               <div className="md:w-1/2 p-6 flex flex-col justify-between">
                 <div>
                   <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
-                  <div className="flex gap-6 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center gap-2">
+                  <div className="flex gap-2 text-sm mb-4">
+                    <div className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded-2xl">
                       <Users size={16} /> {room.guests} Guests
                     </div>
-                    <div className="flex items-center gap-2">
-                      <BedDouble size={16} /> {room.beds}
+                    <div className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded-2xl">
+                      <BedDouble size={16} /> {room.beds} bed
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-3 ">
                     {room.tags?.map((tag, i) => (
                       <span
                         key={i}
