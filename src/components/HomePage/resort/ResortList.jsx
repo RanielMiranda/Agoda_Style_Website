@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import ResortCard from "./ResortCard";
-import { resorts } from "../data/resorts";
+import { resorts } from "../../data/resorts";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function ResortList() {
 const [price, setPrice] = useState(5000);
+const navigate = useNavigate();
 
     return (
     <div className="w-full lg:w-4/6 mx-auto px-4 py-12">
@@ -85,7 +87,10 @@ const [price, setPrice] = useState(5000);
             >
 
             {/* Card Area */}
-            <div className="flex-1">
+            <div className="flex-1 cursor-pointer"
+                onClick={() =>
+                navigate(`/resort/${encodeURIComponent(resort.name)}`)
+            }>
                 <ResortCard resort={resort} />
             </div>
 
@@ -98,7 +103,10 @@ const [price, setPrice] = useState(5000);
                     ₱{resort.price.toLocaleString()}
                 </p>
 
-                <Button className="w-full rounded-xl text-lg hover:scale-102 transition-transform">
+                <Button 
+                    onClick={() => navigate(`/resort/${encodeURIComponent(resort.name)}`)
+                    } className="w-full rounded-xl text-lg hover:scale-102 transition-transform"
+                >
                 Check Availability
                 </Button>
             </div>

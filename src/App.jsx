@@ -1,19 +1,33 @@
-import React from "react";
-import HeroBanner from "./components/hero/HeroBanner";
-import ResortList from "./components/resort/ResortList";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HeroBanner from "./components/HomePage/hero/HeroBanner";
+import ResortList from "./components/HomePage/resort/ResortList";
+import ResortDetailPage from "./components/ResortPages/ResortDetailPage";
 import TopBar from "./components/ui/TopBar";
 
+function HomePage() {
+  return (
+    <>
+      <HeroBanner />
+      <ResortList />
+    </>
+  );
+}
 
 export default function App() {
-return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
         <TopBar />
-        <HeroBanner />
-        <ResortList />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/resort/:name" element={<ResortDetailPage />} />
+        </Routes>
 
         <div className="bg-gray-900 text-gray-400 text-sm text-center py-6">
-        © 2026 ResortGo. All rights reserved.
+          © 2026 ResortGo. All rights reserved.
         </div>
-    </div>
-    );
+
+      </div>
+    </BrowserRouter>
+  );
 }

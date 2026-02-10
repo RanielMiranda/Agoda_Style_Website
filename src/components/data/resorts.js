@@ -9,7 +9,26 @@ export const resorts = [
     "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
-    tags: ["Has Wifi", "Free Parking", "Hot Spring", "Family Friendly"]
+    tags: ["Has Wifi", "Free Parking", "Hot Spring", "Family Friendly"],
+    rooms: [
+      {
+        id: 1,
+        name: "Standard Room",
+        guests: 2,
+        beds: "1 Queen Bed",
+        price: 5200,
+        tags: ["Free Wifi", "Aircon", "Hot Shower"],
+      },
+      {
+        id: 2,
+        name: "Family Room",
+        guests: 4,
+        beds: "2 Double Beds",
+        price: 6700,
+        tags: ["Balcony", "Pool View"],
+      }
+    ]
+
 },
 {
     name: "Resort 2",
@@ -21,6 +40,16 @@ export const resorts = [
     "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1600&auto=format&fit=crop",
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
-    tags: ["Pool", "Restaurant", "Aircon Rooms"]
+    tags: ["Pool", "Restaurant", "Aircon Rooms"],
+    rooms: [
+      {
+        id: 1,
+        name: "Budget Room",
+        guests: 2,
+        beds: "1 Bed",
+        price: 4100,
+        tags: ["Wifi", "Fan"],
+      }
+    ]
 },
 ];
