@@ -4,7 +4,7 @@ import StarFill from "@/components/ui/StarFill";;
 
 export default function ResortCard({ resort }) {
   return (
-    <Card className="overflow-hidden shadow-md">
+    <Card className="overflow-hidden">
       {/* Gallery Container */}
       <div className="flex w-full h-48">
         {/* Main Image - 6/8 width */}

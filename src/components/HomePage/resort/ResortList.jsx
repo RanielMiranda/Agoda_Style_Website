@@ -9,7 +9,7 @@ const [price, setPrice] = useState(5000);
 const navigate = useNavigate();
 
     return (
-    <div className="w-full lg:w-4/6 mx-auto px-4 py-12">
+    <div id="resorts" className="w-full lg:w-4/6 mx-auto px-4 py-12">
 
     <h2 className="text-3xl font-bold mb-8">Top Resorts</h2>
     {/* Layout: Sidebar + Content */}

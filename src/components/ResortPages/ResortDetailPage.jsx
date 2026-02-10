@@ -90,6 +90,8 @@ export default function ResortDetailPage() {
         <div className="flex flex-col gap-3">
           <h1 className="text-3xl font-bold">{resort.name}</h1>
 
+          <p className = "text-2xl"> {resort.details} </p>
+
           <div className="flex items-center gap-4 text-gray-600">
           <div className="flex items-center gap-2 mt-3">
             <StarFill rating={4.5} size={16} />
@@ -123,12 +125,12 @@ export default function ResortDetailPage() {
 
         <div className="flex flex-col gap-6">
           {rooms.map((room) => (
-            <Card key={room.id} className="p-0 overflow-hidden">
+            <Card key={room.id} className="p-0 overflow-hidden rounded-2xl border-1">
               <div className="flex">
                 {/* Room Image */}
                 <img
                   src={resort.image}
-                  className="w-72 h-56 object-cover"
+                  className="w-72 h-56 object-cover rounded-2xl"
                 />
 
                 {/* Room Info */}
@@ -137,6 +139,8 @@ export default function ResortDetailPage() {
                     <h3 className="text-xl font-semibold mb-2">
                       {room.name}
                     </h3>
+
+                    <h1 className="text=md mb"> {room.details} </h1>
 
                     <div className="flex gap-6 text-sm text-gray-600 mb-4">
                       <div className="flex items-center gap-2">

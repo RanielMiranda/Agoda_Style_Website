@@ -11,6 +11,7 @@ function HomePage() {
       <ResortList />
     </>
   );
+
 }
 
 export default function App() {
@@ -24,7 +25,7 @@ export default function App() {
         </Routes>
 
         <div className="bg-gray-900 text-gray-400 text-sm text-center py-6">
-          © 2026 ResortGo. All rights reserved.
+          © 2026 
         </div>
 
       </div>
