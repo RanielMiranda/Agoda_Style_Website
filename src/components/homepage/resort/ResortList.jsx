@@ -96,20 +96,58 @@ const navigate = useNavigate();
             </div>
 
             {/* Check Availability Button */}
-            <div className="w-64 flex flex-col justify-end items-end border-l p-6">
-                <p className="text-2sm font-bold text-black-600 mb-4 ">
+            <div className="w-72 border-l flex flex-col">
+
+            {/* ===== TOP HALF — ROOMS ===== */}
+            <div className="flex-1 p-6">
+                <p className="font-semibold mb-2">Available Rooms</p>
+
+                <div className="flex flex-wrap gap-2">
+                {resort.rooms.map((room) => (
+                <div key={room.id} className="relative group">
+
+                    {/* TAG */}
+                    <div className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded-2xl text-sm cursor-default">
+                    {room.name}
+                    </div>
+
+                    {/* HOVER TOOLTIP */}
+                    <div className="
+                    absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                    bg-gray-600 text-white text-xs px-3 py-2 rounded-lg
+                    opacity-0 group-hover:opacity-100
+                    pointer-events-none
+                    transition-opacity duration-200
+                    whitespace-nowrap
+                    z-50
+                    ">
+                    {room.guests} Guests • {room.beds}
+                    </div>
+
+                </div>
+                ))}
+                </div>
+            </div>
+
+            {/* ===== BOTTOM HALF — PRICE + BUTTON ===== */}
+            <div className="flex-1 p-6 flex flex-col justify-end">
+                <p className="text-sm font-medium text-gray-600 mb-1">
                 Average pricing per night
                 </p>
-                <p className ="text-2xl font-bold text-blue-600 mb-4">
-                    ₱{resort.price.toLocaleString()}
+
+                <p className="text-2xl font-bold text-blue-600 mb-4">
+                ₱{resort.price.toLocaleString()}
                 </p>
 
-                <Button 
-                    onClick={() => navigate(`/resort/${encodeURIComponent(resort.name)}`)
-                    } className="w-full rounded-xl text-lg hover:scale-102 transition-transform"
+                <Button
+                onClick={() =>
+                    navigate(`/resort/${encodeURIComponent(resort.name)}`)
+                }
+                className="w-full rounded-xl text-lg hover:scale-105 transition-transform"
                 >
                 Check Availability
                 </Button>
+            </div>
             </div>
             </div>
         ))}

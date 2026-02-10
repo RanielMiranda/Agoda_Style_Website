@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { useParams } from "react-router-dom";
 import { resorts } from "../data/resorts";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,9 @@ import { HashLink } from "react-router-hash-link";
 import StarFill from "../ui/StarFill";
 
 export default function ResortDetailPage() {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);  
+
   const { name } = useParams();
   const resort = resorts.find((r) => r.name === decodeURIComponent(name));
   if (!resort) {
@@ -25,7 +28,13 @@ export default function ResortDetailPage() {
           {resort.gallery?.slice(0, 5).map((img, idx) => (
             <div
               key={idx}
-              className={`w-full h-full ${idx === 0 ? "col-span-2 row-span-2" : ""} relative`}
+              onClick={() => {
+                setActiveIndex(idx);
+                setGalleryOpen(true);
+              }}
+              className={`cursor-pointer w-full h-full ${
+                idx === 0 ? "col-span-2 row-span-2" : ""
+              } relative`}
             >
               <img
                 src={img}
@@ -33,7 +42,6 @@ export default function ResortDetailPage() {
                 className="w-full h-full object-cover"
               />
 
-              {/* Optional: View All overlay only on the last image */}
               {idx === 4 && resort.gallery.length > 5 && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-semibold">
                   +{resort.gallery.length - 5} more
@@ -185,7 +193,7 @@ export default function ResortDetailPage() {
                     </p>
                   </div>
 
-                  <Button className="px-3 py-3 text-md flex items-center gap-2">
+                  <Button className="px-3 py-3 text-md flex items-center gap-2 hover:scale-105 transition-transform"> 
                     <Flag className="w-4 h-4 text-white" />
                     View Details
                   </Button>
@@ -195,6 +203,63 @@ export default function ResortDetailPage() {
           ))}
         </div>
       </div>
+      {galleryOpen && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center">
+
+          {/* Close Button */}
+          <button
+            onClick={() => setGalleryOpen(false)}
+            className="absolute top-6 right-6 text-white text-3xl"
+          >
+            ✕
+          </button>
+
+          {/* Main Image */}
+          <img
+            src={resort.gallery[activeIndex]}
+            className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
+          />
+
+          {/* Navigation */}
+          <div className="flex gap-6 mt-6 text-white text-2xl">
+            <button
+              onClick={() =>
+                setActiveIndex(
+                  (activeIndex - 1 + resort.gallery.length) %
+                    resort.gallery.length
+                )
+              }
+            >
+              ←
+            </button>
+
+            <button
+              onClick={() =>
+                setActiveIndex(
+                  (activeIndex + 1) % resort.gallery.length
+                )
+              }
+            >
+              →
+            </button>
+          </div>
+
+          {/* Thumbnails */}
+          <div className="flex gap-2 mt-6 overflow-x-auto max-w-[90vw] pb-4">
+            {resort.gallery.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setActiveIndex(i)}
+                className={`h-16 w-24 object-cover rounded cursor-pointer ${
+                  i === activeIndex ? "ring-2 ring-white" : ""
+                }`}
+              />
+            ))}
+          </div>
+
+        </div>
+      )}      
     </div>
   );
 }
