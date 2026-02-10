@@ -8,7 +8,7 @@ function HomePage() {
   return (
     <>
       <HeroBanner />
-      <ResortList />
+      <PropertyList />
     </>
   );
 
