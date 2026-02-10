@@ -1,24 +1,10 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 import ContactModal from "./modals/ContactModal";
 
 export default function TopBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleResortsClick = (e) => {
-    e.preventDefault();
-
-    if (location.pathname !== "/") {
-      // Not on home, navigate there and pass a state
-      navigate("/", { state: { scrollTo: "resorts" } });
-    } else {
-      // Already on home, scroll immediately
-      const element = document.getElementById("resorts");
-      if (element) element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   return (
     <>
@@ -29,26 +15,36 @@ export default function TopBar() {
           </Link>
 
           <div className="hidden md:flex gap-8 font-medium text-gray-700">
-            <a
-              href="#resorts"
-              onClick={handleResortsClick}
+            {/* Resorts Button (uses HashLink) */}
+            <HashLink
+              smooth
+              to="/#resorts"
               className="hover:text-blue-600 transition"
             >
               Resorts
-            </a>
-            <a href="#about" onClick={() => {
-              const element = document.getElementById("about");
-              if (element) element.scrollIntoView({ behavior: "smooth" });
-            }} className="hover:text-blue-600 transition">
+            </HashLink>
+
+            {/* About scroll */}
+            <HashLink
+              smooth
+              to="/#about"
+              className="hover:text-blue-600 transition"
+            >
               About
-            </a>
-            <button onClick={() => setIsModalOpen(true)} className="hover:text-blue-600 transition">
+            </HashLink>
+
+            {/* Contact Modal */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="hover:text-blue-600 transition"
+            >
               Contact
             </button>
           </div>
         </div>
       </div>
 
+      {/* Contact Modal */}
       <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h2 className="text-xl font-bold mb-4">Contact Us</h2>
         <p className="text-gray-600 mb-2">Feel free to reach out via email or phone!</p>
