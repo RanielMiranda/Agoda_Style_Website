@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MapPin, Calendar, Users } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import RangeCalendar from "../calendar/RangeCalendar";
-import { areaSuggestions } from "../data/constants";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import RangeCalendar from "../../calendar/RangeCalendar";
+import { areaSuggestions } from "../../data/constants";
 
 
 export default function SearchBar() {
@@ -98,7 +98,7 @@ export default function SearchBar() {
       </div>
 
       {/* DATE RANGE */}
-      <div className="relative flex items-center gap-2 border rounded-xl px-3 py-1 flex-1">
+      <div className="relative flex items-center gap-2 border rounded-xl px-3 flex-1">
         <Calendar size={18} />
 
         {/* START DATE */}
@@ -230,7 +230,7 @@ export default function SearchBar() {
       </div>
 
       {/* SEARCH BUTTON */}
-      <Button className="rounded-xl px-10 text-lg">Search</Button>
+      <Button className="rounded-xl px-10 text-md">Search</Button>
     </div>
   );
 }

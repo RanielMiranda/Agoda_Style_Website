@@ -1,15 +1,21 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import StarFill from "@/components/ui/StarFill";;
+import StarFill from "@/components/ui/StarFill";
 
 export default function ResortCard({ resort }) {
+  const gallery = resort.gallery || [];
+  const mainImage = gallery[0] || resort.image;
+  const topMini = gallery[1] || resort.image;
+  const bottomMini = gallery[2] || resort.image;
+  const extraCount = gallery.length > 3 ? gallery.length - 2 : 0;
+
   return (
     <Card className="overflow-hidden">
       {/* Gallery Container */}
-      <div className="flex w-full h-48">
+      <div className="flex w-full h-60">
         {/* Main Image - 6/8 width */}
         <img
-          src={resort.image}
+          src={mainImage}
           className="w-3/4 h-full object-cover"
           alt={resort.name}
         />
@@ -18,22 +24,27 @@ export default function ResortCard({ resort }) {
         <div className="w-1/4 h-full flex flex-col">
           {/* Top mini image */}
           <img
-            src={resort.image}
+            src={topMini}
             className="h-1/2 w-full object-cover rounded-tr-xl"
             alt={`${resort.name} 1`}
           />
 
-          {/* Bottom mini image with overlay */}
+          {/* Bottom mini image with overlay if extra images */}
           <div className="relative h-1/2 w-full rounded-br-xl overflow-hidden">
             <img
-              src={resort.image}
+              src={bottomMini}
               className="h-full w-full object-cover"
               alt={`${resort.name} 2`}
             />
-            <div className="absolute inset-0 bg-gray-800/50 flex items-center justify-center">
-                <span className="text-white text-lg font-semibold">+8</span>
-            </div>
-        </div>
+
+            {extraCount > 0 && (
+              <div className="absolute inset-0 bg-gray-800/50 flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">
+                  +{extraCount}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -48,11 +59,11 @@ export default function ResortCard({ resort }) {
           <span className="text-sm text-gray-500">({resort.reviews} reviews)</span>
         </div>
 
-        <div className="flex flex-wrap gap-2 -3">
+        <div className="flex flex-wrap gap-2 mt-3">
           {resort.tags?.map((tag, index) => (
             <span
               key={index}
-              className="text-xs bg-gray-100 mt-3 text-gray-700 px-3 rounded-full"
+              className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full"
             >
               {tag}
             </span>

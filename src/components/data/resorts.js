@@ -1,24 +1,31 @@
 export const resorts = [
-{
-    name: "Resort 1",
-    location: "Calamba, Philippines",
+  {
+    name: "El Nido Resorts Apulit Island",
+    location: "Apulit Island, Taytay, Palawan, Philippines, 5312",
     rating: 4.8,
     reviews: 324,
     price: 5200,
-    image:
-    "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
     details: "Example details about the resort",
+    image: "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
     facilities: [
       "Swimming Pool",
       "Restaurant",
       "Free Wifi",
       "Parking",
       "Spa",
-      "Bar"
-      ],    
+      "Bar",
+    ],
     tags: ["Has Wifi", "Free Parking", "Hot Spring", "Family Friendly"],
+    gallery: [
+      "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
+      "https://gttp.images.tshiftcdn.com/224998/x/0/10-most-beautiful-beach-resorts-in-the-philippines-9.jpg?auto=compress%2Cformat&ch=Width%2CDPR&dpr=1&ixlib=php-3.3.0&w=883",
+      "https://wa-uploads.profitroom.com/cauayanislandresort/videos/poster_17055673751701_cauayanvideo.jpg",
+      "https://wa-uploads.profitroom.com/cauayanislandresort/500x500/1642517400339_cauayanislandresortphotos202.jpg",
+      "https://www.alexisjetsets.com/wp-content/uploads/2019/06/cauayan-island-resort-alexisjetsets-15-e1560908829350.jpg",   
+      "https://www.alexisjetsets.com/wp-content/uploads/2019/06/cauayan-island-resort-alexisjetsets-15-e1560908829350.jpg",         
+    ],
     rooms: [
       {
         id: 1,
@@ -28,6 +35,12 @@ export const resorts = [
         price: 5200,
         details: "Details about the room",
         tags: ["Free Wifi", "Aircon", "Hot Shower"],
+        gallery: [
+          "https://assets.minorhotels.com/image/upload/q_auto,f_auto,c_limit,w_1045/media/minor/anantara/images/naladhu-private-island-maldives/accommodation/details-page/two-bedroom-ocean-house/mnld_two_bedroom_ocean_house_with_pool_2_880x620.jpg",
+          "https://www.steamboat.com/-/media/steamboat/employment/recruiting/ponds-kitchen.jpg?w=480&rev=e387ff4d2fbf439b96c332757652b0eb&hash=551A12B6BAE5E3BB3CFC44C55014C1E0",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s"          
+        ],
       },
       {
         id: 2,
@@ -35,92 +48,75 @@ export const resorts = [
         guests: 4,
         beds: "2 Double Beds",
         price: 6700,
-        details: "Details about the room",        
+        details: "Details about the room",
         tags: ["Balcony", "Pool View"],
+        gallery: [
+          "https://eurobel.com.ph/wp-content/uploads/2025/03/Blog-43-Banner-Opt-2.png",
+          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",
+          "https://img.lamudi.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1wcm9qZWN0cy1hZG1pbi1pbWFnZXMiLCJrZXkiOiIxMDAwODJiYy1iZjlhLTQzZjYtOWUyMi1jOGI4YThkZTg3N2MvMTAwMDgyYmMtYmY5YS00M2Y2LTllMjItYzhiOGE4ZGU4NzdjXzlhNjBkZTE3LWE0YjQtNDhlOC1iYzM2LTk5NGY3ZWFlNmNlYS5qcGciLCJicmFuZCI6ImxhbXVkaSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozMjAsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=",
+          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",          
+        ],
       },
-      {
-        id: 3,
-        name: "Three Bedroom Suite",
-        guests: 6,
-        beds: "3 Double Beds",
-        price: 8600,
-        details: "Details about the room",        
-        tags: ["Balcony", "Pool View"],
-      }      
-    ]
-
-},
-{
+    ],
+  },
+  {
     name: "Resort 2",
-    location: "Laguna, Philippines",
-    rating: 4.6,
-    reviews: 210,
-    price: 4100,
-    image:
-    "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1600&auto=format&fit=crop",
+    location: "Cagayan De Oro, Philippines",
+    rating: 4.8,
+    reviews: 324,
+    price: 5200,
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
     details: "Example details about the resort",
+    image: "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
     facilities: [
       "Swimming Pool",
       "Restaurant",
       "Free Wifi",
       "Parking",
       "Spa",
-      "Bar"
-      ],    
-    tags: ["Pool", "Restaurant", "Aircon Rooms"],
+      "Bar",
+    ],
+    tags: ["Has Wifi", "Free Parking", "Hot Spring", "Family Friendly"],
+    gallery: [
+      "https://www.thehotelguru.com/_images/41/3c/413c5ccb84fd0e963ab97754ea221811/s880x600.jpg",
+      "https://gttp.images.tshiftcdn.com/224998/x/0/10-most-beautiful-beach-resorts-in-the-philippines-9.jpg?auto=compress%2Cformat&ch=Width%2CDPR&dpr=1&ixlib=php-3.3.0&w=883",
+      "https://wa-uploads.profitroom.com/cauayanislandresort/videos/poster_17055673751701_cauayanvideo.jpg",
+      "https://wa-uploads.profitroom.com/cauayanislandresort/500x500/1642517400339_cauayanislandresortphotos202.jpg",
+      "https://www.alexisjetsets.com/wp-content/uploads/2019/06/cauayan-island-resort-alexisjetsets-15-e1560908829350.jpg",   
+
+    ],
     rooms: [
       {
         id: 1,
-        name: "Budget Room",
+        name: "Standard Room",
         guests: 2,
-        beds: "1 Bed",
-        price: 4100,
-        details: "Details about the room",        
-        tags: ["Wifi", "Fan"],
-      }
-    ]
-},
-{
-    name: "Resort 3",
-    location: "Laguna, Philippines",
-    rating: 4.6,
-    reviews: 210,
-    price: 4100,
-    image:
-    "https://pix10.agoda.net/hotelImages/30650764/-1/996f3295b88f5b8079a7e0d61a896f1c.jpg?ce=0&s=702x392",
-    contactPhone: "+63 111 111 1111",
-    contactEmail: "name@example.com",
-    details: "Example details about the resort",    
-    tags: ["Pool", "Restaurant", "Aircon Rooms", "Room Service", "Bar"],
-    facilities: [
-      "Swimming Pool",
-      "Restaurant",
-      "Free Wifi",
-      "Parking",
-      "Spa",
-      "Bar"
-      ],
-    rooms: [
-      {
-        id: 1,
-        name: "Budget Room",
-        guests: 2,
-        beds: "1 Bed",
-        price: 4100,
-        details: "Details about the room",        
-        tags: ["Wifi", "Fan"],
+        beds: "1 Queen Bed",
+        price: 5200,
+        details: "Details about the room",
+        tags: ["Free Wifi", "Aircon", "Hot Shower"],
+        gallery: [
+          "https://assets.minorhotels.com/image/upload/q_auto,f_auto,c_limit,w_1045/media/minor/anantara/images/naladhu-private-island-maldives/accommodation/details-page/two-bedroom-ocean-house/mnld_two_bedroom_ocean_house_with_pool_2_880x620.jpg",
+          "https://www.steamboat.com/-/media/steamboat/employment/recruiting/ponds-kitchen.jpg?w=480&rev=e387ff4d2fbf439b96c332757652b0eb&hash=551A12B6BAE5E3BB3CFC44C55014C1E0",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s"          
+        ],
       },
       {
-        id: 1,
-        name: "Two Suite Room",
+        id: 2,
+        name: "Family Room",
         guests: 4,
-        beds: "2 Bed",
-        price: 6800,
-        details: "Details about the room",        
-        tags: ["Wifi", "Fan"],
-      }      
-    ]
-},
+        beds: "2 Double Beds",
+        price: 6700,
+        details: "Details about the room",
+        tags: ["Balcony", "Pool View"],
+        gallery: [
+          "https://eurobel.com.ph/wp-content/uploads/2025/03/Blog-43-Banner-Opt-2.png",
+          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",
+          "https://img.lamudi.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1wcm9qZWN0cy1hZG1pbi1pbWFnZXMiLCJrZXkiOiIxMDAwODJiYy1iZjlhLTQzZjYtOWUyMi1jOGI4YThkZTg3N2MvMTAwMDgyYmMtYmY5YS00M2Y2LTllMjItYzhiOGE4ZGU4NzdjXzlhNjBkZTE3LWE0YjQtNDhlOC1iYzM2LTk5NGY3ZWFlNmNlYS5qcGciLCJicmFuZCI6ImxhbXVkaSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozMjAsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=",
+          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",          
+        ],
+      },
+    ],
+  },
 ];
