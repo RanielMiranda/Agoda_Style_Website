@@ -1,11 +1,15 @@
 import FacilitiesGallery from "./FacilitiesGallery";
+import { MapPin } from "lucide-react";
 
 export default function ResortInfo({ resort, onFacilityOpen }) {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold">{resort.name}</h1>
-
-      <p className="mt-2">{resort.details}</p>
+        <div className="flex items-center gap-1 my-1 text-gray-800">
+          <MapPin size={16} />
+          <span> {resort.location} </span>
+        </div>
+      <p className="mt-2">{resort.description.summary}</p>
 
       {/* TAGS (TEXT ONLY) */}
       <div className="flex flex-wrap gap-2 mt-4">

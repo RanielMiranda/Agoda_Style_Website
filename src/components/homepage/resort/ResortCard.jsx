@@ -51,10 +51,10 @@ export default function ResortCard({ resort }) {
       {/* Content */}
       <CardContent className="p-4">
         <div className="font-semibold text-lg">{resort.name}</div>
-        <div className="text-sm text-gray-500">
-          <div className="flex items-center gap-1 my-1">
-            <MapPin size={16} />
-            <span> {resort.location} </span>
+          <div className="text-sm text-gray-500">
+            <div className="flex items-center gap-1 my-1">
+              <MapPin size={16} />
+              <span> {resort.location} </span>
             </div>
           </div>
 

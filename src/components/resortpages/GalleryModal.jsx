@@ -1,21 +1,29 @@
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+
 export default function GalleryModal({
   images,
   activeIndex,
   setActiveIndex,
   onClose,
+  names = null, // optional array of names
 }) {
   return (
     <div
       className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center"
       onClick={onClose}
     >
+      {/* Close Button */}
       <button
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         className="absolute top-6 right-6 text-white text-3xl"
       >
-        ✕
+        <X className="w-5 h-5" />
       </button>
 
+      {/* Main Image with Arrows */}
       <div className="relative w-full flex items-center justify-between px-4 h-[70vh]">
         <button
           onClick={(e) => {
@@ -24,7 +32,7 @@ export default function GalleryModal({
           }}
           className="text-white text-4xl"
         >
-          ←
+          <ChevronLeft className="w-6 h-6 ml-20" />
         </button>
 
         <img
@@ -39,11 +47,19 @@ export default function GalleryModal({
           }}
           className="text-white text-4xl"
         >
-          →
+          <ChevronRight className="w-6 h-6 mr-20" />
         </button>
       </div>
 
-      <div className="mt-6 flex gap-2 overflow-x-auto">
+      {/* Optional Name for current image */}
+      {names && names[activeIndex] && (
+        <p className="mt-4 text-white font-semibold text-lg text-center">
+          {names[activeIndex]}
+        </p>
+      )}
+
+      {/* Thumbnails */}
+      <div className="mt-2 flex gap-2 overflow-x-auto">
         {images.map((img, i) => (
           <img
             key={i}

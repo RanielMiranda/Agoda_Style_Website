@@ -7,6 +7,7 @@ import ShortcutBar from "./ShortcutBar";
 import ResortInfo from "./ResortInfo";
 import RoomsSection from "./RoomsSection";
 import GalleryModal from "./GalleryModal";
+import FacilityModal from "./FacilityModal";
 
 export default function ResortDetailPage() {
   const { name } = useParams();
