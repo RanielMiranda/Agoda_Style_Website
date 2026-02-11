@@ -23,7 +23,7 @@ export default function ResortJsBuilder() {
   });
 
   const [newFacility, setNewFacility] = useState({ name: "", image: "" });
-  const [newRoom, setNewRoom] = useState({ name: "", guests: 1, beds: "", price: 0, gallery: [], tags: [] });
+  const [newRoom, setNewRoom] = useState({ name: "", guests: 1, beds: "", price: 0, details: "", gallery: [], tags: [], });
   const [newRoomTag, setNewRoomTag] = useState("");
   const [newRoomGalleryItem, setNewRoomGalleryItem] = useState("");
   const [newTag, setNewTag] = useState("");
@@ -43,7 +43,7 @@ export default function ResortJsBuilder() {
   const addRoom = () => {
     if (!newRoom.name) return;
     setResort({ ...resort, rooms: [...resort.rooms, { ...newRoom, id: Date.now() }] });
-    setNewRoom({ name: "", guests: 1, beds: "", price: 0, gallery: [], tags: [] });
+    setNewRoom({ name: "", guests: 1, beds: "", price: 0, details: "", gallery: [], tags: [] });
   };
 
   const addRoomTag = () => {
@@ -85,8 +85,14 @@ export default function ResortJsBuilder() {
 
   // --- Generate JS file output ---
   const generateJsOutput = () => {
-    return `export const resorts = [\n${JSON.stringify([resort], null, 2).replace(/(\w+)\\s*:/g, '$1:')} \n];`;
-  };
+      // 1. Convert to JSON string
+      const jsonString = JSON.stringify([resort], null, 2);
+      
+      // 2. This Regex removes quotes from keys (e.g., "name": -> name:)
+      const cleanJs = jsonString.replace(/"([^"]+)":/g, '$1:');
+      
+      return `export const resorts = ${cleanJs};`;
+    };
 
   return (
     <div className="max-w-7xl mx-auto p-6 flex flex-col gap-10 bg-gray-50">
@@ -242,6 +248,7 @@ export default function ResortJsBuilder() {
           <div key={room.id} className="border p-3 rounded space-y-2 bg-gray-50">
             <div className="font-semibold text-lg">{room.name}</div>
             <div>Guests: {room.guests}, Beds: {room.beds}, Price: ₱{room.price}</div>
+            <div className="text-sm text-gray-600 italic">{room.details}</div>
             <div className="flex gap-2 flex-wrap">
               {room.tags.map((tag, idx) => (
                 <span key={idx} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -291,6 +298,13 @@ export default function ResortJsBuilder() {
             value={newRoom.price}
             onChange={(e) => setNewRoom({ ...newRoom, price: Number(e.target.value) })}
           />
+
+          <textarea
+              placeholder="Room Details (e.g. Near the pool, quiet area...)"
+              className="border px-2 py-1 rounded w-full"
+              value={newRoom.details}
+              onChange={(e) => setNewRoom({ ...newRoom, details: e.target.value })}
+            />          
 
           {/* Room Tags */}
           <div className="flex gap-2 mt-1">

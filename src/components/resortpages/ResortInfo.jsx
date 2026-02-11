@@ -10,7 +10,7 @@ export default function ResortInfo({ resort, onFacilityOpen }) {
         <MapPin size={16} />
         <span> {resort.location} </span>
       </div>
-      <p className="mt-2">{resort.description.summary}</p>
+      <p className="mt-2 whitespace-pre-line">{resort.description.summary}</p>
 
       {/* TAGS */}
       <div className="flex flex-wrap gap-2 mt-4">

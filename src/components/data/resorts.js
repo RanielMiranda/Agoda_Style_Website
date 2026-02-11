@@ -6,7 +6,7 @@ export const resorts = [
     contactPhone: "+63 111 111 1111",
     contactEmail: "name@example.com",
     description: {
-      summary:  "Kasbah Villa Private Resort - Based in Calamba, Laguna offers an elegant, luxurious experience within reach filled with amenities designed to provide comfort and exclusivity. An experience one wouldn’t want to forget, but would rather share.",
+      summary: "Kasbah Villa Private Resort - Based in Calamba, Laguna offers an elegant, luxurious experience within reach filled with amenities designed to provide comfort and exclusivity. An experience one wouldn’t want to forget, but would rather share.\n\nSwimming Pool:\n• 5 Ft Adult Pool\n• 3 Ft Kiddie Pool\n• Jaccuzzi (Add. 500/Hr)\n\nKitchen:\n• Refrigerator\n• Hot and Cold Dispenser (Add. 50 Pesos/Gal)\n• Microwave\n• Rice Cooker\n• Electric Kettle\n• Casserole, Frying Pan, Ladle Tong\n• Double Burner (Free to use LPG)\n• Dining Tables and Chairs\n• Notes:\n   • Bring your own toiletries, towel, and disposables (plates/cups/spoons)\n\nEntertainment:\n• 43\" TV and Videoke\n• Billiards Table\n\nSports Amenities (800 / for 22 Hrs)\n• Basketball\n• Pingpong Table\n• Dart Board"
     },
       extraServices: [
         { name: "Catering", description: "Food avail for discussion", cost: 3500 },
@@ -63,43 +63,75 @@ export const resorts = [
     ],
     rooms: [
       {
-        id: 1,
-        name: "Standard Room",
-        guests: 2,
-        beds: "1 Queen Bed",
-        price: 5200,
-        details: "Details about the room",
-        tags: ["Free Wifi", "Aircon", "Hot Shower"],
+        name: "Room A",
+        guests: 6,
+        beds: "3 Queen Size Beds",
+        price: 5203,
+        details: "Details about the room",        
         gallery: [
-          "https://scontent.fmnl9-2.fna.fbcdn.net/v/t39.30808-6/514319883_24645918924997158_3934608331272561531_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=f727a1&_nc_ohc=B_6eSmgC5U0Q7kNvwHI8UZy&_nc_oc=AdmLwyVXLJ01l6_Q-DhxnIWqctiF9OddxyUM4o1Lm3GeJdCgekIZWDpv3Ou_CmiH270&_nc_zt=23&_nc_ht=scontent.fmnl9-2.fna&_nc_gid=EQzSQrSKQTZ3Te1KOVxOsQ&oh=00_AfuXdUkWlSJ430g2EAQ0ItJ-WPc2pze9znFqkTKs59WluQ&oe=6991B0E0",
-           
-       ],
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/514039707_24645923878329996_6147084731116776519_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=103&ccb=1-7&_nc_sid=f727a1&_nc_ohc=TUKT5aazRagQ7kNvwHO4Mxj&_nc_oc=AdmlAMSjVevuwv_StcCyo_tYF9ESmu1AUD0FJ8HQXtbpyX8vAEMXBHiizG39ErG2CY0&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=RdzLx9nm6jFiN5CViMKjcw&oh=00_AfvKxXQ_T1tiN5lnEhXf6FQDDAZqm3hrsrHMN3tBBs0EEg&oe=6991FB3E"
+        ],
+        tags: [
+          "Airconditioned"
+        ],
+        id: 1770794495174
       },
       {
-        id: 2,
-        name: "Big big Room",
-        guests: 2,
-        beds: "3 Bunk Bed, 1 Double Bed",
-        price: 5200,
-        details: "Details about the room",
-        tags: ["Free Wifi", "Aircon", "Hot Shower"],
+        name: "Room B",
+        guests: 8,
+        beds: "4 Queen Sized Beds",
+        price: 5800,
+        details: "Details about the room",        
         gallery: [
-          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/499782038_122117818082836693_7953430741353795184_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=jCKwnupILQIQ7kNvwFgqBvK&_nc_oc=AdmpcNYXjzqMM4Rub2tvm3fChsu4yF-nm5m4W8lyXHF_TQC6qEYbEkstaQEuOdpdBoo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=cDnEt6CDXsM9AvxNFXeOvQ&oh=00_AfuqdUU3Uoa6-lOnOqlTydsng0u0rZ0zqivFzPMf0xZjYQ&oe=6991BB89",
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/514039707_24645923878329996_6147084731116776519_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=103&ccb=1-7&_nc_sid=f727a1&_nc_ohc=TUKT5aazRagQ7kNvwHO4Mxj&_nc_oc=AdmlAMSjVevuwv_StcCyo_tYF9ESmu1AUD0FJ8HQXtbpyX8vAEMXBHiizG39ErG2CY0&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=RdzLx9nm6jFiN5CViMKjcw&oh=00_AfvKxXQ_T1tiN5lnEhXf6FQDDAZqm3hrsrHMN3tBBs0EEg&oe=6991FB3E"
         ],
-      },        
-      {
-        id: 3,
-        name: "Family Room",
-        guests: 4,
-        beds: "3 Double Beds",
-        price: 6700,
-        details: "Details about the room",
-        tags: ["Balcony", "Pool View"],
-        gallery: [
-          "https://scontent.fmnl9-2.fna.fbcdn.net/v/t39.30808-6/514319883_24645918924997158_3934608331272561531_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=f727a1&_nc_ohc=B_6eSmgC5U0Q7kNvwHI8UZy&_nc_oc=AdmLwyVXLJ01l6_Q-DhxnIWqctiF9OddxyUM4o1Lm3GeJdCgekIZWDpv3Ou_CmiH270&_nc_zt=23&_nc_ht=scontent.fmnl9-2.fna&_nc_gid=EQzSQrSKQTZ3Te1KOVxOsQ&oh=00_AfuXdUkWlSJ430g2EAQ0ItJ-WPc2pze9znFqkTKs59WluQ&oe=6991B0E0",
-          "https://scontent.fmnl9-1.fna.fbcdn.net/v/t39.30808-6/498592227_122117818088836693_9140900381154017019_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-GQCZWtw6J8Q7kNvwFpZZ2x&_nc_oc=Adkrd8BkLTqCagjEmOo7iEK2IdberL2CgVKCP5qzbs0L8Rar31JSOAVU1BOS9VLq6Ug&_nc_zt=23&_nc_ht=scontent.fmnl9-1.fna&_nc_gid=7_FqivKs29jaDp7QJv4eXA&oh=00_AfvFflsTT0RUjL37zUttAEWhgjx_CMRrmfTx5UfyzIw3LQ&oe=6991AB31",        
+        tags: [
+          "Airconditioned"
         ],
+        id: 1770794547509
       },
+      {
+        name: "Room C",
+        guests: 6,
+        beds: "3 Queen Sized Bed",
+        price: 5200,
+        details: "Details about the room",        
+        gallery: [
+          "https://scontent.fmnl9-1.fna.fbcdn.net/v/t39.30808-6/498592227_122117818088836693_9140900381154017019_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-GQCZWtw6J8Q7kNvwFpZZ2x&_nc_oc=Adkrd8BkLTqCagjEmOo7iEK2IdberL2CgVKCP5qzbs0L8Rar31JSOAVU1BOS9VLq6Ug&_nc_zt=23&_nc_ht=scontent.fmnl9-1.fna&_nc_gid=G82eHON74lL8otl2EeQaaA&oh=00_AftoRCp4vijlW4kIkIcgldg_0ipwolURHiFSmOsSgpbR8A&oe=69921BB1"
+        ],
+        tags: [
+          "Airconditioned"
+        ],
+        id: 1770794620207
+      },
+      {
+        name: "Room D",
+        guests: 6,
+        beds: "3 Queen Sized BEds",
+        price: 5200,
+        details: "Details about the room",        
+        gallery: [
+          "https://scontent.fmnl9-1.fna.fbcdn.net/v/t39.30808-6/498592227_122117818088836693_9140900381154017019_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-GQCZWtw6J8Q7kNvwFpZZ2x&_nc_oc=Adkrd8BkLTqCagjEmOo7iEK2IdberL2CgVKCP5qzbs0L8Rar31JSOAVU1BOS9VLq6Ug&_nc_zt=23&_nc_ht=scontent.fmnl9-1.fna&_nc_gid=G82eHON74lL8otl2EeQaaA&oh=00_AftoRCp4vijlW4kIkIcgldg_0ipwolURHiFSmOsSgpbR8A&oe=69921BB1"
+        ],
+        tags: [
+          "Airconditioned"
+        ],
+        id: 1770794671574
+      },
+      {
+        name: "Room E - Dorm Bedroom",
+        guests: 14,
+        beds: "3 Bunk Beds and 1 Queen Sized Bed",
+        price: 7800,
+        details: "Details about the room",        
+        gallery: [
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/499782038_122117818082836693_7953430741353795184_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=jCKwnupILQIQ7kNvwFgqBvK&_nc_oc=AdmpcNYXjzqMM4Rub2tvm3fChsu4yF-nm5m4W8lyXHF_TQC6qEYbEkstaQEuOdpdBoo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=cDnEt6CDXsM9AvxNFXeOvQ&oh=00_AfuqdUU3Uoa6-lOnOqlTydsng0u0rZ0zqivFzPMf0xZjYQ&oe=6991BB89"
+        ],
+        tags: [
+          "Airconditioned"
+        ],
+        id: 1770794789646
+      }
     ],
   },
 ];

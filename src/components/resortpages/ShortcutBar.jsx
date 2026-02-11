@@ -13,6 +13,10 @@ export default function ShortcutBar() {
         <HashLink smooth to="#amenities" className="hover:text-blue-600">
           Amenities
         </HashLink>
+
+        <HashLink smooth to ='#extra-services' className="hover:text-blue-600">
+          Additional Services
+        </HashLink>
       </div>
     </div>
   );
