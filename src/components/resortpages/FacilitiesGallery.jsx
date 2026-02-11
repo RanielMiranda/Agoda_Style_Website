@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import GalleryModal from "./GalleryModal";
 
 export default function FacilitiesGallery({ facilities }) {
-  const maxVisible = 6;
+  const maxVisible = 10;
   const visibleFacilities = facilities.slice(0, maxVisible);
   const hasMore = facilities.length > maxVisible;
 

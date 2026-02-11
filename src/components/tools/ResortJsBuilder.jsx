@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import ResortResults from "../homepage/resort/ResortResults"; // <-- updated
+import ResortResults from "../homepage/resort/ResortResults";
 import HeroGallery from "../resortpages/HeroGallery";
 import ShortcutBar from "../resortpages/ShortcutBar";
 import ResortInfo from "../resortpages/ResortInfo";
 import RoomsSection from "../resortpages/RoomsSection";
-import ServicesTable from "../resortpages/ServicesTable";
 
 export default function ResortJsBuilder() {
   const [resort, setResort] = useState({
@@ -14,7 +13,7 @@ export default function ResortJsBuilder() {
     contactPhone: "",
     contactEmail: "",
     description: { summary: "" },
-    image: "",
+    profileImage: "",
     gallery: [],
     facilities: [],
     extraServices: [],
@@ -108,6 +107,16 @@ export default function ResortJsBuilder() {
           value={resort.name}
           onChange={(e) => setResort({ ...resort, name: e.target.value })}
         />
+        <label className="block">Profile Image URL</label>
+        <input
+          type="text"
+          placeholder="https://example.com/profile.jpg"
+          className="border px-3 py-2 w-full rounded"
+          value={resort.profileImage}
+          onChange={(e) =>
+            setResort({ ...resort, profileImage: e.target.value })
+          }
+        />        
         <input
           type="text"
           placeholder="Location"
@@ -172,7 +181,7 @@ export default function ResortJsBuilder() {
 
       {/* Facilities */}
       <section className="bg-white p-4 rounded shadow space-y-3">
-        <h2 className="font-semibold text-xl">Facilities</h2>
+        <h2 className="font-semibold text-xl">Amenities</h2>
         <div className="flex flex-wrap gap-2">
           {resort.facilities.map((f, idx) => (
             <div key={idx} className="flex flex-col items-center bg-gray-100 p-2 rounded">
