@@ -119,9 +119,10 @@ const navigate = useNavigate();
                     pointer-events-none
                     transition-opacity duration-200
                     whitespace-nowrap
-                    z-50
+                    z-50 
                     ">
-                    {room.guests} Guests • {room.beds}
+                        {room.guests} Guests • {room.beds} Beds<br />
+                        ₱ {room.price}
                     </div>
 
                 </div>
