@@ -182,6 +182,7 @@ export const resorts = [
     gallery: [
       "https://lihim.com/wp-content/uploads/2023/09/2-3-scaled.jpg",
       "https://lihim.com/wp-content/uploads/2023/09/Presidential-Villa-Facade.jpg",
+      "https://lihim.com/wp-content/uploads/2023/09/2.-Exterior-scaled.jpg",         
       "https://gttp.images.tshiftcdn.com/223277/x/0/best-travel-guide-to-el-nido-town-on-palawan-island-everything-you-need-to-know-33.jpg?auto=compress%2Cformat&ch=Width%2CDPR&dpr=1&ixlib=php-3.3.0&w=883",
       "https://framerusercontent.com/images/CsJCqUMr8rtKqAZMwXOOM04j0XU.webp?width=1600&height=1067",
       "https://lihim.com/wp-content/uploads/2023/09/2.-Exterior-scaled.jpg",   

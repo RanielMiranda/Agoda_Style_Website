@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import StarFill from "@/components/ui/StarFill";
+import { MapPin } from "lucide-react";
 
 export default function ResortCard({ resort }) {
   const gallery = resort.gallery || [];
@@ -51,7 +52,12 @@ export default function ResortCard({ resort }) {
       {/* Content */}
       <CardContent className="p-4">
         <div className="font-semibold text-lg">{resort.name}</div>
-        <div className="text-sm text-gray-500">{resort.location}</div>
+        <div className="text-sm text-gray-500">
+          <div className="flex items-center gap-1 my-1">
+            <MapPin size={16} />
+            <span> {resort.location} </span>
+            </div>
+          </div>
 
         <div className="flex items-center gap-2 mt-3">
           <StarFill rating={resort.rating} size={16} /> 

@@ -203,63 +203,76 @@ export default function ResortDetailPage() {
           ))}
         </div>
       </div>
-      {galleryOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center">
+{galleryOpen && (
+  <div 
+    className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center animate-in fade-in duration-200"
+    onClick={() => setGalleryOpen(false)} // Clicking the backdrop closes the gallery
+  >
+    {/* Close Button - Outside the main flow to keep it top-right */}
+    <button
+      onClick={() => setGalleryOpen(false)}
+      className="absolute top-6 right-6 text-white/70 hover:text-white text-3xl z-[60] p-2 transition-colors"
+    >
+      ✕
+    </button>
 
-          {/* Close Button */}
-          <button
-            onClick={() => setGalleryOpen(false)}
-            className="absolute top-6 right-6 text-white text-3xl"
-          >
-            ✕
-          </button>
+    {/* Main Interaction Area: Arrows and Image */}
+    <div className="relative w-full flex items-center justify-between px-4 md:px-10 h-[70vh]">
+      
+      {/* Previous Arrow */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // Prevents closing the gallery
+          setActiveIndex((prev) => (prev - 1 + resort.gallery.length) % resort.gallery.length);
+        }}
+        className="p-4 text-white hover:bg-white/10 rounded-full transition-all"
+      >
+        <span className="text-4xl">←</span>
+      </button>
 
-          {/* Main Image */}
-          <img
-            src={resort.gallery[activeIndex]}
-            className="max-h-[80vh] max-w-[90vw] object-contain rounded-xl"
-          />
+      {/* Image Container */}
+      <div 
+        className="flex-1 flex justify-center items-center h-full mx-4"
+        onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image itself
+      >
+        <img
+          src={resort.gallery[activeIndex]}
+          alt="Resort Gallery"
+          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
+        />
+      </div>
 
-          {/* Navigation */}
-          <div className="flex gap-6 mt-6 text-white text-2xl">
-            <button
-              onClick={() =>
-                setActiveIndex(
-                  (activeIndex - 1 + resort.gallery.length) %
-                    resort.gallery.length
-                )
-              }
-            >
-              ←
-            </button>
+      {/* Next Arrow */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // Prevents closing the gallery
+          setActiveIndex((prev) => (prev + 1) % resort.gallery.length);
+        }}
+        className="p-4 text-white hover:bg-white/10 rounded-full transition-all"
+      >
+        <span className="text-4xl">→</span>
+      </button>
+    </div>
 
-            <button
-              onClick={() =>
-                setActiveIndex(
-                  (activeIndex + 1) % resort.gallery.length
-                )
-              }
-            >
-              →
-            </button>
-          </div>
-
-          {/* Thumbnails */}
-          <div className="flex gap-2 mt-6 overflow-x-auto max-w-[90vw] pb-4">
-            {resort.gallery.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                onClick={() => setActiveIndex(i)}
-                className={`h-16 w-24 object-cover rounded cursor-pointer ${
-                  i === activeIndex ? "ring-2 ring-white" : ""
-                }`}
-              />
-            ))}
-          </div>
-
-        </div>
-      )}      
+    {/* Thumbnails Container */}
+    <div 
+      className="mt-8 flex gap-2 overflow-x-auto max-w-[90vw] pb-4 px-4 no-scrollbar"
+      onClick={(e) => e.stopPropagation()} // Prevents closing when clicking thumbnails
+    >
+      {resort.gallery.map((img, i) => (
+        <img
+          key={i}
+          src={img}
+          alt="Thumbnail"
+          onClick={() => setActiveIndex(i)}
+          className={`h-16 w-24 flex-shrink-0 object-cover rounded cursor-pointer transition-opacity ${
+            i === activeIndex ? "ring-2 ring-blue-500 opacity-100" : "opacity-50 hover:opacity-80"
+          }`}
+        />
+      ))}
+    </div>
+  </div>
+)}
     </div>
   );
 }
