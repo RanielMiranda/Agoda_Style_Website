@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import StarFill from "@/components/ui/StarFill";
 import { MapPin } from "lucide-react";
 
 export default function ResortCard({ resort }) {
@@ -58,12 +57,6 @@ export default function ResortCard({ resort }) {
             <span> {resort.location} </span>
             </div>
           </div>
-
-        <div className="flex items-center gap-2 mt-3">
-          <StarFill rating={resort.rating} size={16} /> 
-          <span className="text-sm text-gray-600">{resort.rating}</span>
-          <span className="text-sm text-gray-500">({resort.reviews} reviews)</span>
-        </div>
 
         <div className="flex flex-wrap gap-2 mt-3">
           {resort.tags?.map((tag, index) => (
