@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import ContactModal from "./modals/ContactModal";
+import ResortJsBuilder from "../tools/ResortJsBuilder";
 
 export default function TopBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function TopBar() {
       <div className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-2xl font-bold text-blue-600 cursor-pointer">
-            Prototype
+            Twin Acacia
           </Link>
 
           <div className="hidden md:flex gap-8 font-medium text-gray-700">
@@ -32,6 +33,7 @@ export default function TopBar() {
                 const element = document.getElementById("about");
                 if (element) element.scrollIntoView({ behavior: "smooth" });
               }}
+              className = "hover:text-blue-600 transition"
             >
               About
             </a>
@@ -43,6 +45,12 @@ export default function TopBar() {
             >
               Contact
             </button>
+
+            <div>
+              <Link to="/resort-builder" className="hidden md:flex gap-8 font-medium text-gray-700 hover:text-blue-600 transition">
+                Resort Bulder
+              </Link>
+            </div>
           </div>
         </div>
       </div>

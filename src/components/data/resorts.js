@@ -95,155 +95,58 @@ export const resorts = [
         ],
       },
     ],
+  },
+  {
+    name: "Resort Name",
+    location: "Location Address",
+    price: 0,
+    contactPhone: "123123132123",
+    contactEmail: "asdasd@gmaillclomd",
+    description: {
+      summary: "wassa"
+    },
+    image: "",
+    gallery: [
+      "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+      "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+      "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+      "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+      "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83"
+    ],
+    facilities: [
+      {
+        name: "fac 1",
+        image: "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83"
+      },
+      {
+        name: "fac2 ",
+        image: "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83"
+      }
+    ],
+    rooms: [
+      {
+        name: "room a",
+        guests: 1,
+        beds: "2 doule beds",
+        price: 6698,
+        gallery: [
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83",
+          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/495541849_122114971262836693_6151526954222791016_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=FbQ4RdOPyZMQ7kNvwEpa9QJ&_nc_oc=AdmLpVMMpgV9S8jFpZ4bSR_f3gK3XUVus5rqslaWnfWsIkMZL7g1jnPDSpbHoungtyo&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=5ekMqfqLarRIdpc2qSsn7A&oh=00_AfsxHXyOncU0iQYdkaOk_yVeBmCcKDpd1ehPCloHId0rBA&oe=6991AB83"
+        ],
+        tags: [
+          "tag 1",
+          "tag 2"
+        ],
+        id: 1770789313632
+      }
+    ],
+    tags: [
+      "tag0",
+      "tag",
+      "tag2",
+      "tag3"
+    ]
   }
-/*
-  },
-  {
-    name: "Two Seasons Coron Island Resort",
-    location: "Two Seasons in Coron, Palawan, Philippines",
-    price: 5200,
-    contactPhone: "+63 111 111 1111",
-    contactEmail: "name@example.com",
-    details: "Example details about the resort",
-    image: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/576649757.jpg?k=ad2067eb6bc5b6c21d59ceb7eeee74d3d296ca806e7d49bffe84aec24592b71f&o=",
-    facilities: [
-      "Swimming Pool",
-      "Restaurant",
-      "Free Wifi",
-      "Parking",
-      "Spa",
-      "Bar",
-    ],
-    tags: [
-      "Private Island",
-      "Beachfront",
-      "Free Breakfast",
-      "Boat Transfer Available",
-      "Family-Friendly",
-      "Great Views",
-      "Snorkeling Nearby",
-      "Spa & Wellness",
-    ],
-    gallery: [
-      "https://cf.bstatic.com/xdata/images/hotel/max1024x768/576649757.jpg?k=ad2067eb6bc5b6c21d59ceb7eeee74d3d296ca806e7d49bffe84aec24592b71f&o=",
-      "https://scontent.fmnl30-1.fna.fbcdn.net/v/t39.30808-6/510729928_1243508400560316_6948059133684259595_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGS1ODk825JIMPa8YP18DjYRYw1GeMhObBFjDUZ4yE5sGUa2PJFRB-uAb46w1CU28iSXXOW6H-lpAn-hVtIMZ7_&_nc_ohc=uAcGV3_YiI8Q7kNvwGEOBnD&_nc_oc=AdnaNquBeDkrccSuPfV492_Iaddt1NSGnilNCSIgMKBQFPBtphZZkxyi-ZxwB5IJfH4&_nc_zt=23&_nc_ht=scontent.fmnl30-1.fna&_nc_gid=zP1unwJCSWm82zbIC9Xsvg&oh=00_AftrHDzm5vmgOKHGZ1oOvs-AoF32ekboJ7vxS6rdeQJphg&oe=6990FF08",
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/03/8d/9f/5d/two-seasons-coron-island.jpg?w=900&h=-1&s=1",
-      "https://cf.bstatic.com/xdata/images/hotel/max1024x768/576649751.jpg?k=7502619849dd15c8fe3ae1ce5ff87e4d68b9aed6c0df88a036d9eb985d9c9d87&o=",
-      "https://cf.bstatic.com/xdata/images/hotel/max1024x768/576649756.jpg?k=4456e247731f8ac40f38920783f5c078d4f43ab35e96039c4588b97495a860d5&o=",   
-    ],
-    rooms: [
-      {
-        id: 1,
-        name: "Standard Room",
-        guests: 2,
-        beds: "1 Queen Bed",
-        price: 5200,
-        details: "Details about the room",
-        tags: ["Free Wifi", "Aircon", "Hot Shower"],
-        gallery: [
-          "https://assets.minorhotels.com/image/upload/q_auto,f_auto,c_limit,w_1045/media/minor/anantara/images/naladhu-private-island-maldives/accommodation/details-page/two-bedroom-ocean-house/mnld_two_bedroom_ocean_house_with_pool_2_880x620.jpg",
-          "https://www.steamboat.com/-/media/steamboat/employment/recruiting/ponds-kitchen.jpg?w=480&rev=e387ff4d2fbf439b96c332757652b0eb&hash=551A12B6BAE5E3BB3CFC44C55014C1E0",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s"          
-        ],
-      },    
-      {
-        id: 2,
-        name: "Family Room",
-        guests: 4,
-        beds: "2 Double Beds",
-        price: 6700,
-        details: "Details about the room",
-        tags: ["Balcony", "Pool View"],
-        gallery: [
-          "https://eurobel.com.ph/wp-content/uploads/2025/03/Blog-43-Banner-Opt-2.png",
-          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",
-          "https://img.lamudi.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1wcm9qZWN0cy1hZG1pbi1pbWFnZXMiLCJrZXkiOiIxMDAwODJiYy1iZjlhLTQzZjYtOWUyMi1jOGI4YThkZTg3N2MvMTAwMDgyYmMtYmY5YS00M2Y2LTllMjItYzhiOGE4ZGU4NzdjXzlhNjBkZTE3LWE0YjQtNDhlOC1iYzM2LTk5NGY3ZWFlNmNlYS5qcGciLCJicmFuZCI6ImxhbXVkaSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozMjAsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=",
-          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",          
-        ],
-      },
-    ],
-  },
-  {
-    name: "The Lihim Villas",
-    location: "999 Sitio Caalan, Brgy. Masagana, El Nido, Palawan 5313, Philippines",
-    price: 5200,
-    contactPhone: "+63 111 111 1111",
-    contactEmail: "name@example.com",
-    details: "Example details about the resort",
-    image: "https://lihim.com/wp-content/uploads/2023/09/2.-Exterior-scaled.jpg",
-    facilities: [
-      "Swimming Pool",
-      "Restaurant",
-      "Free Wifi",
-      "Parking",
-      "Spa",
-      "Bar",
-    ],
-    tags: [
-      "Luxury Villas",
-      "Secluded & Quiet",
-      "Great for Honeymoon",
-      "Private Pool Options",
-      "Free Breakfast",
-      "Spa & Wellness",
-      "Scenic Views",
-      "Couples Retreat",
-    ],
-    gallery: [
-      "https://lihim.com/wp-content/uploads/2023/09/2-3-scaled.jpg",
-      "https://lihim.com/wp-content/uploads/2023/09/Presidential-Villa-Facade.jpg",
-      "https://lihim.com/wp-content/uploads/2023/09/2.-Exterior-scaled.jpg",         
-      "https://gttp.images.tshiftcdn.com/223277/x/0/best-travel-guide-to-el-nido-town-on-palawan-island-everything-you-need-to-know-33.jpg?auto=compress%2Cformat&ch=Width%2CDPR&dpr=1&ixlib=php-3.3.0&w=883",
-      "https://framerusercontent.com/images/CsJCqUMr8rtKqAZMwXOOM04j0XU.webp?width=1600&height=1067",
-      "https://lihim.com/wp-content/uploads/2023/09/2.-Exterior-scaled.jpg",   
-    ],
-    rooms: [
-      {
-        id: 1,
-        name: "Standard Room",
-        guests: 2,
-        beds: "1 Queen Bed",
-        price: 5200,
-        details: "Details about the room",
-        tags: ["Free Wifi", "Aircon", "Hot Shower"],
-        gallery: [
-          "https://assets.minorhotels.com/image/upload/q_auto,f_auto,c_limit,w_1045/media/minor/anantara/images/naladhu-private-island-maldives/accommodation/details-page/two-bedroom-ocean-house/mnld_two_bedroom_ocean_house_with_pool_2_880x620.jpg",
-          "https://www.steamboat.com/-/media/steamboat/employment/recruiting/ponds-kitchen.jpg?w=480&rev=e387ff4d2fbf439b96c332757652b0eb&hash=551A12B6BAE5E3BB3CFC44C55014C1E0",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s"          
-        ],
-      },
-      {
-        id: 2,
-        name: "Family Room",
-        guests: 4,
-        beds: "2 Double Beds",
-        price: 6700,
-        details: "Details about the room",
-        tags: ["Balcony", "Pool View"],
-        gallery: [
-          "https://eurobel.com.ph/wp-content/uploads/2025/03/Blog-43-Banner-Opt-2.png",
-          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",
-          "https://img.lamudi.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1wcm9qZWN0cy1hZG1pbi1pbWFnZXMiLCJrZXkiOiIxMDAwODJiYy1iZjlhLTQzZjYtOWUyMi1jOGI4YThkZTg3N2MvMTAwMDgyYmMtYmY5YS00M2Y2LTllMjItYzhiOGE4ZGU4NzdjXzlhNjBkZTE3LWE0YjQtNDhlOC1iYzM2LTk5NGY3ZWFlNmNlYS5qcGciLCJicmFuZCI6ImxhbXVkaSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozMjAsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=",
-          "https://evermoreresort.com/sites/default/files/2024-02/H62A2017-HDR-1copy.jpg",          
-        ],
-      },
-      {
-        id: 3,
-        name: "Extended-Family Room",
-        guests: 12,
-        beds: "6 Double Beds",
-        price: 9800,
-        details: "Details about the room",
-        tags: ["Balcony", "Pool View"],
-        gallery: [
-          "https://www.steamboat.com/-/media/steamboat/employment/recruiting/ponds-kitchen.jpg?w=480&rev=e387ff4d2fbf439b96c332757652b0eb&hash=551A12B6BAE5E3BB3CFC44C55014C1E0",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTAPuhavi_djnZyEViDMGKZ0yRdDaWQMz4-w&s",
-          "https://img.lamudi.com/eyJidWNrZXQiOiJwcmQtbGlmdWxsY29ubmVjdC1wcm9qZWN0cy1hZG1pbi1pbWFnZXMiLCJrZXkiOiIxMDAwODJiYy1iZjlhLTQzZjYtOWUyMi1jOGI4YThkZTg3N2MvMTAwMDgyYmMtYmY5YS00M2Y2LTllMjItYzhiOGE4ZGU4NzdjXzlhNjBkZTE3LWE0YjQtNDhlOC1iYzM2LTk5NGY3ZWFlNmNlYS5qcGciLCJicmFuZCI6ImxhbXVkaSIsImVkaXRzIjp7InJvdGF0ZSI6bnVsbCwicmVzaXplIjp7IndpZHRoIjozMjAsImhlaWdodCI6MjQwLCJmaXQiOiJjb3ZlciJ9fX0=",
-        ],
-      },      
-    ],
-  },  
-*/
 ];

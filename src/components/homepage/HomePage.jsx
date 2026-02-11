@@ -1,15 +1,15 @@
 import React from "react";
-import HeroBanner from "../components/HomePage/hero/HeroBanner";
-import ResortList from "../components/HomePage/resort/ResortList";
+import HeroBanner from "./hero/HeroBanner";
+import ResortSection from "./resort/ResortSection"
 
-export default function HomePage() {
+export default function homepage() {
   return (
     <>
       <HeroBanner />
 
       {/* Resorts Section */}
       <div id="resorts">
-        <ResortList />
+        <ResortSection />
       </div>
 
       {/* About Section */}

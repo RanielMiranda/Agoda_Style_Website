@@ -1,18 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HeroBanner from "./components/homepage/hero/HeroBanner";
-import ResortSection from "./components/homepage/resort/ResortSection";
+import HomePage from "./components/homepage/HomePage";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
+import ResortJsBuilder from "./components/tools/ResortJsBuilder";
 import TopBar from "./components/ui/TopBar";
-
-function HomePage() {
-  return (
-    <>
-      <HeroBanner />
-      <ResortSection />
-    </>
-  );
-
-}
 
 export default function App() {
   return (
@@ -22,6 +12,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/resort/:name" element={<ResortDetailPage />} />
+          <Route path="/resort-builder" element = {<ResortJsBuilder/> } />
         </Routes>
 
         <div id = "about" className="bg-gray-900 text-gray-400 text-sm text-center py-6">
