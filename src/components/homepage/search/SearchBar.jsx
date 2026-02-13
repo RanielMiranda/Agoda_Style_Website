@@ -100,7 +100,7 @@ export default function SearchBar() {
           className="flex-1 text-center whitespace-nowrap"
           onClick={() => setActiveDropdown("start")}
         >
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium ">
             {startDate ? formatFullDate(startDate) : "Check-in date"}
           </div>
           <div className="text-xs text-gray-400">
@@ -263,7 +263,7 @@ export default function SearchBar() {
 
 
       {/* SEARCH BUTTON */}
-      <Button className="rounded-xl px-6 text-sm">
+      <Button className="rounded-xl px-6 text-sm flex items-center justify-center mx-auto md:mx-0">
         Search
       </Button>
     </div>

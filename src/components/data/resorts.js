@@ -4,16 +4,18 @@ export const resorts = [
     location: "National Highway, Brgy. Bagong Kalsada, Calamba, Philippines, 4027, Calamba, Philippines, 4027",
     price: 5200,
     contactPhone: "+63 111 111 1111",
-    contactEmail: "name@example.com",
+    contactEmail: "kasbahvilla@gmail.com",
     profileImage: "https://scontent.fmnl9-7.fna.fbcdn.net/v/t39.30808-6/495967281_122114675090836693_6388479535100070654_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=GeAc93BIwCgQ7kNvwFu9WyS&_nc_oc=Admm-Jok_4yzJ2fHdj3IfTADhiEkYQtSbA3TNFlFtpjKonTCFBehah00kPSiVd_jPrE&_nc_zt=23&_nc_ht=scontent.fmnl9-7.fna&_nc_gid=n2ncA5q_kv5BX3MhidX80g&oh=00_Afu90VsWEHnxMCfZM_snFhxLSO_gzR3MXllYXREPMdelBw&oe=69920B0D",
     description: {
       summary: "Kasbah Villa Private Resort - Based in Calamba, Laguna offers an elegant, luxurious experience within reach filled with amenities designed to provide comfort and exclusivity. An experience one wouldn’t want to forget, but would rather share.\n\nSwimming Pool:\n• 5 Ft Adult Pool\n• 3 Ft Kiddie Pool\n• Jaccuzzi (Add. 500/Hr)\n\nKitchen:\n• Refrigerator\n• Hot and Cold Dispenser (Add. 50 Pesos/Gal)\n• Microwave\n• Rice Cooker\n• Electric Kettle\n• Casserole, Frying Pan, Ladle Tong\n• Double Burner (Free to use LPG)\n• Dining Tables and Chairs\n• Notes:\n   • Bring your own toiletries, towel, and disposables (plates/cups/spoons)\n\nEntertainment:\n• 43\" TV and Videoke\n• Billiards Table\n\nSports Amenities (800 / for 22 Hrs)\n• Basketball\n• Pingpong Table\n• Dart Board"
     },
-      extraServices: [
-        { name: "Catering", description: "Food avail for discussion", cost: 3500 },
-        { name: "Sound System", description: "Speakers for playing music", cost: 1500 },
-        { name: "Food Carts", description: "Food Available for discussion", cost: 1200 }
-      ],    
+    extraServices: [
+      { name: "Catering", description: "Food avail for discussion", cost: 3500 },
+      { name: "Sound System", description: "Speakers for playing music", cost: 1500 },
+      { name: "Food Carts", description: "Food Available for discussion", cost: 1200 },
+      { name: "Hot and Cold Dispenser", description: "Additional 50 Pesos per gallon", cost: 50},
+      { name: "Sports Amenities", description: "Basketball, Pingpong Table, Dart Board ₱800 for 22 hours", cost: 800}
+    ],    
     facilities: [
       {
         name: "Swimming Pool",
@@ -44,6 +46,10 @@ export const resorts = [
         image: "https://scontent.fmnl9-4.fna.fbcdn.net/v/t39.30808-6/498588112_122117818934836693_2593623401048603365_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=HOBdZEP5oi0Q7kNvwHwZvs_&_nc_oc=Adn767PPWMrYmhRWqfSkwXfMsY5c9jHhX7xWBq5hFXnBrbeBlaeIQLLB_b2jezF4k5w&_nc_zt=23&_nc_ht=scontent.fmnl9-4.fna&_nc_gid=uRoKKFG-LAGlKZI_DjgkiA&oh=00_AfvPfU8VfwVwNgELySXCEdDf3gc6OWVey8BwRpzQX6zvgg&oe=6991BAA3",
       },
       {
+        name: "Pool Table",
+        image: "https://scontent.fmnl9-7.fna.fbcdn.net/v/t39.30808-6/499470453_122117818460836693_3881452310068939149_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=6xLkdEVBrkoQ7kNvwEmgPT4&_nc_oc=Adl5WRcR8_uM76drq1-qetvIhaPPmOoIBtGvUtI1ZixHcXsHRD6pIn7RhiW5a6db2fQ&_nc_zt=23&_nc_ht=scontent.fmnl9-7.fna&_nc_gid=hv5I0h32fE2j4pDlbRYKJw&oh=00_AfvhWgbkCDwhQ8f17FWhkzpKr3CrwYWd7PAk4P5IOpOsOw&oe=6991BEDA"
+      },      
+      {
         name: "Toilet",
         image: "https://scontent.fmnl9-4.fna.fbcdn.net/v/t39.30808-6/499030862_122117818130836693_1622926753752641040_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=z-yKx7a0r3sQ7kNvwHwnt9x&_nc_oc=AdmpVvhjxQiGIiRSbXs5CbZQybhsFTChd-xKny_mq40pLOJmLNnx3MLxQ5fEEgr9m-U&_nc_zt=23&_nc_ht=scontent.fmnl9-4.fna&_nc_gid=Jrr_5Qctrgeh2dSO5fAyNw&oh=00_AftYiAOPuM0kVzu7qblDk706g3VAjCm4A3rdDDDxER-S1g&oe=6991BEAE",
       },
@@ -54,11 +60,7 @@ export const resorts = [
       {
         name: "Toilet",
         image: "https://scontent.fmnl9-4.fna.fbcdn.net/v/t39.30808-6/499030862_122117818130836693_1622926753752641040_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=z-yKx7a0r3sQ7kNvwHwnt9x&_nc_oc=AdmpVvhjxQiGIiRSbXs5CbZQybhsFTChd-xKny_mq40pLOJmLNnx3MLxQ5fEEgr9m-U&_nc_zt=23&_nc_ht=scontent.fmnl9-4.fna&_nc_gid=Jrr_5Qctrgeh2dSO5fAyNw&oh=00_AftYiAOPuM0kVzu7qblDk706g3VAjCm4A3rdDDDxER-S1g&oe=6991BEAE",
-      },            
-      {
-        name: "Pool Table",
-        image: "https://scontent.fmnl9-7.fna.fbcdn.net/v/t39.30808-6/499470453_122117818460836693_3881452310068939149_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=6xLkdEVBrkoQ7kNvwEmgPT4&_nc_oc=Adl5WRcR8_uM76drq1-qetvIhaPPmOoIBtGvUtI1ZixHcXsHRD6pIn7RhiW5a6db2fQ&_nc_zt=23&_nc_ht=scontent.fmnl9-7.fna&_nc_gid=hv5I0h32fE2j4pDlbRYKJw&oh=00_AfvhWgbkCDwhQ8f17FWhkzpKr3CrwYWd7PAk4P5IOpOsOw&oe=6991BEDA"
-      }
+      }            
     ],
     tags: [
       "Swimming Pool",
@@ -295,6 +297,11 @@ export const resorts = [
         name: "Catering Service",
         description: "Food can be discussed",
         cost: 1200
+      },
+      {
+        name: "Jacuzzi",
+        description: "₱500 per hour",
+        cost: 500
       }
     ],
     rooms: [

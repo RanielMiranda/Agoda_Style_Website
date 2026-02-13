@@ -14,7 +14,7 @@ export default function HeroBanner() {
   }, []);
 
   return (
-    <div className="relative h-[600px] overflow-visible">
+    <div className="relative h-[60vh] overflow-visible">
       <AnimatePresence>
         <motion.img
           key={heroIndex}

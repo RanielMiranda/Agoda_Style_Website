@@ -12,16 +12,16 @@ export default function ResortCard({ resort }) {
   return (
     <Card className="overflow-hidden">
       {/* Gallery Container */}
-      <div className="flex w-full h-60">
+      <div className="flex w-full h-60 gap-1">
         {/* Main Image - 6/8 width */}
         <img
           src={mainImage}
-          className="w-3/4 h-full object-cover"
+          className="w-3/4 h-full object-cover rounded-bl-xl rounded-tl-xl"
           alt={resort.name}
         />
 
         {/* Mini Gallery - 2/8 width */}
-        <div className="w-1/4 h-full flex flex-col">
+        <div className="w-1/4 h-full flex flex-col gap-1">
           {/* Top mini image */}
           <img
             src={topMini}
