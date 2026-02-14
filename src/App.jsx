@@ -3,6 +3,7 @@ import HomePage from "./components/homepage/HomePage";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
 import ResortJsBuilder from "./components/tools/ResortJsBuilder";
 import TopBar from "./components/ui/TopBar";
+import BottomBar from "./components/ui/BottomBar";
 
 export default function App() {
   return (
@@ -14,10 +15,6 @@ export default function App() {
           <Route path="/resort/:name" element={<ResortDetailPage />} />
           <Route path="/resort-builder" element = {<ResortJsBuilder/> } />
         </Routes>
-
-        <div id = "about" className="bg-gray-900 text-gray-400 text-sm text-center py-6">
-          © 2026 Prototype Website
-        </div>
 
       </div>
     </BrowserRouter>

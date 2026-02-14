@@ -1,5 +1,6 @@
 import React from "react";
-import ResortCard from "./ResortCard";
+import ResortGallery from "./ResortGallery";
+import ResortContent from "./ResortContent";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -14,15 +15,19 @@ export default function ResortResults({ resorts }) {
           className="flex flex-col sm:flex-row bg-white shadow rounded-2xl overflow-hidden"
         >
           {/* MAIN CARD */}
-          <div
-            className="flex-1 cursor-pointer"
-            onClick={() => {
+          <div className="flex-1 ">
+            {/* Gallery Section*/}
+            <div 
+              className ="cursor-pointer"
+              onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
               navigate(`/resort/${encodeURIComponent(resort.name)}`);
-            }}
-          >
-            <ResortCard resort={resort} />
+            }}>   
+              <ResortGallery resort={resort} />
+            </div>
+            <ResortContent resort={resort} />
           </div>
+
 
           {/* RIGHT INFO PANEL */}
           <div className="w-full sm:w-72 border-t sm:border-t-0 sm:border-l flex flex-col">
