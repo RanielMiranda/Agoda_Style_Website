@@ -84,7 +84,7 @@ export const resorts = [
         price: 5203,
         details: "Details about the room",        
         gallery: [
-          "https://scontent.fmnl9-6.fna.fbcdn.net/v/t39.30808-6/514039707_24645923878329996_6147084731116776519_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=103&ccb=1-7&_nc_sid=f727a1&_nc_ohc=TUKT5aazRagQ7kNvwHO4Mxj&_nc_oc=AdmlAMSjVevuwv_StcCyo_tYF9ESmu1AUD0FJ8HQXtbpyX8vAEMXBHiizG39ErG2CY0&_nc_zt=23&_nc_ht=scontent.fmnl9-6.fna&_nc_gid=RdzLx9nm6jFiN5CViMKjcw&oh=00_AfvKxXQ_T1tiN5lnEhXf6FQDDAZqm3hrsrHMN3tBBs0EEg&oe=6991FB3E"
+          "https://scontent.fmnl9-1.fna.fbcdn.net/v/t39.30808-6/498592227_122117818088836693_9140900381154017019_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_ohc=-GQCZWtw6J8Q7kNvwFpZZ2x&_nc_oc=Adkrd8BkLTqCagjEmOo7iEK2IdberL2CgVKCP5qzbs0L8Rar31JSOAVU1BOS9VLq6Ug&_nc_zt=23&_nc_ht=scontent.fmnl9-1.fna&_nc_gid=G82eHON74lL8otl2EeQaaA&oh=00_AftoRCp4vijlW4kIkIcgldg_0ipwolURHiFSmOsSgpbR8A&oe=69921BB1"
         ],
         tags: [
           "Airconditioned"
