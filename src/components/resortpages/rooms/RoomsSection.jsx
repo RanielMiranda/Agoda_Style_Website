@@ -37,7 +37,10 @@ export default function RoomsSection({ resort, onOpenRoomGallery, onViewRoomDeta
                     className="object-cover w-full h-full cursor-pointer rounded-br-xl"
                   />
                   {room.gallery.length > 3 && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold rounded-br-xl">
+                    <div 
+                      className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold rounded-br-xl cursor-pointer" 
+                      onClick={() => onOpenRoomGallery(room.gallery, 2)}
+                      >
                       +{room.gallery.length - 2} more
                     </div>
                   )}

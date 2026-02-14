@@ -67,9 +67,10 @@ export default function ResortResults({ resorts }) {
 
               <Button
                 className="w-full rounded-xl text-lg hover:scale-105 transition"
-                onClick={() =>
-                  navigate(`/resort/${encodeURIComponent(resort.name)}`)
-                }
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  navigate(`/resort/${encodeURIComponent(resort.name)}`);
+                }}
               >
                 Check Availability
               </Button>

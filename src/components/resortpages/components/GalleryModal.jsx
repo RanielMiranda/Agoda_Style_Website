@@ -33,7 +33,7 @@ export default function GalleryModal({
             setActiveIndex((i) => (i - 1 + images.length) % images.length);
           }}
           className="
-            absolute left-50
+            absolute left-5
             p-3
             rounded-full
             bg-black            
@@ -59,7 +59,7 @@ export default function GalleryModal({
             setActiveIndex((i) => (i + 1) % images.length);
           }}
           className="
-            absolute right-50
+            absolute right-5
             p-3
             rounded-full
             bg-black

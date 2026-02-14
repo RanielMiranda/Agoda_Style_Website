@@ -59,7 +59,7 @@ export default function SearchBar() {
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded-2xl shadow-xl py-3 px-4 flex flex-wrap md:flex-nowrap gap-2 w-full max-w-6xl"
+      className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap gap-2 bg-white rounded-xl p-[1vh]"
     >
       <DestinationField
         destination={destination}
@@ -93,7 +93,7 @@ export default function SearchBar() {
         handleGuestTypeChange={handleGuestTypeChange}
       />
 
-      <Button className="rounded-xl px-6 text-sm">
+      <Button className="rounded-xl px-6 text-sm ">
         Search
       </Button>
     </div>

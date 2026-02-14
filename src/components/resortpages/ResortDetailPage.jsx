@@ -3,14 +3,13 @@ import { useParams } from "react-router-dom";
 import { resorts } from "../data/resorts";
 
 import HeroGallery from "./Gallery/HeroGallery";
-import ShortcutBar from "./rooms/ShortcutBar";
 import ResortInfo from "./rooms/ResortInfo";
 import RoomsSection from "./rooms/RoomsSection";
+
+import ShortcutBar from "./rooms/ShortcutBar";
+
 import GalleryModal from "./components/GalleryModal";
 import FacilityModal from "./components/FacilityModal";
-
-import ContactModal from "../ui/modals/ContactModal";
-import InquiryForm from "./components/InquiryForm";
 import RoomContactModal from "./components/RoomContactModal";
 
 export default function ResortDetailPage() {

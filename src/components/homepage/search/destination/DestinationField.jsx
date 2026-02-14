@@ -22,11 +22,11 @@ export default function DestinationField({
       />
 
       {activeDropdown === "destination" && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow rounded-xl mt-2 z-[9999]">
+        <div className="absolute top-full left-0 right-0 bg-white shadow rounded-xl mt-2 z-[9999] p-2">
           {areaSuggestions.map((a) => (
             <div
               key={a}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              className="p-2 hover:bg-gray-100 cursor-pointer rounded-xl"
               onClick={() => {
                 setDestination(a);
                 setActiveDropdown(null);
