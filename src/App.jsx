@@ -3,7 +3,7 @@ import HomePage from "./components/homepage/HomePage";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
 import ResortJsBuilder from "./components/tools/ResortJsBuilder";
 import TopBar from "./components/ui/TopBar";
-import BottomBar from "./components/ui/BottomBar";
+
 
 export default function App() {
   return (
