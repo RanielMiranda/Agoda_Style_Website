@@ -124,6 +124,7 @@ export default function ResortJsBuilder() {
           value={resort.location}
           onChange={(e) => setResort({ ...resort, location: e.target.value })}
         />
+        <label className="block">Average Pricing</label>
         <input
           type="number"
           placeholder="Price"
@@ -286,6 +287,7 @@ export default function ResortJsBuilder() {
             value={newRoom.name}
             onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
           />
+          <label className="block">Number of Guests:</label>
           <input
             type="number"
             placeholder="Guests"
@@ -300,6 +302,7 @@ export default function ResortJsBuilder() {
             value={newRoom.beds}
             onChange={(e) => setNewRoom({ ...newRoom, beds: e.target.value })}
           />
+          <label className="block">Pricing</label>
           <input
             type="number"
             placeholder="Price"
@@ -398,7 +401,7 @@ export default function ResortJsBuilder() {
         {showCardPreview && (
           <div>
             <h2 className="font-semibold mb-2">ResortResults Preview</h2>
-            <ResortResults resorts={[resort]} /> {/* <-- now using ResortResults */}
+            <ResortResults resorts={[resort]} />
           </div>
         )}
 
