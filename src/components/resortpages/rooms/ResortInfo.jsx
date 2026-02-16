@@ -1,6 +1,6 @@
 import FacilitiesGallery from "../Gallery/FacilitiesGallery";
 import ServicesTable from "./ServicesTable";
-import { MapPin, Mails, Phone } from "lucide-react";
+import { MapPin, Mails, Phone, Facebook } from "lucide-react";
 
 export default function ResortInfo({ resort, onFacilityOpen }) {
   return (
@@ -22,6 +22,19 @@ export default function ResortInfo({ resort, onFacilityOpen }) {
         <MapPin size={16} />
         <span className = "px-2"> {resort.location} </span>
       </div>
+      {resort.contactMedia && (
+      <div className="flex items-center gap-1 my-1 text-gray-800">
+        <Facebook size={16} />
+        <a
+          href={resort.contactMedia}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-2 text-blue-600 hover:underline"
+        >
+          Visit our Facebook Page
+        </a>
+      </div>
+    )}      
       <div className="flex items-center gap-1 my-1 text-gray-800">
         <Mails size={16} />
         <span className = "px-2"> {resort.contactEmail} </span>

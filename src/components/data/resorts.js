@@ -5,6 +5,7 @@ export const resorts = [
     price: 5200,
     contactPhone: "+63 111 111 1111",
     contactEmail: "kasbahvilla@gmail.com",
+    contactMedia: "https://www.facebook.com/profile.php?id=61575100816613",
     profileImage: "https://scontent.fmnl9-2.fna.fbcdn.net/v/t39.30808-6/498599251_122117817644836693_1784896103272791655_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeEYrO3JRgiyy0zUVeFqs8cnxN7FjB8X_EzE3sWMHxf8TOgaLv3sDKPXEWg5AwnA_vbDwI0mZYfqzF_z12HzTslD&_nc_ohc=Tkzugf_t6s4Q7kNvwGB-x8G&_nc_oc=Adkawkyj4lph-WDyOojeNIwcb7j0qefrUTzhnebFTVzEcTxIN8qBv39SHpxpBcvGVGs&_nc_zt=23&_nc_ht=scontent.fmnl9-2.fna&_nc_gid=h72repAIKO4vkcl8rVDDew&oh=00_AfvJHrg0yMeQZAtevXH-NAkd2ogyz5QQVdcrs3L8eNi_FA&oe=69985D57",
     description: {
       summary: "Kasbah Villa Private Resort - Based in Calamba, Laguna offers an elegant, luxurious experience within reach filled with amenities designed to provide comfort and exclusivity. An experience one wouldn’t want to forget, but would rather share.\n\nSwimming Pool:\n• 5 Ft Adult Pool\n• 3 Ft Kiddie Pool\n• Jaccuzzi (Add. 500/Hr)\n\nKitchen:\n• Refrigerator\n• Hot and Cold Dispenser (Add. 50 Pesos/Gal)\n• Microwave\n• Rice Cooker\n• Electric Kettle\n• Casserole, Frying Pan, Ladle Tong\n• Double Burner (Free to use LPG)\n• Dining Tables and Chairs\n• Notes:\n   • Bring your own toiletries, towel, and disposables (plates/cups/spoons)\n\nEntertainment:\n• 43\" TV and Videoke\n• Billiards Table\n\nSports Amenities (800 / for 22 Hrs)\n• Basketball\n• Pingpong Table\n• Dart Board"
@@ -156,6 +157,7 @@ export const resorts = [
     price: 5200,
     contactPhone: "0993 053 7495  ",
     contactEmail: "resortceleste@gmail.com",
+    contactMedia: "https://www.facebook.com/profile.php?id=61570554086379",
     profileImage: "https://scontent.fmnl9-1.fna.fbcdn.net/v/t39.30808-1/470198287_122100919730685136_1345299528945212438_n.jpg?stp=c242.17.566.566a_dst-jpg_s200x200_tt6&_nc_cat=110&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeGkA1cnWE-w978NYd2JvYrlA3s2nIxwf8IDezacjHB_wrM8xA5x4SIsh7IeNP4jWavWHc1hAry0fb0o1CSO94Iy&_nc_ohc=RrNQ8PM2WVkQ7kNvwGGZf3j&_nc_oc=AdmiDvmPPcRF9kRGv4CLTBiQo5otVI9XrRN8jlF1TWuj_HsQI_N6gvMrKdMGMSXMQXs&_nc_zt=24&_nc_ht=scontent.fmnl9-1.fna&_nc_gid=8a4mQTxYmf35TfJroIcLMg&oh=00_AftfaPKnXyQvMS3WDWgEg-LzmB15FGStkrd3WJvnjGAQfw&oe=6998634E",
     description: {
       summary: "Céleste Resort offers an unforgettable experience of blissful pleasure. We are renowned for our natural hot springs, providing a rejuvenating retreat that heals both body and soul.\n"
@@ -254,8 +256,9 @@ export const resorts = [
     price: 5199,
     contactPhone: "0917 820 1091  ",
     contactEmail: "luxville.resort@gmail.com",
+    contactMedia: "https://www.facebook.com/profile.php?id=61558978768296",
     description: {
-      summary: "Your modern hot spring resort located in the heart of Calamba, Laguna🍃\n\nNatural Hot Spring:\n• Adult Swimming Pool (3-5 ft)\n• Kiddie Pool\n• Jacuzzi (P500 Per hour)\n\nRooms:\n• 6 Bedrooms w ith own toilet and bath, fully air conditioned with pillows and blankets (sleeping capacity up to 35 pax)\n\nResort Amenities:\n• Free Wifi\n• Dining area\n• Common area with sofa lounge set\n• sun lounger and daybeds\n• powder room\n\nKitchen amenities:\n• 2-burner gas stove with FREE LPG gas usage\n• Microwave\n• Rice cooker\n• Electric Kettle\n• Water dispenser\n• Refrigerator with ample freezer space\n\nEntertainment:\n• Complete audiophile videoke set up\n• Billiard table\n\nOutdoor Space:\n• BBQ griller (charcoal not included)\n• Wide parking space\n\nNot Included:\n• Cups\n• Plates\n• Utensils\n• Toiletries\n• Towels"
+      summary: "Your modern hot spring resort located in the heart of Calamba, Laguna 🍃\n\nNatural Hot Spring:\n• Adult Swimming Pool (3-5 ft)\n• Kiddie Pool\n• Jacuzzi (P500 Per hour)\n\nRooms:\n• 6 Bedrooms w ith own toilet and bath, fully air conditioned with pillows and blankets (sleeping capacity up to 35 pax)\n\nResort Amenities:\n• Free Wifi\n• Dining area\n• Common area with sofa lounge set\n• sun lounger and daybeds\n• powder room\n\nKitchen amenities:\n• 2-burner gas stove with FREE LPG gas usage\n• Microwave\n• Rice cooker\n• Electric Kettle\n• Water dispenser\n• Refrigerator with ample freezer space\n\nEntertainment:\n• Complete audiophile videoke set up\n• Billiard table\n\nOutdoor Space:\n• BBQ griller (charcoal not included)\n• Wide parking space\n\nNot Included:\n• Cups\n• Plates\n• Utensils\n• Toiletries\n• Towels"
     },
     profileImage: "https://scontent.fmnl9-3.fna.fbcdn.net/v/t39.30808-6/473691376_122167841522299292_5579231035805664781_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGlt0K4NlSY-0RvOAtbhjX_j7DU9eSSRdmPsNT15JJF2dLj-Yh-n2TQ32YXDUuGFNKZGqYk_l5K8VIpMOo4W3kJ&_nc_ohc=kc5UAtMZuVIQ7kNvwF5SFOj&_nc_oc=AdnMLjAgkhXlPmcxpCbx7jxsuAF9_1k02y4kiBwUou7myByrvde4Mxz19T6KAJQuQiE&_nc_zt=23&_nc_ht=scontent.fmnl9-3.fna&_nc_gid=F_ecOpjA918iihBBxVJdag&oh=00_AfvZRQcosOMQxWmWJsAOzOWcxJvfhFOx_LDHobVxr_NEVA&oe=69987F8E",
     gallery: [

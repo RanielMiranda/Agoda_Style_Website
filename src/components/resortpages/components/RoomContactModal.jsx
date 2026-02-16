@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ContactModal from "../../ui/modals/ContactModal";
 import InquiryForm from "./InquiryForm";
-import { Mails, Phone } from "lucide-react";
+import { Mails, Phone, Facebook } from "lucide-react";
 
 export default function RoomContactModal({ isOpen, onClose, resort, room }) {
   if (!room || !resort || !isOpen) return null;
@@ -68,6 +68,19 @@ const handleSubmit = () => {
       <div className="mb-4 space-y-1">
         <h3 className="text-xl font-semibold">Resort Contact</h3>
 
+        {resort.contactMedia && (
+          <div className="flex items-center gap-2 text-gray-800">
+            <Facebook size={16} />
+            <a
+              href={resort.contactMedia}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Facebook Page
+            </a>
+          </div>
+        )}
         {resort.contactEmail && (
           <div className="flex items-center gap-2 text-gray-800">
             <Mails size={16} />
