@@ -9,6 +9,7 @@ export default function RoomContactModal({ isOpen, onClose, resort, room }) {
   // Form state lifted here
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [dates, setDates] = useState("");
   const [message, setMessage] = useState("");
 
@@ -38,6 +39,7 @@ const handleSubmit = () => {
   setEmail("");
   setDates("");
   setMessage("");
+  setContactNumber("");
 };
 
   return (
@@ -96,6 +98,8 @@ const handleSubmit = () => {
         setName={setName}
         email={email}
         setEmail={setEmail}
+        contactNumber = {contactNumber}
+        setContactNumber = {setContactNumber}
         dates={dates}
         setDates={setDates}
         message={message}

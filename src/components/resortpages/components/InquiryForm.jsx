@@ -5,6 +5,8 @@ export default function InquiryForm({
   setName,
   email,
   setEmail,
+  contactNumber,
+  setContactNumber,
   dates,
   setDates,
   message,
@@ -22,10 +24,17 @@ export default function InquiryForm({
       />
 
       <input
-        placeholder="Email"
+        placeholder="Your Email"
         className="w-full border rounded p-2"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        placeholder="Your Contact Number"
+        className="w-full border rounded p-2"
+        value={contactNumber}
+        onChange={(e) => setContactNumber(e.target.value)}
       />
 
       <input
