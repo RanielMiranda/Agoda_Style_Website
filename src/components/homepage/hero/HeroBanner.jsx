@@ -14,7 +14,7 @@ export default function HeroBanner() {
   }, []);
 
   return (
-    <div className="relative h-[60vh] overflow-visible">
+    <div className="relative h-[80vh] overflow-visible">
       <AnimatePresence>
         <motion.img
           key={heroIndex}
@@ -40,7 +40,7 @@ export default function HeroBanner() {
       </div>
 
         {/* --- DOT INDICATOR --- */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 pb-2">
         {heroImages.map((_, index) => (
             <button
             key={index}

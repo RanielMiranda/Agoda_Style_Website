@@ -3,7 +3,7 @@ import HomePage from "./components/homepage/HomePage";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
 import ResortJsBuilder from "./components/tools/ResortJsBuilder";
 import TopBar from "./components/ui/TopBar";
-import BottomBar from "./components/ui/BottomBar";
+import Footer from "./components/ui/Footer";
 
 export default function App() {
   return (
@@ -16,7 +16,7 @@ export default function App() {
           <Route path="/resort-builder" element = {<ResortJsBuilder/> } />
         </Routes>
 
-      <BottomBar />
+      <Footer />
 
       </div>
     </BrowserRouter>
