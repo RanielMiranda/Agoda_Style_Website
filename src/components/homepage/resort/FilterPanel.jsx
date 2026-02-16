@@ -2,15 +2,7 @@ import React from "react";
 
 export default function FilterPanel({ price, setPrice }) {
   return (
-    <div
-      className="
-        w-full
-        lg:w-80
-        bg-white shadow rounded-2xl p-6
-        h-fit
-        lg:sticky lg:top-24
-      "
-    >
+    <div className="w-full lg:w-80 bg-white shadow rounded-2xl p-6 h-fit lg:sticky lg:top-24">
       <h3 className="font-semibold text-lg mb-4">Filters</h3>
 
       {/* PRICE */}

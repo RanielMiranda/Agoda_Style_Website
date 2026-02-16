@@ -7,7 +7,7 @@ export default function ResortSection() {
   const [price, setPrice] = useState(5000);
 
   return (
-    <section id="resorts" className="w-full max-w-[150vh] mx-auto px-4 py-12">
+    <section id="resorts" className= "w-full max-w-7xl mx-auto px-4 py-12">
       <h2 className="text-3xl font-bold mb-8">Top Resorts</h2>
 
       {/* Mobile: stacked | Desktop: side-by-side */}

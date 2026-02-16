@@ -199,7 +199,7 @@ export const resorts = [
     rooms: [
       {
         name: "Room A",
-        guests: 0,
+        guests: 4,
         beds: "2 Queen Sized Beds",
         price: 5200,
         details: "Room Details",
