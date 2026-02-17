@@ -364,5 +364,6 @@ export const resorts = [
       "Kitchen",
       "Billiard Table"
     ]
-  }
+  },
+  
 ];

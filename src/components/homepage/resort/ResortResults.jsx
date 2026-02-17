@@ -63,7 +63,7 @@ export default function ResortResults({ resorts }) {
             {/* PRICE + BUTTON */}
             <div className="p-4 sm:p-6">
               <p className="text-sm font-medium text-gray-600 mb-1">
-                Average pricing per night
+                Average pricing
               </p>
 
               <p className="text-2xl font-bold text-blue-600 mb-4">

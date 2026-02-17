@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./components/homepage/HomePage";
 import ResortDetailPage from "./components/resortpages/ResortDetailPage";
-import ResortJsBuilder from "./components/tools/ResortJsBuilder";
 import TopBar from "./components/ui/TopBar";
 import Footer from "./components/ui/Footer";
+import AdminResortPage from "./components/adminpage/AdminResortPage";
 
 export default function App() {
   return (
@@ -13,7 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/resort/:name" element={<ResortDetailPage />} />
-          <Route path="/resort-builder" element = {<ResortJsBuilder/> } />
+          <Route path="/resort-builder" element = {<AdminResortPage/> } />
         </Routes>
 
       <Footer />
