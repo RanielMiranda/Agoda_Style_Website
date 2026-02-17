@@ -1,22 +1,36 @@
-// ServicesTable.jsx
-import React from "react";
-
 export default function ServicesTable({ services }) {
-  if (!services || services.length === 0) return null;
+  if (!services?.length) return null;
 
   return (
-    <div id="extra-services" className="mt-6">
-      <h2 className="text-2xl font-semibold mb-2">Extra Services</h2>
+    <div className="max-w-5xl mx-auto mt-10">
+      <h2 className="text-2xl font-semibold mb-4">Extra Services</h2>
 
-      <div className="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded flex items-center justify-center">
-        {services.map((service, idx) => (
-          <React.Fragment key={idx}>
-            <div className="font-medium">{service.name}</div>
-            <div>{service.description}</div>
-            <div className="font-semibold text-blue-600">
+      <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+        {/* Header */}
+        <div className="grid grid-cols-12 bg-slate-50 text-sm font-semibold text-slate-600 px-6 py-4">
+          <div className="col-span-3">Service</div>
+          <div className="col-span-7">Description</div>
+          <div className="col-span-2 text-right">Price</div>
+        </div>
+
+        {/* Rows */}
+        {services.map((service, i) => (
+          <div
+            key={i}
+            className="grid grid-cols-12 px-6 py-5 border-t border-slate-100 hover:bg-blue-50/40 transition"
+          >
+            <div className="col-span-3 font-semibold text-slate-900">
+              {service.name}
+            </div>
+
+            <div className="col-span-7 text-slate-500 text-sm">
+              {service.description}
+            </div>
+
+            <div className="col-span-2 text-right font-bold text-blue-600">
               ₱{service.cost?.toLocaleString()}
             </div>
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </div>

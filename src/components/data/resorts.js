@@ -365,5 +365,4 @@ export const resorts = [
       "Billiard Table"
     ]
   },
-  
 ];

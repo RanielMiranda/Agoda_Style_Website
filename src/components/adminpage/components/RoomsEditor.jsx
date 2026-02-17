@@ -52,17 +52,17 @@ export default function RoomsEditor({ rooms, onUpdate }) {
 
                {/* Mosaic Logic */}
                <img
-                src={room.gallery?.[0] || "https://via.placeholder.com/400"}
-                className="col-span-1 row-span-2 object-cover w-full h-full bg-slate-200"
+                src={room.gallery?.[0] || ""}
+                className="col-span-1 row-span-2 object-cover w-full h-full bg-slate-200 rounded-bl-xl rounded-tl-xl"
               />
               <img
-                src={room.gallery?.[1] || "https://via.placeholder.com/400?text=2"}
-                className="object-cover w-full h-full bg-slate-100"
+                src={room.gallery?.[1] || ""}
+                className="object-cover w-full h-full bg-slate-100 rounded-tr-xl"
               />
               <div className="relative">
                  <img
-                    src={room.gallery?.[2] || "https://via.placeholder.com/400?text=3"}
-                    className="object-cover w-full h-full bg-slate-50"
+                    src={room.gallery?.[2] || ""}
+                    className="object-cover w-full h-full bg-slate-50 rounded-br-xl"
                   />
                   {room.gallery.length > 3 && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold">
@@ -128,12 +128,6 @@ export default function RoomsEditor({ rooms, onUpdate }) {
                   placeholder="Room details..."
                   rows={2}
                />
-               
-               <div className="mt-auto pt-4 flex justify-end">
-                   <div className="text-blue-600 font-bold text-lg flex items-center">
-                      ₱ <input type="number" className="bg-transparent border-none p-0 w-24 text-right focus:ring-0 font-bold" value={room.price} onChange={(e) => updateRoom(room.id, { price: e.target.value })}/>
-                   </div>
-               </div>
 
                {/* EXPANDED EDITING AREA for Cameras */}
                {editingRoomId === room.id && (

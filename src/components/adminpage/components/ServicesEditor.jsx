@@ -1,12 +1,17 @@
-import { 
-  Plus, Trash2, Image
-} from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function ServicesEditor ({ services, onUpdate }) {
+export default function ServicesEditor({ services, onUpdate }) {
+
   const addService = () => {
-    const name = prompt("Service name:");
-    if (name) onUpdate([...services, { name, description: "Service Description", cost: 0 }]);
+    onUpdate([
+      ...services,
+      {
+        name: "New Service",
+        description: "Service description",
+        cost: 0
+      }
+    ]);
   };
 
   const updateService = (index, field, value) => {
@@ -15,44 +20,102 @@ export default function ServicesEditor ({ services, onUpdate }) {
     onUpdate(updated);
   };
 
+  const removeService = (index) => {
+    onUpdate(services.filter((_, i) => i !== index));
+  };
+
   return (
-    <div className="max-w-6xl mx-auto px-4 mt-8">
-      <div className="flex items-center gap-4 mb-4">
+    <div className="max-w-5xl mx-auto mt-10 px-4">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Extra Services</h2>
-        <Button variant="outline" size="sm" onClick={addService} className="rounded-full text-xs h-8 flex items-center justify-center">
-            <Plus size={14} className="mr-1"/> Add
+
+        <Button
+          onClick={addService}
+          className="rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Plus size={16} className="mr-2" />
+          Add Service
         </Button>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+
+      {/* Table Container */}
+      <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+
+        {/* Column Header */}
+        <div className="grid grid-cols-12 bg-slate-50 text-sm font-semibold text-slate-600 px-6 py-4">
+          <div className="col-span-3">Service</div>
+          <div className="col-span-6">Description</div>
+          <div className="col-span-2 text-right">Price</div>
+          <div className="col-span-1 text-right"> </div>
+        </div>
+
+        {/* Editable Rows */}
         {services.map((service, i) => (
-          <div key={i} className="flex flex-col gap-1 p-3 rounded-lg hover:bg-white hover:shadow-md transition group border border-transparent hover:border-gray-100">
-             <div className="flex justify-between items-start">
-                <input 
-                    className="font-medium bg-transparent border-none p-0 focus:ring-0 w-full"
-                    value={service.name}
-                    onChange={(e) => updateService(i, "name", e.target.value)}
-                />
-                <button onClick={() => onUpdate(services.filter((_, idx) => idx !== i))} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition">
-                    <Trash2 size={14} />
-                </button>
-             </div>
-             <input 
-                className="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0 w-full"
+          <div
+            key={i}
+            className="grid grid-cols-12 px-6 py-4 border-t border-slate-100 hover:bg-blue-50/40 transition group"
+          >
+
+            {/* Name */}
+            <div className="col-span-3">
+              <input
+                className="w-full font-semibold bg-transparent border-none p-0 focus:ring-0 focus:text-blue-600"
+                value={service.name}
+                onChange={(e) =>
+                  updateService(i, "name", e.target.value)
+                }
+              />
+            </div>
+
+            {/* Description */}
+            <div className="col-span-6">
+              <input
+                className="w-full text-sm text-slate-500 bg-transparent border-none p-0 focus:ring-0 focus:text-slate-700"
                 value={service.description}
-                onChange={(e) => updateService(i, "description", e.target.value)}
-             />
-             <div className="font-semibold text-blue-600 mt-1 flex items-center">
-                ₱<input 
-                    type="number"
-                    className="bg-transparent border-none p-0 focus:ring-0 w-24 font-semibold text-blue-600"
-                    value={service.cost}
-                    onChange={(e) => updateService(i, "cost", Number(e.target.value))}
-                />
-             </div>
+                onChange={(e) =>
+                  updateService(i, "description", e.target.value)
+                }
+              />
+            </div>
+
+            {/* Price */}
+            <div className="col-span-2 text-right font-bold text-blue-600 flex justify-end">
+              ₱
+              <input
+                type="number"
+                className="w-24 text-right bg-transparent border-none p-0 focus:ring-0 font-bold text-blue-600"
+                value={service.cost}
+                onChange={(e) =>
+                  updateService(i, "cost", Number(e.target.value))
+                }
+              />
+            </div>
+
+            {/* Delete */}
+            <div className="col-span-1 flex justify-end">
+              <button
+                onClick={() => removeService(i)}
+                className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
         ))}
+
+        {/* Add Row Footer */}
+        <div className="border-t border-slate-100 px-6 py-3">
+          <button
+            onClick={addService}
+            className="text-sm text-blue-600 font-semibold hover:text-blue-800 transition"
+          >
+            + Add another service
+          </button>
+        </div>
+
       </div>
     </div>
   );
-};
+}

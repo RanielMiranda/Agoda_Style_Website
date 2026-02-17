@@ -22,9 +22,6 @@ export default function AmenitiesEditor ({ facilities, onUpdate }) {
     <div className="max-w-6xl mx-auto px-4 mt-8">
       <div className="flex items-center gap-4 mb-4">
         <h2 className="text-2xl font-semibold">Amenities</h2>
-        <Button variant="outline" size="sm" onClick={addAmenity} className="rounded-full text-xs h-8 flex items-center justify-center">
-            <Plus size={14} className="mr-1"/> Add
-        </Button>
       </div>
 
       {/* Horizontal Gallery matching FacilitiesGallery.jsx */}
