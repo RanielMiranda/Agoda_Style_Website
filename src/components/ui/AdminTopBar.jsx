@@ -93,7 +93,7 @@ export default function AdminTopBar() {
               Dashboard
             </Link>
             <Link
-              to="/resort-builder"
+              to="/accounts"
               onClick={closeMenu}
               className={`flex items-center gap-3 p-3 rounded-xl ${
                 isResortBuilder ? "bg-blue-50 text-blue-600 font-bold" : "text-slate-600"
