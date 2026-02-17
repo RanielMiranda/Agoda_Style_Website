@@ -1,67 +1,107 @@
 import FacilitiesGallery from "../Gallery/FacilitiesGallery";
 import ServicesTable from "./ServicesTable";
-import { MapPin, Mails, Phone, Facebook } from "lucide-react";
+import { MapPin, Mail, Phone, Facebook, DollarSign } from "lucide-react";
 
 export default function ResortInfo({ resort, onFacilityOpen }) {
+  if (!resort) return null;
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-    <div className="flex items-center gap-4">
-      {/* Circular Profile Image */}
-      {resort.profileImage && (
-        <img
-          src={resort.profileImage}
-          alt={resort.name}
-          className="w-20 h-20 rounded-full object-cover ring-2 ring-blue-100 shadow-md"
-        />
-      )}
+    <div className="max-w-6xl mx-auto px-4 py-10">
 
-      {/* Resort Name */}
-      <h1 className="text-3xl font-bold">{resort.name}</h1>
-    </div>
-      <div className="flex items-center gap-1 my-1 text-gray-800">
-        <MapPin size={16} />
-        <span className = "px-2"> {resort.location} </span>
-      </div>
-      {resort.contactMedia && (
-      <div className="flex items-center gap-1 my-1 text-gray-800">
-        <Facebook size={16} />
-        <a
-          href={resort.contactMedia}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-2 text-blue-600 hover:underline"
-        >
-          Visit our Facebook Page
-        </a>
-      </div>
-    )}      
-      <div className="flex items-center gap-1 my-1 text-gray-800">
-        <Mails size={16} />
-        <span className = "px-2"> {resort.contactEmail} </span>
-      </div>
-      <div className="flex items-center gap-1 my-1 text-gray-800">
-        <Phone size={16} />
-        <span className = "px-2"> {resort.contactPhone} </span>
-      </div>            
-      <p className="mt-2 whitespace-pre-line">{resort.description.summary}</p>
+      {/* ===== HEADER (Matches ProfileEditor Layout) ===== */}
+      <div className="flex flex-col md:flex-row gap-8 items-start">
 
-      {/* TAGS */}
-      <div className="flex flex-wrap gap-2 mt-4">
+        {/* Profile Image */}
+        {resort.profileImage && (
+          <img
+            src={resort.profileImage}
+            alt={resort.name}
+            className="w-32 h-32 rounded-full object-cover ring-4 ring-slate-100 shadow-lg"
+          />
+        )}
+
+        {/* Info */}
+        <div className="flex-1 space-y-4">
+
+          {/* Resort Name */}
+          <h1 className="text-4xl font-black text-slate-900">
+            {resort.name}
+          </h1>
+
+          {/* Info Rows */}
+          <div className="flex flex-col gap-2 text-gray-800">
+
+            <div className="flex items-center gap-2">
+              <MapPin size={16} />
+              <span className="font-medium">{resort.location}</span>
+            </div>
+
+            {resort.contactMedia && (
+              <div className="flex items-center gap-2">
+                <Facebook size={16} />
+                <a
+                  href={resort.contactMedia}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline font-medium"
+                >
+                  Visit our Facebook Page
+                </a>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <Mail size={16} />
+              <span>{resort.contactEmail}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Phone size={16} />
+              <span>{resort.contactPhone}</span>
+            </div>
+
+            {resort.price && (
+              <div className="flex items-center gap-2 font-semibold text-blue-600">
+                <DollarSign size={16} />
+                ₱{resort.price?.toLocaleString()}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== DESCRIPTION (Matches Editor Box Style) ===== */}
+      <div className="mt-8">
+        <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-600 leading-relaxed whitespace-pre-line">
+          {resort.description?.summary}
+        </div>
+      </div>
+
+      {/* ===== TAGS ===== */}
+      <div className="mt-6 flex flex-wrap gap-2">
         {resort.tags?.map((tag, i) => (
-          <span
+          <div
             key={i}
-            className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full"
+            className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold"
           >
             {tag}
-          </span>
+          </div>
         ))}
       </div>
 
-      {/* FACILITIES */}
-      <FacilitiesGallery facilities={resort.facilities} onOpen={onFacilityOpen} />
+      {/* ===== FACILITIES ===== */}
+      <div className="mt-10">
+        <FacilitiesGallery
+          facilities={resort.facilities}
+          onOpen={onFacilityOpen}
+        />
+      </div>
 
-      {/* SERVICES TABLE */}
-      <ServicesTable services={resort.extraServices} />
+      {/* ===== SERVICES ===== */}
+      <div className="mt-10">
+        <ServicesTable services={resort.extraServices} />
+      </div>
+
     </div>
   );
 }

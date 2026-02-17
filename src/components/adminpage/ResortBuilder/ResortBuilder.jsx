@@ -13,8 +13,6 @@ import ServicesEditor from "./components/ServicesEditor";
 import ResortInitialData from "./data/ResortInitialData";
 
 
-// --- SUB-COMPONENTS ---
-
 // Floating Action Button for Exporting
 const FloatingAdminControls = ({ isSaved, onSave }) => (
   <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 items-end animate-in slide-in-from-bottom-4">
@@ -34,7 +32,7 @@ const FloatingAdminControls = ({ isSaved, onSave }) => (
 
 // --- MAIN APP COMPONENT ---
 
-export default function AdminResortPage() {
+export default function ResortBuilder() {
   const [resort, setResort] = useState(ResortInitialData);
 
   const [isSaved, setIsSaved] = useState(false);

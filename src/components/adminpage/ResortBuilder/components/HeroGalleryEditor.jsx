@@ -18,8 +18,8 @@ export default function HeroGalleryEditor ({ gallery, onUpdate }) {
     <div className="w-full max-w-6xl mx-auto px-4 pt-8 relative group/section text-black">
       {/* Add Button Overlay */}
       <div className="absolute right-8 z-20 mt-2">
-        <Button onClick={addImage} className=" backdrop-blur-sm">
-          <Plus size={16} className="mr-2 text-black"/> Add Photo
+        <Button onClick={addImage} className=" backdrop-blur-sm flex items-center justify-center">
+          <Plus size={16} className="mr-2 text-white"/> Add Photo
         </Button>
       </div>
 
