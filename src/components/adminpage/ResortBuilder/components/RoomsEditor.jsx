@@ -17,8 +17,12 @@ export default function RoomsEditor() {
   // Sync local state if resort.rooms changes externally
   useEffect(() => setLocalRooms(resort.rooms || []), [resort.rooms]);
 
-  const scrollToBottom = () => {
-    roomsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToCenter = () => {
+    // Use the ref that actually points to the new element or the end of the list
+    roomsEndRef.current?.scrollIntoView({ 
+      behavior: "smooth", 
+      block: "center" // This replaces all that manual math!
+    });
   };
 
   const addRoom = () => {
@@ -34,7 +38,7 @@ export default function RoomsEditor() {
     };
     setLocalRooms([...localRooms, newRoom]);
     setEditingRoomId(newRoom.id);
-    setTimeout(scrollToBottom, 100);
+    setTimeout(scrollToCenter, 100);
   };
 
   const updateRoomLocal = (id, updates) => {

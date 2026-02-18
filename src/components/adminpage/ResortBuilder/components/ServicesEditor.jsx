@@ -11,15 +11,31 @@ export default function ServicesEditor() {
   // Sync if context changes externally
   useEffect(() => setLocalServices(resort.extraServices || []), [resort.extraServices]);
 
-  const scrollToBottom = () => {
-    servicesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToCenter = () => {
+    if (!servicesEndRef.current) return;
+
+    const element = servicesEndRef.current;
+    const rect = element.getBoundingClientRect();
+
+    const elementTop = rect.top + window.scrollY;
+    const elementHeight = rect.height;
+    const viewportHeight = window.innerHeight;
+
+    // Scroll so the element is centered vertically
+    const scrollPosition =
+      elementTop - viewportHeight / 2 + elementHeight / 2;
+
+    window.scrollTo({
+      top: scrollPosition,
+      behavior: "smooth",
+    });
   };
 
   const addService = () => {
     const updated = [...localServices, { name: "New Service", description: "", cost: 0 }];
     setLocalServices(updated);
     updateResort("extraServices", updated);
-    setTimeout(scrollToBottom, 100);
+    setTimeout(scrollToCenter, 100);
   };
 
   const updateServiceLocal = (index, field, value) => {
@@ -33,9 +49,13 @@ export default function ServicesEditor() {
   };
 
   const removeService = (index) => {
-    const updated = localServices.filter((_, i) => i !== index);
-    setLocalServices(updated);
-    updateResort("extraServices", updated);
+    const serviceName = localServices[index]?.name;
+
+    if (window.confirm(`Are you sure you want to remove "${serviceName}"?`)) {
+      const updated = localServices.filter((_, i) => i !== index);
+      setLocalServices(updated);
+      updateResort("extraServices", updated);
+    }
   };
 
   return (
