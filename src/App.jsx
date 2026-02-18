@@ -10,6 +10,7 @@ import ResortBuilder from "./components/adminpage/ResortBuilder/ResortBuilder";
 import Dashboard from "./components/adminpage/Dashboard/Dashboard";
 import AccountManagement from "./components/adminpage/Accountmanager/AccountManagement";
 import Login from "./components/adminpage/Login/Login";
+import BookingsPage from "./components/adminpage/BookingsPage";
 
 import { ResortProvider } from "./components/context/ContextEditor";
 import { FilterProvider } from "./components/context/ContextFilter";
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} /> 
           <Route path="/resort-builder" element={<ResortBuilder />} />
           <Route path ="/accounts" element = {<AccountManagement />} />
+          <Route path ="/bookings" element = {<BookingsPage /> } />
         </Route>
 
       </Routes>

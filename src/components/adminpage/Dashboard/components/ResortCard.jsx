@@ -1,11 +1,15 @@
 import React from "react";
-import { MapPin, Globe, Edit2, Trash2 } from "lucide-react";
+import { MapPin, Globe, Edit2, Trash2, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 export default function ResortCard({ resort, onDelete }) {
   const navigate = useNavigate();
+
+  const handleViewBookings = () => {
+    navigate("/bookings", { state: { resort } });
+  };
 
   const handleEdit = () => {
     navigate("/resort-builder", { state: { resort } });
@@ -42,6 +46,16 @@ export default function ResortCard({ resort, onDelete }) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleViewBookings}
+            className="rounded-lg border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 flex justify-center items-center"
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Bookings
+          </Button>
+          
           <Button 
             variant="outline" 
             size="sm"

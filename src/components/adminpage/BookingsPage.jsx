@@ -10,7 +10,7 @@ const GROUP_COLORS = [
   "bg-rose-500", "bg-violet-600", "bg-cyan-500"
 ];
 
-export default function BookingCalendar() {
+export default function BookingsPage() {
   const { resort, updateResort } = useResort();
   const [selectedRoomId, setSelectedRoomId] = useState(resort.rooms?.[0]?.id || null);
   const [activeRangeId, setActiveRangeId] = useState(null);
@@ -119,7 +119,7 @@ export default function BookingCalendar() {
   };
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 bg-white border-slate-200 shadow-xl rounded-3xl mt-8">
+    <Card className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-3xl mt-8 pt-10">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-lg font-bold flex items-center gap-2">

@@ -19,7 +19,7 @@ export default function AdminTopBar() {
         {/* Logo & Brand */}
         <div className="flex items-center gap-6">
           <Link
-            to="/"
+            to="/dashboard"
             className="text-2xl font-bold text-blue-600 cursor-pointer flex items-center gap-2"
           >
             🍃 Twin Acacia
@@ -61,7 +61,7 @@ export default function AdminTopBar() {
           <div className="w-[1px] h-6 bg-slate-200 mx-2" />
           
           <Link 
-            to="/"
+            to="/dashboard"
             className="text-sm text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors px-2"
           >
             <ArrowLeft size={14} />
