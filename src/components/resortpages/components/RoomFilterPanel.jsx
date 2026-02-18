@@ -1,144 +1,121 @@
 import React, { useState } from "react";
-import { Calendar } from "lucide-react";
+import { Calendar, Tag } from "lucide-react";
 import SideRangeCalendar from "./SideRangeCalendar";
+import { useFilters } from "../../context/ContextFilter"; 
 
-export default function RoomFilterPanel({ price, setPrice }) {
-// DATE RANGE STATE
-const [startDate, setStartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
-const [activeDropdown, setActiveDropdown] = useState(null);
+export default function RoomFilterPanel() {
+  const { selectedTags, setSelectedTags } = useFilters();
+  
+  // Define the master list of tags available for rooms
+  const availableTags = ["Wifi", "Kitchen", "Pool View", "Aircon", "Pet Friendly", "Breakfast Included"];
 
-// FORMAT HELPERS
-const formatFullDate = (date) =>
-date.toLocaleDateString("default", { month: "short", day: "numeric", year: "numeric" });
-const formatWeekday = (date) =>
-date.toLocaleDateString("default", { weekday: "short" });
+  const handleTagToggle = (tag) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter((t) => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
 
-return (
-<div className="w-full lg:w-80 bg-white shadow rounded-2xl p-6 h-fit lg:sticky lg:top-24 flex flex-col gap-6">
-<h3 className="font-semibold text-lg mb-2">Filters</h3>
+  // DATE RANGE STATE
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  {/* DATE RANGE */}
-  <div className="flex flex-col gap-2">
-    <p className="font-medium text-sm mb-1">Dates</p>
-    <DateRangeField
-      startDate={startDate}
-      endDate={endDate}
-      setStartDate={setStartDate}
-      setEndDate={setEndDate}
-      activeDropdown={activeDropdown}
-      setActiveDropdown={setActiveDropdown}
-      formatFullDate={formatFullDate}
-      formatWeekday={formatWeekday}
-    />
-  </div>
+  const formatFullDate = (date) =>
+    date.toLocaleDateString("default", { month: "short", day: "numeric", year: "numeric" });
+  const formatWeekday = (date) =>
+    date.toLocaleDateString("default", { weekday: "short" });
 
-  {/* PRICE RANGE */}
-  <div className="flex flex-col gap-2">
-    <p className="font-medium text-sm mb-1">Price / night</p>
-    <input
-      type="range"
-      min="1000"
-      max="10000"
-      value={price}
-      onChange={(e) => setPrice(Number(e.target.value))}
-      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-    />
-    <div className="flex items-center border rounded-lg px-2">
-      <span className="text-gray-500 text-sm">₱</span>
-      <input
-        type="number"
-        value={price}
-        onChange={(e) => {
-          const val = Math.max(0, Number(e.target.value));
-          setPrice(val);
-        }}
-        className="w-full px-2 py-1 text-sm outline-none"
-      />
+  return (
+    <div className="w-full lg:w-80 bg-white shadow rounded-2xl p-6 h-fit lg:sticky lg:top-24 flex flex-col gap-6">
+      <h3 className="font-semibold text-lg border-b pb-2">Filters</h3>
+
+      {/* DATE RANGE */}
+      <div className="flex flex-col gap-2">
+        <p className="font-medium text-sm text-gray-700">Check Dates</p>
+        <DateRangeField
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          activeDropdown={activeDropdown}
+          setActiveDropdown={setActiveDropdown}
+          formatFullDate={formatFullDate}
+          formatWeekday={formatWeekday}
+        />
+      </div>
+
+      {/* AMENITIES TAGS */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+           <Tag size={16} className="text-blue-600" />
+           <p className="font-medium text-sm text-gray-700">Amenities</p>
+        </div>
+        
+        <div className="flex flex-col gap-2">
+          {availableTags.map((tag) => (
+            <label key={tag} className="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                checked={selectedTags.includes(tag)}
+                onChange={() => handleTagToggle(tag)}
+              />
+              <span className={`text-sm transition-colors ${
+                selectedTags.includes(tag) ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"
+              }`}>
+                {tag}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {selectedTags.length > 0 && (
+        <button 
+          onClick={() => setSelectedTags([])}
+          className="text-xs text-red-500 hover:text-red-700 font-medium underline underline-offset-4"
+        >
+          Reset Amenities
+        </button>
+      )}
     </div>
-  </div>
-
-  {/* OPTIONAL TAGS */}
-  <div className="flex flex-col gap-2 text-sm">
-    <p className="font-medium mb-1">Tags</p>
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" className="rounded text-blue-600" /> Wifi
-    </label>
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" className="rounded text-blue-600" /> Kitchen
-    </label>
-  </div>
-</div>
-
-
-);
+  );
 }
 
-// --------------------------
-// DATE RANGE FIELD COMPONENT
-// --------------------------
 function DateRangeField({
-startDate,
-endDate,
-setStartDate,
-setEndDate,
-activeDropdown,
-setActiveDropdown,
-formatFullDate,
-formatWeekday
+  startDate, endDate, setStartDate, setEndDate,
+  activeDropdown, setActiveDropdown, formatFullDate, formatWeekday
 }) {
-return (
-<div className="relative flex items-center gap-2 border rounded-xl px-3 py-2 flex-1">
-<Calendar size={16} className="text-gray-800" />
+  return (
+    <div className="relative flex items-center gap-2 border rounded-xl px-3 py-2 flex-1 bg-gray-50">
+      <Calendar size={16} className="text-gray-500" />
+      <button className="flex-1 text-center outline-none" onClick={() => setActiveDropdown("start")}>
+        <div className="text-sm font-semibold">{startDate ? formatFullDate(startDate) : "Check-in"}</div>
+        <div className="text-[10px] uppercase text-gray-400">{startDate ? formatWeekday(startDate) : "Start"}</div>
+      </button>
+      <span className="w-px bg-gray-200 h-8" />
+      <button className="flex-1 text-center outline-none" onClick={() => setActiveDropdown("end")}>
+        <div className="text-sm font-semibold">{endDate ? formatFullDate(endDate) : "Check-out"}</div>
+        <div className="text-[10px] uppercase text-gray-400">{endDate ? formatWeekday(endDate) : "End"}</div>
+      </button>
 
-  {/* START DATE */}
-  <button
-    className="flex-1 text-center whitespace-nowrap outline-none"
-    onClick={() => setActiveDropdown("start")}
-  >
-    <div className={`text-sm font-medium ${!startDate ? 'text-gray-800' : ''}`}>
-      {startDate ? formatFullDate(startDate) : "Check-in"}
+      {(activeDropdown === "start" || activeDropdown === "end") && (
+        <div className="absolute top-full left-0 mt-2 z-[1000]">
+          <SideRangeCalendar
+            startDate={startDate}
+            endDate={endDate}
+            activeDropdown={activeDropdown}
+            onClose={() => setActiveDropdown(null)}
+            onChange={(s, e) => {
+              setStartDate(s);
+              setEndDate(e);
+              if (activeDropdown === "start" && s && !e) setActiveDropdown("end");
+            }}
+          />
+        </div>
+      )}
     </div>
-    <div className="text-[10px] uppercase text-gray-400">
-      {startDate ? formatWeekday(startDate) : "Start"}
-    </div>
-  </button>
-
-  <span className="w-px bg-gray-200 h-8" />
-
-  {/* END DATE */}
-  <button
-    className="flex-1 text-center whitespace-nowrap outline-none"
-    onClick={() => setActiveDropdown("end")}
-  >
-    <div className={`text-sm font-medium ${!endDate ? 'text-gray-800' : ''}`}>
-      {endDate ? formatFullDate(endDate) : "Check-out"}
-    </div>
-    <div className="text-[10px] uppercase text-gray-400">
-      {endDate ? formatWeekday(endDate) : "End"}
-    </div>    
-  </button>
-
-  {/* POPUP CALENDAR */}
-  {(activeDropdown === "start" || activeDropdown === "end") && (
-    <div className="absolute top-0 left-0 mt-[7vh] flex items-center justify-center lg:block z-[1000]">
-      <SideRangeCalendar
-        startDate={startDate}
-        endDate={endDate}
-        activeDropdown={activeDropdown}
-        onClose={() => setActiveDropdown(null)}
-        onChange={(s, e) => {
-          setStartDate(s);
-          setEndDate(e);
-          if (activeDropdown === "start" && s && !e) {
-            setActiveDropdown("end");
-          } 
-        }}
-      />
-    </div>
-  )}
-</div>
-
-
-);
+  );
 }

@@ -10,12 +10,13 @@ import Dashboard from "./components/adminpage/Dashboard/Dashboard";
 import AccountManagement from "./components/adminpage/Accountmanager/AccountManagement";
 
 import { ResortProvider } from "./components/context/ContextEditor";
-
+import { FilterProvider } from "./components/context/ContextFilter";
 
 export default function App() {
   return (
     <ResortProvider>
     <BrowserRouter>
+    <FilterProvider>    
       <Routes>
 
         {/* PUBLIC PAGES */}
@@ -32,6 +33,7 @@ export default function App() {
         </Route>
 
       </Routes>
+    </FilterProvider>   
     </BrowserRouter>
     </ResortProvider>
   );

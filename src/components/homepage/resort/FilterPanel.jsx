@@ -1,5 +1,5 @@
 import React from "react";
-import { useFilters } from "../../context/FilterContext"; // Adjust path
+import { useFilters } from "../../context/ContextFilter"; // Adjust path
 
 export default function FilterPanel() {
   const { price, setPrice, selectedTags, setSelectedTags } = useFilters();

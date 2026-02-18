@@ -4,12 +4,12 @@ import { resorts as allResorts } from "../data/resorts";
 const FilterContext = createContext();
 
 export function FilterProvider({ children }) {
-  // Filter States
+  // Global Filter States
   const [price, setPrice] = useState(25000);
   const [selectedTags, setSelectedTags] = useState([]);
   const [guests, setGuests] = useState({ adults: 2, children: 0, rooms: 1 });
 
-  // Filtering Logic
+  // Filtering Logic for the Main Resort Results Page
   const filteredResorts = allResorts.filter((resort) => {
     // 1. Price Filter (matches resort average price)
     const matchesPrice = resort.price <= price;
@@ -19,7 +19,6 @@ export function FilterProvider({ children }) {
       selectedTags.every(tag => resort.tags?.includes(tag));
 
     // 3. Guest Capacity Filter
-    // Checks if any room in the resort can fit the total guests
     const totalNeeded = guests.adults + guests.children;
     const hasFittingRoom = resort.rooms.some(room => room.guests >= totalNeeded);
 

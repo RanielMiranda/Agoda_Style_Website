@@ -1,4 +1,4 @@
-import { useFilters } from "../../context/FilterContext";
+import { useFilters } from "../../context/ContextFilter";
 import FilterPanel from "./FilterPanel";
 import ResortResults from "./ResortResults";
 
