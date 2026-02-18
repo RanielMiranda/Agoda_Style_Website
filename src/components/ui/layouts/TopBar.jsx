@@ -59,6 +59,8 @@ export default function TopBar() {
             >
               Contact
             </button>
+            
+            <div className="w-[1px] h-6 bg-slate-200 mx-2" />
 
             <Link
               to="/login"

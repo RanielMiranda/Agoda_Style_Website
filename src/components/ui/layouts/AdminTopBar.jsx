@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Hammer, Users, Menu, X, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, Menu, X, ArrowLeft } from "lucide-react";
 
 export default function AdminTopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,10 +62,9 @@ export default function AdminTopBar() {
           
           <Link 
             to="/"
-            className="text-sm text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors px-2"
+            className="text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors px-2"
           >
-            <ArrowLeft size={14} />
-            View Site
+            Back to Site
           </Link>
         </div>
 

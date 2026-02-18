@@ -47,7 +47,7 @@ export default function ResortBuilder() {
           className="flex items-center gap-2 px-4 py-2 shadow-lg rounded-full"
         >
           {isSaved ? <CheckCircle size={20} /> : <Save size={20} />}
-          <span>{isSaved ? "Saved" : "Save Resort"}</span>
+          <span>{isSaved ? "Copied" : "Copy Resort"}</span>
         </Button>
       </div>
     </div>
