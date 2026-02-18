@@ -41,9 +41,13 @@ export default function ResortBuilder() {
       <ServicesEditor />
       <RoomsEditor />
 
-      <div className="fixed bottom-6 right-6">
-        <Button onClick={handleSave}>
+      <div className="fixed bottom-6 right-6 flex items-center justify-center">
+        <Button
+          onClick={handleSave}
+          className="flex items-center gap-2 px-4 py-2 shadow-lg rounded-full"
+        >
           {isSaved ? <CheckCircle size={20} /> : <Save size={20} />}
+          <span>{isSaved ? "Saved" : "Save Resort"}</span>
         </Button>
       </div>
     </div>

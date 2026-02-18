@@ -118,10 +118,11 @@ export default function RoomsEditor() {
                       <Trash2 size={18}/>
                   </button>
                 </div>
-                <Button size="sm" variant="secondary" className="pointer-events-auto " 
-                  onClick={() => addRoomImage(room.id)}>
-                    <Camera size={18} className="mr-1"/>
-                </Button>
+                <button 
+                  onClick={() => addRoomImage(room.id)}
+                  className ="p-2 hover:bg-slate-100 rounded-full text-slate-400 mx-2">
+                    <Camera size={18}/>
+                </button>
               </div>
 
               <div className="flex gap-2 text-sm mb-4">
