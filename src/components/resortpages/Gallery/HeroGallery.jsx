@@ -1,8 +1,15 @@
-export default function HeroGallery({ resort, onOpen }) {
+import { useResort } from "../../context/ContextEditor"; // Adjust path as needed
+
+export default function HeroGallery({ onOpen }) {
+  const { resort } = useResort();
+
+  // Guard clause: If resort isn't loaded yet, show a placeholder or nothing
+  if (!resort || !resort.gallery) return <div className="h-[60vh] bg-gray-200 animate-pulse rounded-2xl" />;
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pt-8">
       <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[60vh] rounded-2xl overflow-hidden">
-        {resort.gallery?.slice(0, 5).map((img, idx) => (
+        {resort.gallery.slice(0, 5).map((img, idx) => (
           <div
             key={idx}
             onClick={() => onOpen(idx)}

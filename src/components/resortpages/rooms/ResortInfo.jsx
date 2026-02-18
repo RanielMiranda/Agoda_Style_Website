@@ -1,17 +1,17 @@
 import FacilitiesGallery from "../Gallery/FacilitiesGallery";
 import ServicesTable from "./ServicesTable";
 import { MapPin, Mail, Phone, Facebook, DollarSign } from "lucide-react";
+import { useResort } from "../../context/ContextEditor"; //
 
-export default function ResortInfo({ resort, onFacilityOpen }) {
+export default function ResortInfo({ onFacilityOpen }) {
+  const { resort } = useResort(); // Pull data from context
+
   if (!resort) return null;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-
-      {/* ===== HEADER (Matches ProfileEditor Layout) ===== */}
       <div className="flex flex-col md:flex-row gap-8 items-start">
-
-        {/* Profile Image */}
+        {/* Profile Image using context data */}
         {resort.profileImage && (
           <img
             src={resort.profileImage}
@@ -20,23 +20,15 @@ export default function ResortInfo({ resort, onFacilityOpen }) {
           />
         )}
 
-        {/* Info */}
         <div className="flex-1 space-y-4">
-
-          {/* Resort Name */}
-          <h1 className="text-4xl font-black text-slate-900">
-            {resort.name}
-          </h1>
-
-          {/* Info Rows */}
+          <h1 className="text-4xl font-black text-slate-900">{resort.name}</h1>
+          
           <div className="flex flex-col gap-2 text-gray-800">
-
             <div className="flex items-center gap-2">
               <MapPin size={16} />
               <span className="font-medium">{resort.location}</span>
             </div>
-
-            {resort.contactMedia && (
+                        {resort.contactMedia && (
               <div className="flex items-center gap-2">
                 <Facebook size={16} />
                 <a
@@ -70,38 +62,20 @@ export default function ResortInfo({ resort, onFacilityOpen }) {
         </div>
       </div>
 
-      {/* ===== DESCRIPTION (Matches Editor Box Style) ===== */}
       <div className="mt-8">
         <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-600 leading-relaxed whitespace-pre-line">
           {resort.description?.summary}
         </div>
       </div>
 
-      {/* ===== TAGS ===== */}
-      <div className="mt-6 flex flex-wrap gap-2">
-        {resort.tags?.map((tag, i) => (
-          <div
-            key={i}
-            className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold"
-          >
-            {tag}
-          </div>
-        ))}
-      </div>
-
-      {/* ===== FACILITIES ===== */}
+      {/* Facilities and Services */}
       <div className="mt-10">
-        <FacilitiesGallery
-          facilities={resort.facilities}
-          onOpen={onFacilityOpen}
-        />
+        <FacilitiesGallery facilities={resort.facilities} onOpen={onFacilityOpen} />
       </div>
 
-      {/* ===== SERVICES ===== */}
       <div className="mt-10">
         <ServicesTable services={resort.extraServices} />
       </div>
-
     </div>
   );
 }

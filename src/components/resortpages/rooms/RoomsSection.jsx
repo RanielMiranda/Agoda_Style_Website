@@ -1,11 +1,32 @@
 import { Card } from "@/components/ui/card";
 import { Users, BedDouble } from "lucide-react";
+import { useResort } from "../../context/ContextEditor"; 
+import { useFilters } from "../../context/ContextFilter"; 
 
-export default function RoomsSection({ resort, onOpenRoomGallery }) {
+export default function RoomsSection({ onOpenRoomGallery }) {
+  const { resort } = useResort(); 
+  const { selectedTags } = useFilters(); 
+
+  if (!resort || !resort.rooms) return null;
+
+  // Filter rooms: If user has selected tags, only show rooms that contain EVERY selected tag
+  const displayedRooms = resort.rooms.filter((room) => {
+    if (selectedTags.length === 0) return true;
+    return selectedTags.every(tag => room.tags?.includes(tag));
+  });
+
   return (
     <div id="rooms" className="max-w-6xl mx-auto px-4 pb-16">
+      <h2 className="text-2xl font-bold mb-6">Available Accommodations</h2>
+      
       <div className="flex flex-col gap-6">
-        {resort.rooms?.map((room) => (
+        {displayedRooms.length === 0 ? (
+          <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+            <p className="text-slate-500 font-medium">No rooms match your selected amenities.</p>
+            <p className="text-sm text-slate-400 mt-1">Try deselecting some tags in the filter panel.</p>
+          </div>
+        ) : (
+          displayedRooms.map((room) => (
           <Card
             key={room.id}
             className="rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-md"
@@ -71,7 +92,8 @@ export default function RoomsSection({ resort, onOpenRoomGallery }) {
               </div>
             </div>
           </Card>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
