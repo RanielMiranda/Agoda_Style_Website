@@ -10,7 +10,7 @@ import ResortBuilder from "./components/adminpage/ResortBuilder/ResortBuilder";
 import Dashboard from "./components/adminpage/Dashboard/Dashboard";
 import AccountManagement from "./components/adminpage/Accountmanager/AccountManagement";
 import Login from "./components/adminpage/Login/Login";
-import BookingsPage from "./components/adminpage/BookingsPage";
+import BookingsPage from "./components/adminpage/BookingsPage/BookingsPage";
 
 import { ResortProvider } from "./components/context/ContextEditor";
 import { FilterProvider } from "./components/context/ContextFilter";
