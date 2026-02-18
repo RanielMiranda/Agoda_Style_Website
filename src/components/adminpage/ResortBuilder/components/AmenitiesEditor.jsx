@@ -14,8 +14,11 @@ export default function AmenitiesEditor ({ facilities, onUpdate }) {
     onUpdate(updated);
   };
 
-  const removeAmenity = (index) => {
-    onUpdate(facilities.filter((_, i) => i !== index));
+const removeAmenity = (index) => {
+    const amenityName = facilities[index].name;
+    if (window.confirm(`Are you sure you want to remove ${amenityName}?`)) {
+      onUpdate(facilities.filter((_, i) => i !== index));
+    }
   };
 
   return (
@@ -39,7 +42,7 @@ export default function AmenitiesEditor ({ facilities, onUpdate }) {
                 />
                 
                 {/* Hover Editing Controls */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-row items-center justify-center gap-2">
                     <button 
                         onClick={() => updateAmenity(idx, "image", prompt("Image URL:", facility.image))}
                         className="p-1 bg-white rounded-full text-black hover:scale-110 transition"

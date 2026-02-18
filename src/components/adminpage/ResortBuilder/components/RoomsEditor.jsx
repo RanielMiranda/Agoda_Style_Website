@@ -5,10 +5,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function RoomsEditor({ rooms, onUpdate }) {
   const [editingRoomId, setEditingRoomId] = useState(null);
+  const roomsEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    roomsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const addRoom = () => {
     const newRoom = {
@@ -23,6 +28,8 @@ export default function RoomsEditor({ rooms, onUpdate }) {
     };
     onUpdate([...rooms, newRoom]);
     setEditingRoomId(newRoom.id);
+
+    setTimeout(scrollToBottom, 100);
   };
 
   const updateRoom = (id, updates) => {
@@ -32,6 +39,18 @@ export default function RoomsEditor({ rooms, onUpdate }) {
   const addRoomImage = (roomId, gallery) => {
     const url = prompt("Enter Room Image URL:");
     if (url) updateRoom(roomId, { gallery: [...gallery, url] });
+  };
+
+  const removeRoom = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove ${name}?`)) {
+      onUpdate(rooms.filter(r => r.id !== id));
+    }
+  };
+
+  const removeRoomImage = (roomId, gallery, index) => {
+    if (window.confirm("Are you sure you want to remove this image?")) {
+      updateRoom(roomId, { gallery: gallery.filter((_, gi) => gi !== index) });
+    }
   };
 
   return (
@@ -44,6 +63,7 @@ export default function RoomsEditor({ rooms, onUpdate }) {
       </div>
 
       <div className="flex flex-col gap-6">
+        
         {rooms.map((room) => (
           <Card key={room.id} className={`rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-md transition-all ${editingRoomId === room.id ? 'ring-2 ring-blue-400' : ''}`}>
              
@@ -85,7 +105,10 @@ export default function RoomsEditor({ rooms, onUpdate }) {
                     <button onClick={() => setEditingRoomId(editingRoomId === room.id ? null : room.id)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-blue-600">
                         {editingRoomId === room.id ? <CheckCircle size={18}/> : <Edit3 size={18}/>}
                     </button>
-                    <button onClick={() => onUpdate(rooms.filter(r => r.id !== room.id))} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500">
+                    <button 
+                      onClick={() => removeRoom(room.id, room.name)} 
+                      className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500"
+                    >
                         <Trash2 size={18}/>
                     </button>
                  </div>
@@ -137,8 +160,11 @@ export default function RoomsEditor({ rooms, onUpdate }) {
                             {room.gallery.map((img, i) => (
                                 <div key={i} className="relative w-16 h-12 shrink-0 rounded overflow-hidden group/thumb">
                                     <img src={img} className="w-full h-full object-cover" />
-                                    <button onClick={() => updateRoom(room.id, { gallery: room.gallery.filter((_, gi) => gi !== i) })} className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center">
-                                        <X size={14}/>
+                                    <button 
+                                          onClick={() => removeRoomImage(room.id, room.gallery, i)} 
+                                          className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center"
+                                        >
+                                          <X size={14}/>
                                     </button>
                                 </div>
                             ))}
@@ -151,6 +177,7 @@ export default function RoomsEditor({ rooms, onUpdate }) {
             </div>
           </Card>
         ))}
+        <div ref={roomsEndRef} />
       </div>
     </div>
   );

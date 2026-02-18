@@ -10,9 +10,12 @@ export default function HeroGalleryEditor({ gallery, onUpdate }) {
   };
 
   const removeImage = (index) => {
-    if (gallery.length <= 1) return alert("You must have at least one hero image.");
-    onUpdate(gallery.filter((_, i) => i !== index));
-  };
+      if (gallery.length <= 1) return alert("You must have at least one hero image.");
+      
+      if (window.confirm("Are you sure you want to remove this image from the gallery?")) {
+        onUpdate(gallery.filter((_, i) => i !== index));
+      }
+    };
 
   const updateImage = (index) => {
     const url = prompt("Update Image URL:", gallery[index]);

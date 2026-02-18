@@ -1,7 +1,13 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { useEffect, useRef, useState } from "react";
 export default function ServicesEditor({ services, onUpdate }) {
+
+  const servicesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    servicesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const addService = () => {
     onUpdate([
@@ -12,6 +18,7 @@ export default function ServicesEditor({ services, onUpdate }) {
         cost: 0
       }
     ]);
+    setTimeout(scrollToBottom, 100);
   };
 
   const updateService = (index, field, value) => {
@@ -21,8 +28,11 @@ export default function ServicesEditor({ services, onUpdate }) {
   };
 
   const removeService = (index) => {
-    onUpdate(services.filter((_, i) => i !== index));
-  };
+      const serviceName = services[index].name;
+      if (window.confirm(`Are you sure you want to remove ${serviceName}?`)) {
+        onUpdate(services.filter((_, i) => i !== index));
+      }
+    };
 
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4">
@@ -114,7 +124,7 @@ export default function ServicesEditor({ services, onUpdate }) {
             + Add another service
           </button>
         </div>
-
+<div ref={servicesEndRef} />
       </div>
     </div>
   );

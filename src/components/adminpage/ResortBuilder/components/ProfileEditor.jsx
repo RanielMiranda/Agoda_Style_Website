@@ -10,7 +10,10 @@ export default function ProfileEditor ({ resort, onUpdate }) {
   };
 
   const removeTag = (index) => {
-    onUpdate("tags", resort.tags.filter((_, i) => i !== index));
+    const tagName = resort.tags[index];
+      if (window.confirm(`Are you sure you want to remove the tag "${tagName}"?`)) {
+        onUpdate("tags", resort.tags.filter((_, i) => i !== index));
+    }
   };
 
   return (

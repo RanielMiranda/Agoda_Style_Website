@@ -17,13 +17,9 @@ import ResortInitialData from "./data/ResortInitialData";
 // Floating Action Button for Exporting
 const FloatingAdminControls = ({ isSaved, onSave }) => (
   <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 items-end animate-in slide-in-from-bottom-4">
-    <div className="bg-slate-900/90 text-white p-3 rounded-lg shadow-xl mb-2 text-xs backdrop-blur-md border border-slate-700">
-      <p className="font-bold text-blue-400">Admin Mode Active</p>
-      <p className="opacity-80">Edits preview live.</p>
-    </div>
     <Button 
       onClick={onSave}
-      className={`${isSaved ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} transition-all flex gap-3 rounded-full px-8 py-8 shadow-2xl text-white border-4 border-white/10`}
+      className={`${isSaved ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} transition-all flex gap-3 rounded-full p-4 shadow-2xl text-white border-4 border-white/10`}
     >
       {isSaved ? <CheckCircle size={28} /> : <Save size={28} />}
       <span className="font-bold text-lg tracking-tight">{isSaved ? "Copied!" : "Export JS"}</span>
@@ -40,7 +36,6 @@ export default function ResortBuilder() {
     location.state?.resort || ResortInitialData;
 
   const [resort, setResort] = useState(initialResort);
-
 
   const [isSaved, setIsSaved] = useState(false);
 
@@ -59,6 +54,12 @@ export default function ResortBuilder() {
     navigator.clipboard.writeText(output);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
+  };
+
+  const handleDelete = (name) => {
+    if (window.confirm(`Are you sure you want to remove ${name}?`)) {
+      setResorts(resorts.filter(r => r.name !== name));
+    }
   };
 
   return (
