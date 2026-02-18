@@ -11,7 +11,7 @@ import ShortcutBar from "./rooms/ShortcutBar";
 import GalleryModal from "./components/GalleryModal";
 import FacilityModal from "./components/FacilityModal";
 import ContactOwnerModal from "./components/ContactOwnerModal";
-import RoomFilterPanel from "./components/RoomFilterPanel";
+import RoomFilterPanel from "./rooms/RoomFilterPanel";
 
 export default function ResortDetailPage() {
   const { name } = useParams();

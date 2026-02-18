@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
-import ContactModal from "./modals/ContactModal";
+import ContactModal from "../modals/ContactModal";
 
 export default function TopBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,7 +61,7 @@ export default function TopBar() {
             </button>
 
             <Link
-              to="/dashboard"
+              to="/login"
               className="hover:text-blue-600 transition"
             >
               Admin page
@@ -118,7 +118,7 @@ export default function TopBar() {
             </button>
 
             <Link
-              to="/dashboard"
+              to="/login"
               onClick={() => setIsMenuOpen(false)}
               className="hover:text-blue-600 transition"
             >
@@ -132,7 +132,7 @@ export default function TopBar() {
         <ContactModal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          panelClass="bg-gray-200 text-black"
+          panelClass="bg-white text-black"
           overlayClass="bg-black/70 backdrop-blur-sm"
         />
     </>

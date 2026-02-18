@@ -1,5 +1,5 @@
 // layouts/PublicLayout.jsx
-import TopBar from "../TopBar";
+import TopBar from "./TopBar";
 import Footer from "../Footer";
 import { Outlet } from "react-router-dom";
 
