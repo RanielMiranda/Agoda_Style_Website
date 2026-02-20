@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { heroImages } from "../../data/constants";
@@ -46,8 +48,8 @@ export default function HeroBanner() {
             key={index}
             onClick={() => setHeroIndex(index)} // jump to clicked image
             className={`
-                w-4 h-2 rounded-full transition-all duration-300
-                ${heroIndex === index ? "bg-white scale-100" : "bg-white/50 scale-75"}
+                w-4 h-2 rounded-full transition-all duration-300 hover:scale-110
+                ${heroIndex === index ? "bg-white scale-110" : "bg-white/50 scale-75"}
                 cursor-pointer
             `}
             />

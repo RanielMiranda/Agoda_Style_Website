@@ -1,7 +1,8 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { resorts } from "../data/resorts";
-import { useResort } from "../context/ContextEditor"
+import { useResort } from "../useclient/ContextEditor";
 
 import HeroGallery from "./Gallery/HeroGallery";
 import ResortInfo from "./rooms/ResortInfo";
@@ -13,11 +14,9 @@ import FacilityModal from "./components/FacilityModal";
 import ContactOwnerModal from "./components/ContactOwnerModal";
 import RoomFilterPanel from "./rooms/RoomFilterPanel";
 
-export default function ResortDetailPage() {
-  const { name } = useParams();
-  const { resort, setResort } = useResort(); // Access context state
+export default function ResortDetailPage({ name }) {
+  const { resort, setResort } = useResort();
 
-  // Local UI States for Modals
   const [facilityIndex, setFacilityIndex] = useState(0);
   const [facilityOpen, setFacilityOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -28,20 +27,28 @@ export default function ResortDetailPage() {
   const [contactOpen, setContactOpen] = useState(false);
   const [price, setPrice] = useState(5000);
 
-  // Sync the context with the URL parameter
   useEffect(() => {
-    const found = resorts.find((r) => r.name === decodeURIComponent(name));
+    if (!name) return;
+
+    const found = resorts.find(
+      (r) => r.name === decodeURIComponent(name)
+    );
+
     if (found) {
-      setResort(found); // Update the global "active" resort
+      setResort(found);
     }
   }, [name, setResort]);
 
   if (!resort) {
-    return <div className="p-10 text-center text-gray-500">Resort not found</div>;
+    return (
+      <div className="p-10 text-center text-gray-500">
+        Resort not found
+      </div>
+    );
   }
-
+  
   return (
-    <div className="bg-gray-50 min-h-screen mt-10">
+    <div className="bg-white min-h-screen mt-10">
       <HeroGallery
         onOpen={(index) => {
           setActiveIndex(index);
@@ -61,7 +68,7 @@ export default function ResortDetailPage() {
       <div className="max-w-6xl mx-auto px-4 mb-6 flex flex-col md:flex-row items-center justify-between">
         <h2 className="text-2xl font-semibold mb-4 md:mb-0">Available Rooms</h2>
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition hover:scale-105"
+          className="bg-blue-600 text-white px-4 py-2 rounded-2xl hover:bg-blue-700 transition hover:scale-105"
           onClick={() => setContactOpen(true)}
         >
           Contact Owner

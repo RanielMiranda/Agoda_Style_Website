@@ -1,6 +1,6 @@
 import React from "react";
 import { Users } from "lucide-react";
-import { useFilters } from "../../../context/ContextFilter"; // Ensure this path is correct
+import { useFilters } from "../../../useclient/ContextFilter"; // Ensure this path is correct
 
 export default function GuestField({
   activeDropdown,
@@ -21,7 +21,7 @@ export default function GuestField({
   };
 
   return (
-    <div className="relative flex items-center gap-2 border rounded-xl px-3 py-2 flex-1">
+    <div className="relative flex items-center gap-2 border-gray-200 border rounded-xl px-3 py-2 flex-1">
       <Users size={16} />
 
       <button

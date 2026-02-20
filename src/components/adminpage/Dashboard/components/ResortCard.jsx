@@ -1,24 +1,31 @@
+"use client";
+
 import React from "react";
-import { MapPin, Globe, Edit2, Trash2, Calendar } from "lucide-react";
+import { MapPin, Globe, Edit2, Trash2, Calendar, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 export default function ResortCard({ resort, onDelete }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleViewBookings = () => {
-    navigate("/bookings", { state: { resort } });
+    router.push(`/admin/bookings/${resort.id}`);
   };
 
   const handleEdit = () => {
-    navigate("/resort-builder", { state: { resort } });
+    router.push(`/admin/resort-builder/${resort.id}`);
   };
+  
+  const handleViewResort = (resortName) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    router.push(`/resort/${encodeURIComponent(resortName)}`);
+  };
+
 
   return (
     <Card className="p-4 bg-white border-none shadow-sm hover:shadow-md transition-shadow group rounded-2xl">
-      <div className="flex items-center gap-4">
-
+      <div className="flex flex-col md:flex-row gap-4 md:items-center">
         {/* Image */}
         <div className="h-20 w-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
           <img 
@@ -31,7 +38,7 @@ export default function ResortCard({ resort, onDelete }) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-bold text-slate-900 truncate">{resort.name}</h2>
-          <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-4 mt-1 text-sm text-slate-500">
             <span className="flex items-center gap-1">
               <MapPin size={14} /> {resort.location || "No location set"}
             </span>
@@ -45,7 +52,17 @@ export default function ResortCard({ resort, onDelete }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row gap-2 md:ml-auto w-full md:w-auto mt-4 md:mt-0">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleViewResort(resort.name)}
+            className="rounded-lg border-slate-200 hover:bg-emerald-50 hover:text-blue-600 hover:border-blue-200 flex justify-center items-center"
+          >
+            <ExternalLink size={16} className="mr-2" />
+            View Resort
+          </Button>
+
           <Button 
             variant="outline" 
             size="sm"
