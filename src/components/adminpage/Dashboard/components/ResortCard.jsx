@@ -53,7 +53,7 @@ export default function ResortCard({ resort, onDelete }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
           <Button 
             variant="outline" 
             size="sm" 

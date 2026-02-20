@@ -1,24 +1,46 @@
 import React, { useState } from "react";
 import { 
   Inbox, CheckCircle2, AlertCircle, 
-  ChevronRight, Mail, Trash2, Calendar
+  Mail, Calendar, FileText
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function RentalManager() {
-  const [activeTab, setActiveTab] = useState("inbox"); // inbox, confirmed, overdue
+export default function RentalManager({ onOpenForm }) {
+  const [activeTab, setActiveTab] = useState("inbox");
 
-  // Mock data - In a real app, you'd filter your 'bookings' array based on dates
+  // Updated Mock Data to include fields for the Form
   const mockData = {
     inbox: [
-      { id: 1, guest: "Name 1", room: "Room A", dates: "Feb 20 - 22", email: "name1@example.com" }
+      { 
+        id: 1, 
+        guestName: "Juan Dela Cruz", 
+        room: "Room A", 
+        dates: "Feb 20 - 22", 
+        email: "juan@example.com",
+        pax: "4 Adults",
+        status: "Inquiry",
+        checkInDate: "Feb 20, 2024",
+        checkOutDate: "Feb 22, 2024",
+      }
     ],
     confirmed: [
-      { id: 2, guest: "Name 2", room: "Room C", dates: "Feb 18 - 25", email: "name2@example.com" }
+      { 
+        id: 2, 
+        guestName: "Maria Clara", 
+        room: "Room C", 
+        dates: "Feb 18 - 25", 
+        email: "maria@example.com",
+        pax: "2 Adults",
+        status: "Confirmed",
+        downpayment: "5,000",
+        paymentMethod: "GCash",
+        checkInDate: "Feb 18, 2024",
+        checkOutDate: "Feb 25, 2024",
+      }
     ],
     overdue: [
-      { id: 3, guest: "Name 3", room: "Room B", dates: "Feb 10 - 15", email: "name3@example.com" }
+      { id: 3, guestName: "Simoun Ibarra", room: "Room B", dates: "Feb 10 - 15", email: "simoun@example.com" }
     ]
   };
 
@@ -28,7 +50,7 @@ export default function RentalManager() {
     { id: "overdue", label: "Pending Checkout", icon: AlertCircle, count: mockData.overdue.length },
   ];
 
-return (
+  return (
     <Card className="border-slate-200 shadow-xl rounded-3xl overflow-hidden bg-white">
       {/* Panel Header / Tabs */}
       <div className="flex border-b border-slate-100 bg-slate-50/50">
@@ -67,7 +89,7 @@ return (
                     <Calendar size={20} />
                   </div>
                   <div className="truncate">
-                    <h4 className="font-bold text-slate-900 truncate">{item.guest}</h4>
+                    <h4 className="font-bold text-slate-900 truncate">{item.guestName}</h4>
                     <p className="text-xs text-slate-500 flex items-center gap-2">
                       <span className="font-semibold text-blue-600">{item.room}</span> 
                       <span className="text-slate-300">•</span>
@@ -101,8 +123,14 @@ return (
                   
                   <div className="h-8 w-px bg-slate-200/60 mx-1 hidden md:block" />
                   
-                  <button className="p-2 text-slate-300 hover:text-blue-600 transition-colors" title="Contact Guest">
-                    <Mail size={18} />
+                  {/* CHANGED: This button now opens the confirmation form */}
+                  <button 
+                    onClick={() => onOpenForm(item)}
+                    className="p-2 text-slate-300 hover:text-blue-600 transition-colors flex items-center gap-2 group/btn" 
+                    title="View Confirmation Form"
+                  >
+                    <FileText size={18} />
+                    <span className="text-[10px] font-bold uppercase opacity-0 group-hover/btn:opacity-100 transition-opacity">Form</span>
                   </button>
                 </div>
               </div>

@@ -1,132 +1,104 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Printer, Share2 } from "lucide-react";
+import { Printer, CheckCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function BookingConfirmation({ data, onBack }) {
-  // Mock data for display if none provided
-  const info = data || {
-    guestName: "John Doe",
-    address: "123 Maple Street, Manila",
-    location: "Resort Main Branch",
-    checkInDate: "Oct 24, 2024",
-    checkOutDate: "Oct 26, 2024",
-    checkedInBy: "Admin Sarah",
-    area: "Garden View",
-    pax: "4 Adults, 2 Kids",
-    rooms: "2 Deluxe Rooms",
-    rates: "15,000",
-    checkInTime: "2:00 PM",
-    checkOutTime: "12:00 PM",
-    agent: "Direct Booking",
-    services: [
-      { name: "Extra Bed", price: "500" },
-      { name: "Late Checkout", price: "1,000" },
-      { name: "Breakfast Buffet", price: "2,400" },
-      { name: "Pool Access (Night)", price: "800" }
-    ],
-    totalDue: "19,700",
-    downpayment: "5,000",
-    channel: "GCash",
-    additionalTotal: "4,700"
-  };
+export default function BookingConfirmation({ data, resortName, onBack }) {
+  // Check if it's a confirmed booking or just an inquiry
+  const isConfirmed = data?.status === "Confirmed";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 print:m-0 print:p-0 mt-[10vh]">
+    <div className="max-w-4xl mx-auto space-y-6 mt-[10vh]">
       <div className="flex justify-between items-center no-print">
-        <Button variant="ghost" onClick={onBack}>← Back to Manager</Button>
-        <div className="flex gap-2">
-           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 flex items-center justify-center">
-             <Printer size={16} /> Print
-           </Button>
+        <Button variant="ghost" onClick={onBack}>← Back to List</Button>
+        
+        <div className="flex gap-3 items-center">
+          {/* Status Badge */}
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider ${
+            isConfirmed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+          }`}>
+            {isConfirmed ? <CheckCircle size={14}/> : <Clock size={14}/>}
+            {data?.status || "Pending Inquiry"}
+          </div>
+          
+          <Button onClick={() => window.print()} className="bg-blue-600">
+            <Printer size={16} className="mr-2" /> Print Form
+          </Button>
         </div>
       </div>
 
-      <Card className="p-8 bg-white border-slate-200 shadow-2xl rounded-md">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Booking Confirmation</h1>
-          <p className="text-slate-500 font-medium">Official Reservation Voucher</p>
+      <Card className="p-10 bg-white shadow-xl rounded-none relative overflow-hidden">
+
+        <div className="text-center mb-12">
+          <h2 className="text-sm font-bold text-blue-600 uppercase tracking-[0.2em] mb-1">{resortName}</h2>
+          <h1 className="text-3xl font-black text-slate-900 uppercase">Confirmation Booking Form</h1>
         </div>
 
         {/* Section 1: Details */}
         <div className="mb-10">
-          <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4 border-b pb-2">Section 1: Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
-            {/* Column 1 */}
-            <div className="space-y-3">
-              <DetailRow label="Guest Name" value={info.guestName} />
-              <DetailRow label="Address" value={info.address} />
-              <DetailRow label="Location" value={info.location} />
-              <DetailRow label="Check-In Date" value={info.checkInDate} />
-              <DetailRow label="Check-Out Date" value={info.checkOutDate} />
-              <DetailRow label="Checked In By" value={info.checkedInBy} />
-            </div>
-            {/* Column 2 */}
-            <div className="space-y-3">
-              <DetailRow label="Area" value={info.area} />
-              <DetailRow label="# of Pax" value={info.pax} />
-              <DetailRow label="# of Room" value={info.rooms} />
-              <DetailRow label="Rates (PHP)" value={info.rates} />
-              <DetailRow label="Check-In Time" value={info.checkInTime} />
-              <DetailRow label="Check-Out Time" value={info.checkOutTime} />
-              <DetailRow label="Agent" value={info.agent} />
-            </div>
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Section 1: Details</h3>
+          <div className="grid grid-cols-2 gap-x-12 gap-y-3">
+             <DetailRow label="Guest Name" value={data?.guestName || "________________"} />
+             <DetailRow label="Area" value={data?.area || "Resort Grounds"} />
+             <DetailRow label="Address" value={data?.address || "N/A"} />
+             <DetailRow label="# of Pax" value={data?.pax || "0"} />
+             <DetailRow label="Location" value={data?.location} />
+             <DetailRow label="Rates (PHP)" value={data?.rates?.toLocaleString()} />
+             <DetailRow label="Check-In" value={data?.checkInDate} />
+             <DetailRow label="Check-In Time" value="2:00 PM" />
+             <DetailRow label="Check-Out" value={data?.checkOutDate} />
+             <DetailRow label="Check-Out Time" value="12:00 PM" />
+             <DetailRow label="Agent" value={data?.agent || "Direct"} />
           </div>
         </div>
 
         {/* Section 2: Additional Services */}
         <div className="mb-10">
-          <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4 border-b pb-2">Section 2: Additional Services</h3>
-          <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm">
-            {info.services.map((service, idx) => (
-              <div key={idx} className="flex justify-between border-b border-slate-50 pb-1">
-                <span className="text-slate-500">{service.name}</span>
-                <span className="font-bold text-slate-700">₱{service.price}</span>
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Section 2: Additional Services</h3>
+          <div className="grid grid-cols-2 gap-x-10 gap-y-2">
+            {data?.resortServices?.map((s, i) => (
+              <div key={i} className="flex justify-between text-sm border-b border-dotted pb-1">
+                <span className="text-slate-500">{s.name}</span>
+                <span className="font-bold">₱{s.cost}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Section 3: Breakdown */}
-        <div className="bg-slate-50 p-6 rounded-2xl mb-12">
-          <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">Section 3: Breakdown</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase">Total Amount Due</p>
-              <p className="text-3xl font-black text-slate-900">PHP {info.totalDue}</p>
-            </div>
-            <div className="space-y-2 text-sm border-l border-slate-200 pl-8">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Downpayment:</span>
-                <span className="font-bold text-emerald-600">PHP {info.downpayment}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 font-medium italic">Channel:</span>
-                <span className="text-slate-700">{info.channel}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Additional Services:</span>
-                <span className="text-slate-700">PHP {info.additionalTotal}</span>
-              </div>
-              <div className="flex justify-between border-t pt-2 mt-2">
-                <span className="font-bold text-slate-900">Final Total:</span>
-                <span className="font-black text-blue-600 text-lg">PHP {info.totalDue}</span>
-              </div>
-            </div>
+        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-2 items-center">
+             <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Amount Due</p>
+                <p className="text-3xl font-black text-slate-900">₱{data?.totalAmount || data?.rates}</p>
+             </div>
+             <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Downpayment:</span>
+                  <span className="font-bold">₱{data?.downpayment || 0}</span>
+                </div>
+                <div className="flex justify-between text-blue-600">
+                  <span>Channel:</span>
+                  <span className="font-bold uppercase text-[10px]">{data?.paymentMethod || "Pending"}</span>
+                </div>
+                <div className="flex justify-between border-t pt-2 font-black text-lg">
+                  <span>Total Due:</span>
+                  <span>₱{data?.totalAmount || data?.rates}</span>
+                </div>
+             </div>
           </div>
         </div>
 
-        {/* Signatures */}
-        <div className="mt-20 flex justify-between items-end px-4">
-          <div className="text-center">
-            <div className="w-48 border-b-2 border-slate-900 font-bold text-slate-900 pb-1">Juan Dela Cruz</div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">Resort Admin</p>
-          </div>
-          <div className="text-center">
-            <div className="w-48 border-b-2 border-slate-900 font-bold text-slate-900 pb-1">_________________</div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">Client</p>
-          </div>
+        {/* Footer Signatures */}
+        <div className="mt-20 flex justify-between">
+           <div className="text-center">
+              <p className="font-bold border-b border-slate-900 px-8">Management</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold mt-1">Resort Admin</p>
+           </div>
+           <div className="text-center">
+              <p className="font-bold border-b border-slate-900 px-8">{data?.guestName || "________________"}</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold mt-1">Client</p>
+           </div>
         </div>
       </Card>
     </div>
@@ -135,7 +107,7 @@ export default function BookingConfirmation({ data, onBack }) {
 
 function DetailRow({ label, value }) {
   return (
-    <div className="flex justify-between border-b border-slate-100 pb-1">
+    <div className="flex justify-between text-sm">
       <span className="text-slate-500 font-medium">{label}:</span>
       <span className="text-slate-900 font-bold">{value}</span>
     </div>
