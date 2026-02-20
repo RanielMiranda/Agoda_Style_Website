@@ -1,28 +1,23 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { HashLink } from "react-router-hash-link";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import ContactModal from "../modals/ContactModal";
 
 export default function TopBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const closeAll = () => {
-    setIsMenuOpen(false);
-    setIsModalOpen(false);
-  };
-
   return (
     <>
-      {/* ================= TOP BAR ================= */}
       <div className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           
           {/* Logo */}
           <Link
-            to="/"
-            className="text-2xl font-bold text-blue-600 cursor-pointer"
-            onClick={(e) => {
+            href="/"
+            className="text-2xl font-bold text-blue-600"
+            onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
               setIsMenuOpen(false);
             }}
@@ -30,28 +25,25 @@ export default function TopBar() {
             🍃 Twin Acacia
           </Link>
 
-          {/* ================= DESKTOP NAV ================= */}
+          {/* Desktop Nav */}
           <div className="hidden md:flex gap-8 font-medium text-gray-700 items-center">
             
-            <HashLink
-              smooth
-              to="/#resorts"
+            <Link
+              href="/#resorts"
               className="hover:text-blue-600 transition"
             >
               Resorts
-            </HashLink>
+            </Link>
 
-            <a
-              href="#about"
-              onClick={(e) => {
-                e.preventDefault();
+            <button
+              onClick={() => {
                 const element = document.getElementById("about");
                 if (element) element.scrollIntoView({ behavior: "smooth" });
               }}
               className="hover:text-blue-600 transition"
             >
               About
-            </a>
+            </button>
 
             <button
               onClick={() => setIsModalOpen(true)}
@@ -63,14 +55,14 @@ export default function TopBar() {
             <div className="w-[1px] h-6 bg-slate-200 mx-2" />
 
             <Link
-              to="/login"
+              href="/login"
               className="hover:text-blue-600 transition"
             >
-              Admin page
+              Admin Page
             </Link>
           </div>
 
-          {/* ================= MOBILE MENU BUTTON ================= */}
+          {/* Mobile Button */}
           <button
             className="md:hidden text-3xl text-gray-700"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -79,7 +71,7 @@ export default function TopBar() {
           </button>
         </div>
 
-        {/* ================= MOBILE DROPDOWN ================= */}
+        {/* Mobile Menu */}
         <div
           className={`md:hidden bg-white shadow-md overflow-hidden transition-all duration-300 ${
             isMenuOpen ? "max-h-96 py-4" : "max-h-0"
@@ -87,27 +79,24 @@ export default function TopBar() {
         >
           <div className="flex flex-col gap-4 px-4 font-medium text-gray-700">
             
-            <HashLink
-              smooth
-              to="/#resorts"
+            <Link
+              href="/#resorts"
               onClick={() => setIsMenuOpen(false)}
               className="hover:text-blue-600 transition"
             >
               Resorts
-            </HashLink>
+            </Link>
 
-            <a
-              href="#about"
-              onClick={(e) => {
-                e.preventDefault();
+            <button
+              onClick={() => {
                 const element = document.getElementById("about");
                 if (element) element.scrollIntoView({ behavior: "smooth" });
                 setIsMenuOpen(false);
               }}
-              className="hover:text-blue-600 transition"
+              className="text-left hover:text-blue-600 transition"
             >
               About
-            </a>
+            </button>
 
             <button
               onClick={() => {
@@ -120,7 +109,7 @@ export default function TopBar() {
             </button>
 
             <Link
-              to="/login"
+              href="/login"
               onClick={() => setIsMenuOpen(false)}
               className="hover:text-blue-600 transition"
             >
@@ -130,13 +119,12 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* ================= CONTACT MODAL ================= */}
-        <ContactModal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          panelClass="bg-white text-black"
-          overlayClass="bg-black/70 backdrop-blur-sm"
-        />
+      <ContactModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        panelClass="bg-white text-black"
+        overlayClass="bg-black/70 backdrop-blur-sm"
+      />
     </>
   );
 }

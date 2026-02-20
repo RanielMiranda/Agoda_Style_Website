@@ -2,7 +2,6 @@
 
 import ResortDetailPage from "@/components/resortpages/ResortDetailPage";
 
-export default function ResortPage({ params }) {
-  const { name } = params; // Next.js gives dynamic route params
-  return <ResortDetailPage name={name} />;
+export default function Page({ params }) {
+  return <ResortDetailPage name={params.name} />;
 }
