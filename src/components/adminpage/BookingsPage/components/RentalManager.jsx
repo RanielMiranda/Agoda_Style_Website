@@ -14,10 +14,10 @@ export default function RentalManager({ onOpenForm }) {
     inbox: [
       { 
         id: 1, 
-        guestName: "Owner 1", 
+        guestName: "User 1", 
         room: "Room A", 
         dates: "Feb 20 - 22", 
-        email: "ownerA@example.com",
+        email: "User1@example.com",
         pax: "4 Adults",
         status: "Inquiry",
         checkInDate: "Feb 20, 2024",
@@ -27,10 +27,10 @@ export default function RentalManager({ onOpenForm }) {
     confirmed: [
       { 
         id: 2, 
-        guestName: "user 2", 
+        guestName: "User 2", 
         room: "Room C", 
         dates: "Feb 18 - 25", 
-        email: "user@gmail.com",
+        email: "User2@gmail.com",
         pax: "2 Adults",
         status: "Confirmed",
         downpayment: "5,000",
@@ -41,10 +41,10 @@ export default function RentalManager({ onOpenForm }) {
     ],
     overdue: [
       { id: 3, 
-        guestName: "Simoun Ibarra", 
+        guestName: "User 3", 
         room: "Room B", 
         dates: "Feb 10 - 15", 
-        email: "simoun@example.com" }
+        email: "User3@example.com" }
     ]
   };
 

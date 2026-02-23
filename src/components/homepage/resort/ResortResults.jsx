@@ -35,7 +35,7 @@ export default function ResortResults({ resorts }) {
               <div className="flex flex-wrap gap-2">
                 {resort.rooms.map((room) => (
                   <div key={room.id} className="relative group">
-                    <div className="bg-blue-100 px-2 py-1 rounded-2xl text-sm">
+                    <div className="bg-blue-100 px-2 py-1 rounded-2xl text-xs">
                       {room.name}
                     </div>
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-700 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition whitespace-nowrap z-50">
@@ -54,7 +54,7 @@ export default function ResortResults({ resorts }) {
                   {resort.tags?.map((tag, index) => (
                     <span
                       key={index}
-                      className="text-[2vh] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
+                      className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
                     >
                       {tag}
                     </span>
