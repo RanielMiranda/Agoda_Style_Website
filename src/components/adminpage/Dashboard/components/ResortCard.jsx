@@ -16,11 +16,6 @@ export default function ResortCard({ resort, onDelete }) {
   const handleEdit = () => {
     router.push(`/admin/resort-builder/${resort.id}`);
   };
-  
-  const handleViewResort = (resortName) => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    router.push(`/resort/${encodeURIComponent(resortName)}`);
-  };
 
 
   return (
@@ -53,16 +48,6 @@ export default function ResortCard({ resort, onDelete }) {
 
         {/* Actions */}
         <div className="flex flex-col md:flex-row gap-2 md:ml-auto w-full md:w-auto mt-4 md:mt-0">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleViewResort(resort.name)}
-            className="rounded-lg border-slate-200 hover:bg-emerald-50 hover:text-blue-600 hover:border-blue-200 flex justify-center items-center"
-          >
-            <ExternalLink size={16} className="mr-2" />
-            View Resort
-          </Button>
-
           <Button 
             variant="outline" 
             size="sm"
