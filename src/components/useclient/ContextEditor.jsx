@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { BUCKET_NAME } from "@/lib/utils";
 
@@ -22,16 +22,16 @@ export const ResortProvider = ({ children }) => {
     }
   }, []);
 
-  // 2. Persistence: Save to LocalStorage whenever state changes
+  // 2. Persistence: Save to LocalStorage
   useEffect(() => {
     if (resort) {
-      // Note: File objects cannot be stringified; they will be lost on refresh
-      // but string URLs (previews) and text data will persist.
       localStorage.setItem("resort_builder_draft", JSON.stringify(resort));
     }
   }, [resort]);
 
-  const loadResort = async (identifier, isId = true) => {
+  // FIX: Wrapped in useCallback to prevent infinite loops in useEffects
+  const loadResort = useCallback(async (identifier, isId = true) => {
+    if (!identifier) return;
     setLoading(true);
     const column = isId ? "id" : "name";
     try {
@@ -43,11 +43,11 @@ export const ResortProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const uploadImage = async (file, category, subFolder = "") => {
-    if (!resort?.name) return null;
-    const safeResortName = resort.name.replace(/\s+/g, "-").toLowerCase();
+  const uploadImage = async (file, resortName, category, subFolder = "") => {
+    if (!resortName) return null;
+    const safeResortName = resortName.replace(/\s+/g, "-").toLowerCase();
     const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
     let path = `${safeResortName}/${category}`;
     if (subFolder) path += `/${subFolder.replace(/\s+/g, "-").toLowerCase()}`;
@@ -59,32 +59,35 @@ export const ResortProvider = ({ children }) => {
     return urlData.publicUrl;
   };
 
-  const saveResort = async () => {
+  const saveResort = useCallback(async () => {
     if (!resort) return;
     setLoading(true);
     try {
-      // Process Hero Gallery
+      const rName = resort.name;
+      
+      const updatedProfileImage = resort.profileImage instanceof File 
+        ? await uploadImage(resort.profileImage, rName, "profile") 
+        : resort.profileImage;
+
       const updatedGallery = await Promise.all(
         (resort.gallery || []).map(async (item) => 
-          item instanceof File ? await uploadImage(item, "hero") : item
+          item instanceof File ? await uploadImage(item, rName, "hero") : item
         )
       );
 
-      // Process Amenities (Facilities)
       const updatedFacilities = await Promise.all(
         (resort.facilities || []).map(async (f) => ({
           ...f,
-          image: f.image instanceof File ? await uploadImage(f.image, "facilities") : f.image
+          image: f.image instanceof File ? await uploadImage(f.image, rName, "facilities") : f.image
         }))
       );
 
-      // Process Rooms
       const updatedRooms = await Promise.all(
         (resort.rooms || []).map(async (room) => ({
           ...room,
           gallery: await Promise.all(
             (room.gallery || []).map(async (img) => 
-              img instanceof File ? await uploadImage(img, "rooms", room.name) : img
+              img instanceof File ? await uploadImage(img, rName, "rooms", room.name) : img
             )
           )
         }))
@@ -92,6 +95,7 @@ export const ResortProvider = ({ children }) => {
 
       const finalPayload = {
         ...resort,
+        profileImage: updatedProfileImage,
         gallery: updatedGallery,
         facilities: updatedFacilities,
         rooms: updatedRooms
@@ -101,7 +105,7 @@ export const ResortProvider = ({ children }) => {
       if (error) throw error;
 
       setResort(finalPayload);
-      localStorage.removeItem("resort_builder_draft"); // Clear draft on success
+      localStorage.removeItem("resort_builder_draft");
       return true;
     } catch (err) {
       alert("Error saving: " + err.message);
@@ -109,7 +113,7 @@ export const ResortProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resort]);
 
   const updateResort = (field, value) => setResort(prev => ({ ...prev, [field]: value }));
   const safeSrc = (src) => (src instanceof File ? URL.createObjectURL(src) : src);
