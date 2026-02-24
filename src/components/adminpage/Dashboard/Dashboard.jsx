@@ -11,10 +11,15 @@ import ResortCard from "./components/ResortCard";
 import ResortStats from "./components/ResortStats";
 import { resorts as resortsData } from "@/components/data/resorts";
 
+import { useResort } from "@/components/useclient/ContextEditor";
+import resortInitialData from "@/components/adminpage/ResortBuilder/data/ResortInitialData";
+
+
 export default function Dashboard() {
   const [resorts, setResorts] = useState(resortsData);
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
+  const { resetResort } = useResort();
 
   // Filter resorts based on search
   const filteredResorts = resorts.filter((r) =>
@@ -23,6 +28,7 @@ export default function Dashboard() {
   );
 
   const handleAddNew = () => {
+    resetResort(resortInitialData);
     router.push("/admin/resort-builder");
   };
 

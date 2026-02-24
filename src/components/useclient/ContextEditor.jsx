@@ -29,7 +29,11 @@ export const ResortProvider = ({ children }) => {
     }
   }, [resort]);
 
-  // FIX: Wrapped in useCallback to prevent infinite loops in useEffects
+  const resetResort = useCallback((initialData = null) => {
+    localStorage.removeItem("resort_builder_draft");
+    setResort(initialData);
+  }, []);
+
   const loadResort = useCallback(async (identifier, isId = true) => {
     if (!identifier) return;
     setLoading(true);
@@ -119,7 +123,7 @@ export const ResortProvider = ({ children }) => {
   const safeSrc = (src) => (src instanceof File ? URL.createObjectURL(src) : src);
 
   return (
-    <ResortContext.Provider value={{ resort, setResort, loading, loadResort, saveResort, updateResort, safeSrc }}>
+    <ResortContext.Provider value={{ resort, setResort, loading, loadResort, saveResort, updateResort, safeSrc, resetResort }}>
       {children}
     </ResortContext.Provider>
   );
