@@ -21,7 +21,9 @@ export default function RentalManager({ onOpenForm }) {
         pax: "4 Adults",
         status: "Inquiry",
         checkInDate: "Feb 20, 2024",
-        checkOutDate: "Feb 22, 2024",
+        checkInTime: "2:00 PM",
+        checkOutDate: "Feb 22, 2024",        
+        checkOutTime: "5:00 PM",
       }
     ],
     confirmed: [
