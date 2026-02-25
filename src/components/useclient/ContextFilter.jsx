@@ -10,7 +10,7 @@ export function FilterProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   // Filter States
-  const [price, setPrice] = useState(50000);
+  const [price, setPrice] = useState(22000);
   const [selectedTags, setSelectedTags] = useState([]);
   const [guests, setGuests] = useState({ adults: 2, children: 0, rooms: 1 });
   const [startDate, setStartDate] = useState(null);

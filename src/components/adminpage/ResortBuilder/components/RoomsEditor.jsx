@@ -14,9 +14,41 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+// --- Helper Components for "Update on Blur" ---
+const BlurInput = ({ value, onChange, ...props }) => {
+  const [localVal, setLocalVal] = useState(value);
+  useEffect(() => setLocalVal(value), [value]);
+
+  return (
+    <input
+      {...props}
+      value={localVal}
+      onChange={(e) => setLocalVal(e.target.value)}
+      onBlur={() => onChange(localVal)}
+      onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
+    />
+  );
+};
+
+const BlurTextArea = ({ value, onChange, ...props }) => {
+  const [localVal, setLocalVal] = useState(value);
+  useEffect(() => setLocalVal(value), [value]);
+
+  return (
+    <textarea
+      {...props}
+      value={localVal}
+      onChange={(e) => setLocalVal(e.target.value)}
+      onBlur={() => onChange(localVal)}
+    />
+  );
+};
+
 // --- Sortable Tag Component ---
-function SortableRoomTag({ id, tag, onRemove, onChange }) {
+function SortableRoomTag({ id, tag, onRemove, onUpdate }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const [localVal, setLocalVal] = useState(tag);
+  useEffect(() => setLocalVal(tag), [tag]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -35,9 +67,11 @@ function SortableRoomTag({ id, tag, onRemove, onChange }) {
       </button>
       <input 
         className="bg-transparent border-none p-0 focus:ring-0 text-xs font-medium w-auto max-w-[100px]"
-        value={tag}
+        value={localVal}
         placeholder="Tag..."
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => setLocalVal(e.target.value)}
+        onBlur={() => onUpdate(localVal)}
+        onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
       />
       <X size={12} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={onRemove} />
     </div>
@@ -46,7 +80,7 @@ function SortableRoomTag({ id, tag, onRemove, onChange }) {
 
 export default function RoomsEditor() {
   const { resort, updateResort, safeSrc } = useResort();
-  const [localRooms, setLocalRooms] = useState(resort.rooms || []);
+  const rooms = resort?.rooms || []; // Derive entirely from Context
   const [activeRoomId, setActiveRoomId] = useState(null);
   
   const fileInputRef = useRef(null);
@@ -55,8 +89,6 @@ export default function RoomsEditor() {
   const roomsEndRef = useRef(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-
-  useEffect(() => setLocalRooms(resort.rooms || []), [resort.rooms]);
 
   const scrollToLatestRoom = () => {
     roomsEndRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -72,42 +104,39 @@ export default function RoomsEditor() {
         gallery: [], 
         tags: ["Air Conditioning", "Toilet", "Bath", "Blanket"] 
     };
-    const updated = [...localRooms, newRoom];
-    setLocalRooms(updated);
-    updateResort("rooms", updated);
+    updateResort("rooms", [...rooms, newRoom]);
     setTimeout(scrollToLatestRoom, 100);
   };
 
-  const updateRoomLocal = (id, updates) => {
-    const updatedRooms = localRooms.map(r => r.id === id ? { ...r, ...updates } : r);
-    setLocalRooms(updatedRooms);
+  const handleRoomUpdate = (id, updates) => {
+    const updatedRooms = rooms.map(r => r.id === id ? { ...r, ...updates } : r);
     updateResort("rooms", updatedRooms);
   };
 
   const handleTagDragEnd = (event, roomId) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
-      const room = localRooms.find(r => r.id === roomId);
+      const room = rooms.find(r => r.id === roomId);
       const oldIndex = room.tags.indexOf(active.data.current?.tag || room.tags[parseInt(active.id.split('-').pop())]);
       const newIndex = room.tags.indexOf(over.data.current?.tag || room.tags[parseInt(over.id.split('-').pop())]);
-      updateRoomLocal(roomId, { tags: arrayMove(room.tags, oldIndex, newIndex) });
+      handleRoomUpdate(roomId, { tags: arrayMove(room.tags, oldIndex, newIndex) });
     }
   };
 
   const handleUpload = (e, roomId) => {
     const files = Array.from(e.target.files);
-    const room = localRooms.find(r => r.id === roomId);
-    updateRoomLocal(roomId, { gallery: [...(room.gallery || []), ...files] });
+    const room = rooms.find(r => r.id === roomId);
+    handleRoomUpdate(roomId, { gallery: [...(room.gallery || []), ...files] });
     e.target.value = "";
   };
 
   const handleReplaceImage = (e) => {
     const file = e.target.files[0];
     if (!file || replacingIdx === null || !activeRoomId) return;
-    const room = localRooms.find(r => r.id === activeRoomId);
+    const room = rooms.find(r => r.id === activeRoomId);
     const updatedGallery = [...room.gallery];
     updatedGallery[replacingIdx] = file;
-    updateRoomLocal(activeRoomId, { gallery: updatedGallery });
+    handleRoomUpdate(activeRoomId, { gallery: updatedGallery });
     setReplacingIdx(null);
     e.target.value = "";
   };
@@ -125,7 +154,7 @@ export default function RoomsEditor() {
       </div>
 
       <div className="flex flex-col gap-6">
-        {localRooms.map(room => (
+        {rooms.map(room => (
           <Card key={room.id} className="rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-sm border border-slate-100 bg-white">
             
             {/* DYNAMIC IMAGE MOSAIC */}
@@ -138,7 +167,7 @@ export default function RoomsEditor() {
                     <button onClick={() => { setActiveRoomId(room.id); setReplacingIdx(0); replaceInputRef.current.click(); }} className="p-2 bg-white rounded-full text-slate-700 hover:scale-110 transition">
                       <Edit3 size={16} />
                     </button>
-                    <button onClick={() => updateRoomLocal(room.id, { gallery: [] })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
+                    <button onClick={() => handleRoomUpdate(room.id, { gallery: [] })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -155,7 +184,7 @@ export default function RoomsEditor() {
                         <button onClick={() => { setActiveRoomId(room.id); setReplacingIdx(idx); replaceInputRef.current.click(); }} className="p-2 bg-white rounded-full text-slate-700 hover:scale-110 transition">
                           <Edit3 size={16} />
                         </button>
-                        <button onClick={() => updateRoomLocal(room.id, { gallery: room.gallery.filter((_, i) => i !== idx) })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
+                        <button onClick={() => handleRoomUpdate(room.id, { gallery: room.gallery.filter((_, i) => i !== idx) })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -183,7 +212,7 @@ export default function RoomsEditor() {
                              <button onClick={() => { setActiveRoomId(room.id); setReplacingIdx(idx); replaceInputRef.current.click(); }} className="p-2 bg-white rounded-full text-slate-700 hover:scale-110 transition">
                                 <Edit3 size={16} />
                              </button>
-                             <button onClick={() => updateRoomLocal(room.id, { gallery: room.gallery.filter((_, i) => i !== idx) })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
+                             <button onClick={() => handleRoomUpdate(room.id, { gallery: room.gallery.filter((_, i) => i !== idx) })} className="p-2 bg-white rounded-full text-red-500 hover:scale-110 transition">
                                 <Trash2 size={16} />
                              </button>
                           </div>
@@ -205,8 +234,12 @@ export default function RoomsEditor() {
             {/* ROOM INFO */}
             <div className="md:w-1/2 p-6 flex flex-col">
               <div className="flex justify-between items-start mb-2">
-                <input className="text-xl font-semibold w-full bg-transparent border-none p-0 focus:ring-0" 
-                  value={room.name} onChange={(e) => updateRoomLocal(room.id, { name: e.target.value })} placeholder="Room Name" />
+                <BlurInput 
+                  className="text-xl font-semibold w-full bg-transparent border-none p-0 focus:ring-0" 
+                  value={room.name} 
+                  onChange={(val) => handleRoomUpdate(room.id, { name: val })} 
+                  placeholder="Room Name" 
+                />
                 <div className="flex items-center gap-1">
                   <button 
                     onClick={() => { setActiveRoomId(room.id); fileInputRef.current.click(); }}
@@ -216,7 +249,7 @@ export default function RoomsEditor() {
                     <Camera size={18}/>
                   </button>
                   <button 
-                    onClick={() => { if(confirm(`Remove ${room.name}?`)) updateResort("rooms", localRooms.filter(r => r.id !== room.id)) }} 
+                    onClick={() => { if(confirm(`Remove ${room.name}?`)) updateResort("rooms", rooms.filter(r => r.id !== room.id)) }} 
                     className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                   >
                     <Trash2 size={18}/>
@@ -228,13 +261,21 @@ export default function RoomsEditor() {
               <div className="flex gap-2 text-sm mb-4">
                 <span className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-2xl border border-blue-100">
                   <Users size={14} className="text-blue-600"/> 
-                  <input type="number" className="bg-transparent border-none p-0 w-8 text-center focus:ring-0 font-semibold text-blue-700" value={room.guests} 
-                    onChange={(e) => updateRoomLocal(room.id, { guests: parseInt(e.target.value) || 0 })} />
+                  <BlurInput 
+                    type="number" 
+                    className="bg-transparent border-none p-0 w-8 text-center focus:ring-0 font-semibold text-blue-700" 
+                    value={room.guests} 
+                    onChange={(val) => handleRoomUpdate(room.id, { guests: parseInt(val) || 0 })} 
+                  />
                 </span>
                 <span className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-2xl border border-blue-100 flex-1">
                   <BedDouble size={14} className="text-blue-600 shrink-0"/> 
-                  <input className="bg-transparent border-none p-0 w-full focus:ring-0 font-semibold text-blue-700" value={room.beds} 
-                    onChange={(e) => updateRoomLocal(room.id, { beds: e.target.value })} placeholder="Beds description" />
+                  <BlurInput 
+                    className="bg-transparent border-none p-0 w-full focus:ring-0 font-semibold text-blue-700" 
+                    value={room.beds} 
+                    onChange={(val) => handleRoomUpdate(room.id, { beds: val })} 
+                    placeholder="Beds description" 
+                  />
                 </span>
               </div>
               
@@ -243,32 +284,36 @@ export default function RoomsEditor() {
                 <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Room Amenities — Drag to Reorder</p>
                 <div className="flex flex-wrap gap-2 items-center">
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleTagDragEnd(e, room.id)}>
-                    <SortableContext items={room.tags.map((_, i) => `tag-${room.id}-${i}`)} strategy={horizontalListSortingStrategy}>
+                    <SortableContext items={(room.tags || []).map((_, i) => `tag-${room.id}-${i}`)} strategy={horizontalListSortingStrategy}>
                       {room.tags?.map((tag, i) => (
                         <SortableRoomTag 
                           key={`tag-${room.id}-${i}`}
                           id={`tag-${room.id}-${i}`}
                           tag={tag}
-                          onChange={(val) => {
+                          onUpdate={(val) => {
                             const newTags = [...room.tags];
                             newTags[i] = val;
-                            updateRoomLocal(room.id, { tags: newTags });
+                            handleRoomUpdate(room.id, { tags: newTags });
                           }}
-                          onRemove={() => updateRoomLocal(room.id, { tags: room.tags.filter((_, idx) => idx !== i) })}
+                          onRemove={() => handleRoomUpdate(room.id, { tags: room.tags.filter((_, idx) => idx !== i) })}
                         />
                       ))}
                     </SortableContext>
                   </DndContext>
-                  <button onClick={() => updateRoomLocal(room.id, { tags: [...(room.tags || []), ""] })} 
+                  <button onClick={() => handleRoomUpdate(room.id, { tags: [...(room.tags || []), ""] })} 
                     className="border border-dashed border-slate-300 text-slate-400 px-3 py-1 rounded-full text-xs hover:text-blue-600 hover:border-blue-400 transition-all flex items-center gap-1">
                     <Plus size={12} /> Add
                   </button>
                 </div>
               </div>
 
-              <textarea className="text-slate-500 text-sm w-full bg-transparent border-none p-0 focus:ring-0 resize-none mb-4"
-                value={room.details} onChange={(e) => updateRoomLocal(room.id, { details: e.target.value })} 
-                placeholder="Describe room features..." rows={2} />
+              <BlurTextArea 
+                className="text-slate-500 text-sm w-full bg-transparent border-none p-0 focus:ring-0 resize-none mb-4"
+                value={room.details} 
+                onChange={(val) => handleRoomUpdate(room.id, { details: val })} 
+                placeholder="Describe room features..." 
+                rows={2} 
+              />
 
               {/* THUMBNAIL STRIP */}
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -279,7 +324,7 @@ export default function RoomsEditor() {
                       <button onClick={() => { setActiveRoomId(room.id); setReplacingIdx(i); replaceInputRef.current.click(); }} className="p-1 bg-white rounded-full text-slate-700">
                         <Edit3 size={10} />
                       </button>
-                      <button onClick={() => updateRoomLocal(room.id, { gallery: room.gallery.filter((_, idx) => idx !== i) })} className="p-1 bg-white rounded-full text-red-500">
+                      <button onClick={() => handleRoomUpdate(room.id, { gallery: room.gallery.filter((_, idx) => idx !== i) })} className="p-1 bg-white rounded-full text-red-500">
                         <X size={10} />
                       </button>
                     </div>

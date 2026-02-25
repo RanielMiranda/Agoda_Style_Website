@@ -36,7 +36,9 @@ export default function RentalManager({ onOpenForm }) {
         downpayment: "5,000",
         paymentMethod: "GCash",
         checkInDate: "Feb 18, 2024",
+        checkInTime: "2:00 PM",
         checkOutDate: "Feb 25, 2024",
+        checkOutTime: "5:00 PM"
       }
     ],
     overdue: [
