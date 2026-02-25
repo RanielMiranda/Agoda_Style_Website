@@ -154,8 +154,8 @@ export default function OwnerDashboard() {
               </Button>
 
               <Button
-                variant="ghost"
-                className="w-full mt-2 h-11 text-slate-500 font-medium flex items-center justify-center"
+                variant="outline"
+                className="w-full mt-2 h-11 text-slate-800 font-medium flex items-center justify-center"
               >
                 <MessageSquare size={18} className="mr-2" />
                 Contact Support

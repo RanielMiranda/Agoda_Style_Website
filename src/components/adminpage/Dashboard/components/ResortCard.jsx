@@ -43,7 +43,7 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
           {/* Edit Button */}
           <button 
             onClick={() => router.push(`/admin/resort-builder/${resort.id}`)}
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest transition-all"
+            className="hover:scale-105 flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest transition-all"
           >
             <Edit2 size={14} /> Edit
           </button>
@@ -51,7 +51,7 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
           {/* Bookings Button */}
           <button 
             onClick={() => router.push(`/admin/bookings/${resort.id}`)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-800 text-white rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest shadow-md transition-all"
+            className="hover:scale-105 flex items-center gap-2 bg-blue-600 hover:bg-blue-800 text-white rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest shadow-md transition-all"
           >
             <Calendar size={14} /> Bookings
           </button>
@@ -59,7 +59,7 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
           {/* Visibility Toggle (With Background Colors) */}
           <button 
             onClick={() => onToggleVisibility(resort.id, resort.visible)}
-            className={`h-10 px-4 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-sm ${
+            className={`hover:scale-105 transition-all h-10 px-4 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-sm ${
               resort.visible 
                 ? 'bg-green-500 hover:bg-green-600 text-white' 
                 : 'bg-amber-500 hover:bg-amber-600 text-white'
