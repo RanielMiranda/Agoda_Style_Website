@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { resorts as resortsData } from "@/components/data/resorts";
 import AccountCard from "./components/AccountCard";
+import InviteOwnerModal from "./components/InviteOwnerModal";
 
 export default function AccountManagement() {
   const router = useRouter();
-  
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   const [accounts, setAccounts] = useState(resortsData.map((resort, index) => ({
     id: String(index + 1),
     name: resort.ownerName || `Admin ${index + 1}`,
@@ -57,9 +59,17 @@ export default function AccountManagement() {
             </h1>
             <p className="text-slate-500 mt-1 font-medium">Manage resort owner credentials and platform access.</p>
           </div>
-          <Button className="bg-blue-600 flex items-center justify-center hover:scale-105 hover:bg-blue-700 text-white rounded-2xl h-12 shadow-lg shadow-blue-100 px-6 font-bold">
+          <Button 
+            onClick={() => setIsInviteModalOpen(true)}
+            className="bg-blue-600 flex items-center justify-center hover:scale-105 hover:bg-blue-700 text-white rounded-2xl h-12 shadow-lg shadow-blue-100 px-6 font-bold">
             <UserPlus className="mr-2 h-5 w-5" /> Invite Owner
           </Button>
+
+          {/* Add the Modal component at the bottom of the JSX */}
+          <InviteOwnerModal 
+            isOpen={isInviteModalOpen} 
+            onClose={() => setIsInviteModalOpen(false)} 
+          />
         </div>
 
         {/* Stats Row */}
