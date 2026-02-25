@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { X, User, Building2, Shield, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function InviteOwnerModal({ isOpen, onClose }) {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "",
@@ -22,6 +24,17 @@ export default function InviteOwnerModal({ isOpen, onClose }) {
   const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
+  const handleFinalAction = () => {
+    if (step === 3) {
+      // 3. Logic: In production, this calls your API. 
+      // For now, let's close the modal and go to the setup page.
+      onClose();
+      router.push("/auth/setup-resort"); 
+    } else {
+      nextStep();
+    }
+  };
+  
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -92,6 +105,15 @@ export default function InviteOwnerModal({ isOpen, onClose }) {
               </div>
               <h3 className="text-xl font-bold text-slate-900">Ready to send invitation?</h3>
               <p className="text-slate-500 mt-2 px-10">An email will be sent to the owner with a secure link to set up their password and resort profile.</p>
+              {/* 4. Added a direct link for testing purposes */}
+          <div className="mt-4">
+            <button 
+              onClick={() => router.push("/auth/setup-resort")}
+              className="text-xs font-bold text-blue-600 hover:underline"
+            >
+              Preview setup page manually →
+            </button>
+          </div>
               <div className="mt-6 p-4 bg-blue-50 rounded-2xl text-left border border-blue-100">
                 <p className="text-xs font-bold text-blue-600 uppercase mb-1">Summary</p>
                 <p className="text-sm font-medium text-slate-700">Owner: John Doe</p>

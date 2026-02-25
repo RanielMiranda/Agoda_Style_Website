@@ -40,6 +40,13 @@ export default function AccountManagement() {
     }));
   };
 
+  const handleApprove = (id) => {
+    setAccounts(prev => prev.map(acc => 
+      acc.id === id ? { ...acc, status: 'Active' } : acc
+    ));
+    toast.success("Account approved successfully");
+  };
+
   const filteredAccounts = accounts.filter(acc => {
     const matchesSearch = acc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           acc.resortName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -121,6 +128,7 @@ export default function AccountManagement() {
                 key={account.id} 
                 account={account} 
                 onToggleStatus={toggleStatus} 
+                onApprove={handleApprove} // Add this
                 onViewResort={handleViewResort} 
               />
             ))
