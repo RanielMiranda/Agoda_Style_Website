@@ -30,7 +30,8 @@ export default function ResortSetupPage() {
     }, 2000);
   };
 
-  if (isFinished) return <SuccessState resortName={inviteData.resortName} onGoHome={() => router.push("/admin/dashboard")} />;
+  if (isFinished) return <SuccessState resortName={inviteData.resortName} 
+  onGoHome={() => router.push("/owner/dashboard")} />;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
@@ -46,15 +47,15 @@ export default function ResortSetupPage() {
             <PasswordField label="Confirm Password" />
             <TermsCheckbox />
 
-{/* Add a wrapper div with these classes */}
-<div className="bottom-0 bg-slate-50 pt-4 pb-6 mt-auto">
-  <Button 
-    disabled={isSubmitting}
-    className="w-full h-16 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-lg font-bold shadow-xl transition-all flex items-center justify-center gap-3"
-  >
-    {isSubmitting ? <Loader2 className="animate-spin" /> : <>Complete Setup <ArrowRight size={20} /></>}
-  </Button>
-</div>
+          {/* Add a wrapper div with these classes */}
+          <div className="bottom-0 bg-slate-50 pt-4 pb-6 mt-auto">
+            <Button 
+              disabled={isSubmitting}
+              className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-lg font-bold shadow-xl transition-all flex items-center justify-center gap-3"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" /> : <>Complete Setup <ArrowRight size={20} /></>}
+            </Button>
+          </div>
           </form>
 
           <SecurityFooter />
