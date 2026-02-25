@@ -90,7 +90,7 @@ export default function Dashboard() {
               <LayoutDashboard className="text-blue-600" />
               Resort Management
             </h1>
-            <p className="text-slate-500 mt-1">Manage live properties from your database.</p>
+            <p className="text-slate-500 mt-1">Manage live properties from the database.</p>
           </div>
 
           <Button 

@@ -61,7 +61,7 @@ export default function AccountManagement() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3 tracking-tight">
               <Users className="text-blue-600" /> Account Management
             </h1>
             <p className="text-slate-500 mt-1 font-medium">Manage resort owner credentials and platform access.</p>
@@ -90,7 +90,7 @@ export default function AccountManagement() {
               <div className={`p-4 rounded-2xl ${stat.color}`}><stat.icon size={24} /></div>
               <div>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{stat.label}</p>
-                <p className="text-2xl font-black text-slate-900">{stat.value}</p>
+                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
               </div>
             </Card>
           ))}
@@ -134,7 +134,7 @@ export default function AccountManagement() {
             ))
           ) : (
             <div className="text-center py-24 bg-white rounded-[40px] shadow-inner border-2 border-dashed border-slate-100">
-              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">No accounts found</h3>
+              <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">No accounts found</h3>
               <p className="text-slate-400 mt-1 font-medium">Try a different search term.</p>
             </div>
           )}

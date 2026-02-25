@@ -1,101 +1,79 @@
 "use client";
 
-import React, { useState } from "react";
-import { MapPin, Globe, Edit2, Trash2, Calendar } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { MapPin, Edit2, Calendar } from "lucide-react";
+import ResortActionMenu from "./ResortActionMenu";
 import { useRouter } from "next/navigation";
-import { useResort } from "@/components/useclient/ContextEditor";
 
 export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
   const router = useRouter();
-  const { setVisibility, setResort } = useResort();
-  const [updating, setUpdating] = useState(false);
-
-  const handleViewBookings = () => {
-    router.push(`/admin/bookings/${resort.id}`);
-  };
-
-  const handleEdit = () => {
-    router.push(`/admin/resort-builder/${resort.id}`);
-  };
-
 
   return (
-    <Card className="p-4 bg-white border-none shadow-sm hover:shadow-md transition-shadow group rounded-2xl">
-      <div className="flex flex-col md:flex-row gap-4 md:items-center">
-        {/* Image */}
-        <div className="h-20 w-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
-          <img 
-            src={resort.profileImage || (resort.gallery && resort.gallery[0]) || "https://via.placeholder.com/150"} 
-            alt={resort.name}
-            className="w-full h-full object-cover"
-          />
+    <div className="p-4 bg-white border-none hover:shadow-xl transition-all duration-300 rounded-3xl group relative mb-4 font-sans">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+        
+        {/* 1. Identity Section */}
+        <div className="flex items-center gap-4 lg:w-[280px] shrink-0">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden bg-slate-100 border-2 border-white shadow-sm shrink-0">
+            <img 
+              src={resort.profileImage || (resort.gallery && resort.gallery[0]) || "https://via.placeholder.com/150"} 
+              alt={resort.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 truncate tracking-tight text-lg ">
+              {resort.name}
+            </h3>
+          </div>
         </div>
 
-        {/* Info */}
+        {/* 2. Address Section (Now in the middle) */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-bold text-slate-900 truncate">{resort.name}</h2>
-          <div className="flex flex-wrap items-center gap-4 mt-1 text-sm text-slate-500">
-            <span className="flex items-center gap-1">
-              <MapPin size={14} /> {resort.location || "No location set"}
-            </span>
-            <span className="flex items-center gap-1">
-              <Globe size={14} /> {resort.rooms?.length || 0} Room Types
-            </span>
-            <span className="font-semibold text-blue-600">
-              ₱{resort.price?.toLocaleString() || 0} / night
+          <div className="flex items-center gap-2 text-slate-500">
+            <MapPin size={16} className="shrink-0 text-slate-400" />
+            <span className="text-sm font-semibold truncate leading-none">
+              {resort.location || "No location set"}
             </span>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col md:flex-row gap-2 md:ml-auto w-full md:w-auto mt-4 md:mt-0">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleViewBookings}
-            className="rounded-lg border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 flex justify-center items-center"
+        {/* 3. Action Bar*/}
+        <div className="flex items-center justify-end gap-2 border-t lg:border-t-0 pt-4 lg:pt-0 shrink-0">
+          {/* Edit Button */}
+          <button 
+            onClick={() => router.push(`/admin/resort-builder/${resort.id}`)}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest transition-all"
           >
-            <Calendar className="h-4 w-4 mr-2" />
-            Bookings
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleEdit}
-            className="rounded-lg border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 flex items-center justify-center"
-          >
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
+            <Edit2 size={14} /> Edit
+          </button>
 
-          <Button 
-            variant="outline" 
-            size="sm"
+          {/* Bookings Button */}
+          <button 
+            onClick={() => router.push(`/admin/bookings/${resort.id}`)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-800 text-white rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest shadow-md transition-all"
+          >
+            <Calendar size={14} /> Bookings
+          </button>
+
+          {/* Visibility Toggle (With Background Colors) */}
+          <button 
             onClick={() => onToggleVisibility(resort.id, resort.visible)}
-            className={`rounded-lg flex items-center justify-center px-3 ${
+            className={`h-10 px-4 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-sm ${
               resort.visible 
-                ? "border-green-400 text-green-600 hover:bg-green-50 hover:border-green-500"
-                : "border-slate-300 text-slate-500 hover:bg-slate-100"
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-amber-500 hover:bg-amber-600 text-white'
             }`}
-            disabled={updating}
           >
             {resort.visible ? "Visible" : "Hidden"}
-          </Button>
+          </button>
 
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onDelete(resort.id, resort.name)}
-            className="rounded-lg border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 flex items-center justify-center"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="w-[2px] h-6 bg-slate-100 mx-1" />
+
+          {/* Triple Dot Menu (Assign & Delete) */}
+          <ResortActionMenu resort={resort} onDelete={onDelete} />
         </div>
-
       </div>
-    </Card>
+    </div>
   );
 }

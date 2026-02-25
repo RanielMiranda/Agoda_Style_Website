@@ -23,7 +23,7 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
               {account.profileImage ? (
                 <img src={account.profileImage} className="w-full h-full object-cover" alt="profile" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-blue-600 font-black text-xl">
+                <div className="w-full h-full flex items-center justify-center text-blue-600 font-bold text-xl">
                   {account.name.charAt(0)}
                 </div>
               )}
@@ -55,7 +55,7 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
             {account.status === "Pending" ? (
               <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 shrink-0">
                 <Clock size={14} className="animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Pending</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Pending</span>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
               variant="ghost" 
               size="sm" 
               onClick={() => onToggleStatus(account.id)}
-              className={`rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest ${
+              className={`rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest ${
                 account.status === 'Active' ? 'text-red-400 hover:text-red-500' : 'text-green-500 hover:text-green-600'
               }`}
             >
