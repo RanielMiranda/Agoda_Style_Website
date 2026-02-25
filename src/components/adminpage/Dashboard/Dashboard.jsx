@@ -63,6 +63,22 @@ export default function Dashboard() {
     }
   };
 
+  const handleToggleVisibility = async (id, currentValue) => {
+    try {
+      const { error } = await supabase
+        .from("resorts")
+        .update({ visible: !currentValue })
+        .eq("id", id);
+      if (error) throw error;
+
+      // Update local state so the card re-renders immediately
+      setResorts(prev =>
+        prev.map(r => (r.id === id ? { ...r, visible: !currentValue } : r))
+      );
+    } catch (err) {
+      alert("Failed to toggle visibility: " + err.message);
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto pt-10">
@@ -101,10 +117,11 @@ export default function Dashboard() {
             </div>
           ) : filteredResorts.length > 0 ? (
             filteredResorts.map((resort) => (
-              <ResortCard 
-                key={resort.id} 
-                resort={resort} 
-                onDelete={() => handleDelete(resort.id, resort.name)} 
+              <ResortCard
+                key={resort.id}
+                resort={resort}
+                onDelete={() => handleDelete(resort.id, resort.name)}
+                onToggleVisibility={handleToggleVisibility}
               />
             ))
           ) : (

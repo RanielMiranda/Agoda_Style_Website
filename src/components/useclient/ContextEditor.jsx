@@ -63,6 +63,29 @@ export const ResortProvider = ({ children }) => {
     return urlData.publicUrl;
   };
 
+  const setVisibility = useCallback(async (resortId, visible) => {
+    if (!resortId) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("resorts")
+        .update({ visible })
+        .eq("id", resortId);
+      if (error) throw error;
+
+      // Update local state if the resort being edited is the current one
+      if (resort?.id === resortId) setResort({ ...resort, visible });
+
+      return true;
+    } catch (err) {
+      console.error("Failed to update visibility:", err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [resort]);
+  
+
   const saveResort = useCallback(async () => {
     if (!resort) return;
 
@@ -167,9 +190,21 @@ export const ResortProvider = ({ children }) => {
   const safeSrc = (src) => (src instanceof File ? URL.createObjectURL(src) : src);
 
   return (
-    <ResortContext.Provider value={{ resort, setResort, loading, loadResort, saveResort, updateResort, safeSrc, resetResort }}>
-      {children}
-    </ResortContext.Provider>
+  <ResortContext.Provider
+    value={{
+      resort,
+      setResort,
+      loading,
+      loadResort,
+      saveResort,
+      updateResort,
+      safeSrc,
+      resetResort,
+      setVisibility,
+    }}
+  >
+    {children}
+  </ResortContext.Provider>
   );
 };
 

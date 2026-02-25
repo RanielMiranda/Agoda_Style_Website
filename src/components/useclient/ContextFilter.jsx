@@ -34,7 +34,10 @@ export function FilterProvider({ children }) {
   }, []);
 
   // 🔹 Derived State: Filter logic
-  const filteredResorts = allResorts.filter((resort) => {
+  const filteredResorts = allResorts
+    .filter((resort) => resort.visible !== false) // <-- only visible resorts
+    .filter((resort) => {
+
     const matchesPrice = resort.price <= price;
     
     const matchesTags =

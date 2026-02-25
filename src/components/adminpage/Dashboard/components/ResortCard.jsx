@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
-import { MapPin, Globe, Edit2, Trash2, Calendar, ExternalLink } from "lucide-react";
+import React, { useState } from "react";
+import { MapPin, Globe, Edit2, Trash2, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useResort } from "@/components/useclient/ContextEditor";
 
-export default function ResortCard({ resort, onDelete }) {
+export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
   const router = useRouter();
+  const { setVisibility, setResort } = useResort();
+  const [updating, setUpdating] = useState(false);
 
   const handleViewBookings = () => {
     router.push(`/admin/bookings/${resort.id}`);
@@ -67,10 +70,25 @@ export default function ResortCard({ resort, onDelete }) {
             <Edit2 className="h-4 w-4 mr-2" />
             Edit
           </Button>
+
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => onDelete(resort.id, resort.name)} // Pass both ID and Name
+            onClick={() => onToggleVisibility(resort.id, resort.visible)}
+            className={`rounded-lg flex items-center justify-center px-3 ${
+              resort.visible 
+                ? "border-green-400 text-green-600 hover:bg-green-50 hover:border-green-500"
+                : "border-slate-300 text-slate-500 hover:bg-slate-100"
+            }`}
+            disabled={updating}
+          >
+            {resort.visible ? "Visible" : "Hidden"}
+          </Button>
+
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onDelete(resort.id, resort.name)}
             className="rounded-lg border-slate-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 flex items-center justify-center"
           >
             <Trash2 className="h-4 w-4" />

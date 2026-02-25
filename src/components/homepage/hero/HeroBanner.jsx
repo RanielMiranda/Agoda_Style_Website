@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import SearchBar from "../search/SearchBar";
+import { useResort } from "@/components/useclient/ContextEditor";
 
 export default function HeroBanner() {
   const [heroImages, setHeroImages] = useState([]);
   const [heroIndex, setHeroIndex] = useState(0);
+  const { safeSrc } = useResort();
 
   // Fetch showcase images
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function HeroBanner() {
 
       {/* BACKGROUND (next image always loaded underneath) */}
       <img
-        src={heroImages[nextIndex]}
+        src={safeSrc(heroImages[nextIndex])}
         className="absolute w-full h-full object-cover"
         alt=""
       />
@@ -59,7 +61,7 @@ export default function HeroBanner() {
       {/* FOREGROUND (current image fades out) */}
       <motion.img
         key={heroIndex}
-        src={heroImages[heroIndex]}
+        src={safeSrc(heroImages[nextIndex])}
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
         transition={{ duration: 2, ease: [0.4, 0, 0.2, 1] }}
