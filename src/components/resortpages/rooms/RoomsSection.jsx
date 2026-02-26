@@ -35,42 +35,43 @@ export default function RoomsSection({ onOpenRoomGallery }) {
               >
                 {/* IMAGE MOSAIC */}
                 <div 
-                  className={`md:w-1/2 h-[260px] grid gap-1 
-                    ${imageCount === 1 ? 'grid-cols-1' : 
-                      imageCount === 2 ? 'grid-cols-2' : 
-                      'grid-cols-2 grid-rows-2'}`}
+                  className={`md:w-1/2 h-[260px] grid gap-1 ${
+                    imageCount === 1 ? "grid-cols-1" :
+                    imageCount === 2 ? "grid-cols-2" :
+                    "grid-cols-2 grid-rows-2"
+                  }`}
                 >
                   {/* Image 1 */}
-                  <img
-                    src={room.gallery?.[0] || resort.gallery[0]}
-                    onClick={() => onOpenRoomGallery(room.gallery, 0)}
-                    className={`object-cover w-full h-full cursor-pointer 
-                      ${imageCount === 1 ? 'rounded-xl' : 
-                        imageCount === 2 ? 'rounded-l-xl' : 
-                        'col-span-1 row-span-2 rounded-l-xl'}`}
-                  />
+                  <div className={`overflow-hidden ${imageCount === 1 ? "rounded-xl" : "rounded-l-xl"} row-span-${imageCount === 3 ? 2 : 1}`}>
+                    <img
+                      src={room.gallery?.[0] || resort.gallery[0]}
+                      onClick={() => onOpenRoomGallery(room.gallery, 0)}
+                      className="object-cover w-full h-full cursor-pointer"
+                    />
+                  </div>
 
                   {/* Image 2 */}
                   {imageCount >= 2 && (
-                    <img
-                      src={room.gallery[1]}
-                      onClick={() => onOpenRoomGallery(room.gallery, 1)}
-                      className={`object-cover w-full h-full cursor-pointer 
-                        ${imageCount === 2 ? 'rounded-r-xl' : 'rounded-tr-xl'}`}
-                    />
+                    <div className={`overflow-hidden ${imageCount === 2 ? "rounded-r-xl" : "rounded-tr-xl"}`}>
+                      <img
+                        src={room.gallery[1]}
+                        onClick={() => onOpenRoomGallery(room.gallery, 1)}
+                        className="object-cover w-full h-full cursor-pointer"
+                      />
+                    </div>
                   )}
 
                   {/* Image 3 */}
                   {imageCount === 3 && (
-                    <div className="relative">
+                    <div className="overflow-hidden relative rounded-br-xl">
                       <img
                         src={room.gallery[2]}
                         onClick={() => onOpenRoomGallery(room.gallery, 2)}
-                        className="object-cover w-full h-full cursor-pointer rounded-br-xl"
+                        className="object-cover w-full h-full cursor-pointer"
                       />
                       {room.gallery.length > 3 && (
                         <div
-                          className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold rounded-br-xl cursor-pointer"
+                          className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold cursor-pointer"
                           onClick={() => onOpenRoomGallery(room.gallery, 2)}
                         >
                           +{room.gallery.length - 2} more

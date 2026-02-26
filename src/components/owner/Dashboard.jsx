@@ -97,7 +97,7 @@ export default function OwnerDashboard() {
             <Card className="overflow-hidden rounded-2xl shadow-md bg-white">
               <div className="h-56 relative overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1540541338287-41700207dee6"
+                  src="https://cibirdplhynnpqctcjzj.supabase.co/storage/v1/object/public/resort-images/kasbah-villa---hot-spring-resort/hero/1771915023358-gallery-1.jpg"
                   className="w-full h-full object-cover"
                   alt="Resort"
                 />
@@ -109,7 +109,7 @@ export default function OwnerDashboard() {
               <div className="p-6 flex flex-col md:flex-row justify-between md:items-center gap-6">
                 <div>
                   <h3 className="text-xl font-semibold text-slate-800">
-                    Resort Name
+                    Kasbah Villa - Hot Spring Resort
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">
                     Last updated 2 days ago
