@@ -1,6 +1,6 @@
 "use client";
-import TopBar from "@/components/ui/layouts/TopBar";
-import Footer from "@/components/ui/layouts/Footer";
+import TopBar from "./layout/TopBar";
+import Footer from "./layout/Footer";
 
 export default function MainLayout({ children }) {
   return (

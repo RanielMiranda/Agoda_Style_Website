@@ -48,7 +48,7 @@ export default function Dashboard() {
 
   const handleAddNew = () => {
     resetResort(resortInitialData);
-    router.push("/admin/resort-builder");
+    router.push("/edit/resort-builder");
   };
 
   const handleDelete = async (id, name) => {

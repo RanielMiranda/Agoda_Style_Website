@@ -31,8 +31,8 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
             <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${statusColors[account.status]}`} />
           </div>
           <div className="min-w-0">
-            <h3 className="font-bold text-slate-900 truncate tracking-tight">{account.name}</h3>
-            <p className="text-[10px] text-slate-400 flex items-center gap-1 font-bold uppercase tracking-tighter">
+            <h3 className="font-bold text-slate-900 truncate">{account.name}</h3>
+            <p className="text-[10px] text-slate-400 flex items-center gap-1 font-bold uppercase ">
               <Building2 size={12} /> {account.resortName}
             </p>
           </div>
@@ -55,7 +55,7 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
             {account.status === "Pending" ? (
               <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100 shrink-0">
                 <Clock size={14} className="animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Pending</span>
+                <span className="text-[10px] font-bold uppercase ">Pending</span>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -71,20 +71,20 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
         {/* 3. Quick Actions */}
         <div className="flex items-center justify-end gap-3 border-t lg:border-t-0 pt-4 lg:pt-0 lg:w-[220px] shrink-0">
           {account.status !== "Pending" ? (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onToggleStatus(account.id)}
-              className={`rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest ${
-                account.status === 'Active' ? 'text-red-400 hover:text-red-500' : 'text-green-500 hover:text-green-600'
-              }`}
-            >
-              {account.status === 'Active' ? 'Suspend' : 'Restore'}
-            </Button>
+          <Button 
+            onClick={() => onToggleStatus(account.id)}
+            className={`rounded-xl h-10 px-4 font-bold text-[10px] uppercase text-white ${
+              account.status === 'Active'
+                ? 'bg-red-400 hover:bg-red-500'
+                : 'bg-green-500 hover:bg-green-600'
+            }`}
+          >
+            {account.status === 'Active' ? 'Suspend' : 'Restore'}
+          </Button>
           ) : (
             <Button 
-              onClick={() => onApprove(account.id)} // Add this click handler
-              className="bg-green-500 hover:bg-green-600 text-white rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest shadow-md shadow-green-100">
+              onClick={() => onApprove(account.id)} 
+              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-4 font-bold text-[10px] flex items-center justify-center uppercase shadow-md">
               Approve
             </Button>
           )}

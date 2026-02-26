@@ -78,9 +78,9 @@ export default function ActionMenu({ account, onViewResort }) {
 
             <div className="p-1">
               <button 
-    onClick={() => router.push(`/admin/accounts/${account.id}/edit`)}
-    className="w-full flex items-center gap-3 px-3 py-3 text-sm text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors text-left font-bold"
-  >
+                onClick={() => router.push(`/edit/accounts/${account.id}`)}
+                className="w-full flex items-center gap-3 px-3 py-3 text-sm text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors text-left font-bold"
+              >
                 <Edit3 size={16} /> Edit Profile
               </button>
               <button className="w-full flex items-center gap-3 px-3 py-3 text-sm text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors text-left font-bold">

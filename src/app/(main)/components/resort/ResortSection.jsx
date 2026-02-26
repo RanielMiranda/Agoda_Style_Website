@@ -1,6 +1,6 @@
 "use client";
 
-import { useFilters } from "../../useclient/ContextFilter";
+import { useFilters } from "@/components/useclient/ContextFilter";
 import FilterPanel from "./FilterPanel";
 import ResortResults from "./ResortResults";
 

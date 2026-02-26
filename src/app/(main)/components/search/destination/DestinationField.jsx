@@ -1,7 +1,7 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { Input } from "../../../ui/input";
-import { areaSuggestions } from "../../../data/constants";
+import { Input } from "@/components/ui/input";
+import { areaSuggestions } from "@/components/data/constants";
 
 export default function DestinationField({
   destination,

@@ -13,9 +13,23 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function OwnerDashboard() {
-  const [resortStatus, setResortStatus] = useState("Pending Approval"); // Draft | Pending Approval | Published
+  const [resortStatus, setResortStatus] = useState("Pending Approval");
+  const router = useRouter();
+
+  const handleEditResort = () => {
+    router.push("/edit/resort-builder/1");
+  }
+
+  const handleEditProfile = () => {
+    router.push("/edit/accounts/1")
+  }
+
+  const handlePreview = () => {
+    router.push("/resort/Kasbah%20Villa%20-%20Hot%20Spring%20Resort")
+  }
 
   const statusColor = {
     Draft: "bg-amber-100 text-amber-700",
@@ -100,12 +114,19 @@ export default function OwnerDashboard() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="rounded-xl flex items-center justify-center">
+                  <Button 
+                  variant="outline" 
+                  onClick={handleEditResort}
+                  className="rounded-xl flex items-center justify-center">
                     <Edit3 size={18} className="mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="rounded-xl flex items-center justify-center">
+                  <Button 
+                  variant="outline" 
+                  onClick={handlePreview}
+                  className="rounded-xl flex items-center justify-center">
                     <Eye size={18} className="mr-2" />
+                    
                     Preview
                   </Button>
                 </div>
@@ -148,7 +169,10 @@ export default function OwnerDashboard() {
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full mt-4 rounded-xl h-11 flex items-center justify-center">
+              <Button 
+              variant="outline" 
+              onClick={handleEditProfile}
+              className="w-full mt-4 rounded-xl h-11 flex items-center justify-center">
                 <Settings size={18} className="mr-2" />
                 Edit Profile
               </Button>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import ContactModal from "../modals/ContactModal";
+import ContactModal from "@/components/ui/modals/ContactModal";
 
 export default function TopBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);

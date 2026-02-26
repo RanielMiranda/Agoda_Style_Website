@@ -42,7 +42,7 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
         <div className="flex items-center justify-end gap-2 border-t lg:border-t-0 pt-4 lg:pt-0 shrink-0">
           {/* Edit Button */}
           <button 
-            onClick={() => router.push(`/admin/resort-builder/${resort.id}`)}
+            onClick={() => router.push(`/edit/resort-builder/${resort.id}`)}
             className="hover:scale-105 flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest transition-all"
           >
             <Edit2 size={14} /> Edit
@@ -50,7 +50,7 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
 
           {/* Bookings Button */}
           <button 
-            onClick={() => router.push(`/admin/bookings/${resort.id}`)}
+            onClick={() => router.push(`/edit/bookings/${resort.id}`)}
             className="hover:scale-105 flex items-center gap-2 bg-blue-600 hover:bg-blue-800 text-white rounded-xl h-10 px-4 font-bold text-[10px] uppercase tracking-widest shadow-md transition-all"
           >
             <Calendar size={14} /> Bookings

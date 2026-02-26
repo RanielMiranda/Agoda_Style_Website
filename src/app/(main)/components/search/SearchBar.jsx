@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "../../ui/button";
+import { Button } from "@/components/ui/button"
 
 import DestinationField from "./destination/DestinationField";
 import DateRangeField from "./calendar/DateRangeField";
