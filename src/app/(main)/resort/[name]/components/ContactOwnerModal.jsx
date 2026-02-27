@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InquiryForm from "./InquiryForm";
 import { Mails, Phone, Facebook } from "lucide-react";
-import { useFilters } from "../../useclient/ContextFilter";
+import { useFilters } from "@/components/useclient/ContextFilter"; 
 
 export default function ContactOwnerModal({ isOpen, onClose, resort }) {
   const { guests, startDate, endDate } = useFilters(); // Get current filter states

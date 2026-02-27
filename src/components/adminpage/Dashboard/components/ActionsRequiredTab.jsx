@@ -48,7 +48,7 @@ export default function ActionsRequiredTab({
       <div className="flex p-1 bg-slate-200/50 rounded-xl w-fit">
         {tabs.map((tab) => (
           <button
-            KeyRound  ={tab.id}
+            key={tab.id}
             onClick={() => setActiveActionTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeActionTab === tab.id

@@ -1,11 +1,11 @@
-import FacilitiesGallery from "../Gallery/FacilitiesGallery";
+import FacilitiesGallery from "../gallery/FacilitiesGallery";
 import ServicesTable from "./ServicesTable";
 import { MapPin, Mail, Phone, Facebook, DollarSign } from "lucide-react";
-import { useResort } from "../../useclient/ContextEditor"; //
+import { useResort } from "@/components/useclient/ContextEditor";
 
 export default function ResortInfo({ onFacilityOpen }) {
-  const { resort } = useResort(); // Pull data from context
-
+  const { resort } = useResort(); 
+  
   if (!resort) return null;
 
   return (

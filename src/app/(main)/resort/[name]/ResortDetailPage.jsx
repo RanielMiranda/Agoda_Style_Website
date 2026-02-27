@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useResort } from "../useclient/ContextEditor";
+import { useResort } from "@/components/useclient/ContextEditor";
 
-import HeroGallery from "./Gallery/HeroGallery";
+import HeroGallery from "./gallery/HeroGallery";
 import ResortInfo from "./rooms/ResortInfo";
 import RoomsSection from "./rooms/RoomsSection";
 import ShortcutBar from "./rooms/ShortcutBar";

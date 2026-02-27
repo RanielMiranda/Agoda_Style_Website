@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, LayoutDashboard, Loader2 } from "lucide-react";
+import { Plus, LayoutDashboard, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Toast from "@/components/ui/toast/Toast";
+import { useToast } from "@/components/ui/toast/ToastProvider";
 
 import ResortCard from "./components/ResortCard";
-import SearchBar from "./components/SearchBar"; // Import
-import ActionsRequiredTab from "./components/ActionsRequiredTab"; // Import
+import SearchBar from "./components/SearchBar";
+import ActionsRequiredTab from "./components/ActionsRequiredTab"; 
 
 import { useResort } from "@/components/useclient/ContextEditor";
 import { supabase } from "@/lib/supabase";
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("resorts");
   const [activeActionTab, setActiveActionTab] = useState("resort");
+  const { toast } = useToast();
 
   const [messages, setMessages] = useState({
     resort: [],
@@ -82,36 +85,43 @@ export default function Dashboard() {
   );
 
   const handleToggleVisibility = async (id, currentValue) => {
-    // 1. Browser confirmation popup
+    const targetResort = resorts.find(r => r.id === id);
+    const resortName = targetResort?.name || "Resort";
+    const newVisibility = !currentValue;
+    
     const action = currentValue ? "hide" : "show";
-    const confirmed = window.confirm(`Are you sure you want to ${action} this resort?`);
+    const confirmed = window.confirm(`Are you sure you want to ${action} ${resortName}?`);
 
-    // Guard clause: stop if user clicks 'Cancel'
     if (!confirmed) return;
 
     try {
-      console.log(`Attempting to toggle visibility for ID: ${id}...`);
-
       const { error } = await supabase
         .from("resorts")
-        .update({ visible: !currentValue })
+        .update({ visible: newVisibility })
         .eq("id", id);
 
       if (error) throw error;
 
-      // Update local state so the card re-renders immediately
+      toast({
+        message: `${resortName} is now ${newVisibility ? "visible" : "hidden"}`,
+        color: newVisibility ? "green" : "red",
+        icon: newVisibility ? Eye : EyeOff,
+      });
+
       setResorts(prev =>
-        prev.map(r => (r.id === id ? { ...r, visible: !currentValue } : r))
+        prev.map(r => (r.id === id ? { ...r, visible: newVisibility } : r))
       );
-      
-      console.log("Visibility updated successfully.");
 
     } catch (err) {
       console.error("Supabase Update Error:", err.message);
-      alert("Failed to toggle visibility: " + err.message);
+      toast({
+        message: "Failed to update visibility",
+        color: "red",
+        duration: 4000
+      });
     }
   };
-
+    
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto pt-10">
@@ -186,6 +196,7 @@ export default function Dashboard() {
           />
         )}
       </div>
+      <Toast/>
     </div>
   );
 }

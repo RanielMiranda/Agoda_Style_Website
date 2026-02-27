@@ -1,9 +1,8 @@
-import { useResort } from "../../useclient/ContextEditor"; // Adjust path as needed
+import { useResort } from "@/components/useclient/ContextEditor";
 
 export default function HeroGallery({ onOpen }) {
   const { resort } = useResort();
 
-  // Guard clause: If resort isn't loaded yet, show a placeholder or nothing
   if (!resort || !resort.gallery) return <div className="h-[60vh] bg-gray-200 animate-pulse rounded-2xl" />;
 
   return (

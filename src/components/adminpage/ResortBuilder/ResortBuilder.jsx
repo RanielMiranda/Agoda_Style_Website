@@ -10,7 +10,7 @@ import HeroGalleryEditor from "./components/HeroGalleryEditor";
 import ProfileEditor from "./components/ProfileEditor";
 import RoomsEditor from "./components/RoomsEditor";
 import ServicesEditor from "./components/ServicesEditor";
-import ShortcutBar from "@/components/resortpages/rooms/ShortcutBar";
+import ShortcutBar from "./components/ShortcutBar";
 
 import resortInitialData from "./data/ResortInitialData";
 
