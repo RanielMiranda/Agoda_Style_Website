@@ -1,6 +1,6 @@
 import { useResort } from "@/components/useclient/ContextEditor";
 
-export default function HeroGallery({ onOpen }) {
+export default function HeroSection({ onOpen }) {
   const { resort } = useResort();
 
   if (!resort || !resort.gallery) return <div className="h-[60vh] bg-gray-200 animate-pulse rounded-2xl" />;

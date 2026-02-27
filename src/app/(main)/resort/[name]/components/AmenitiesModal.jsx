@@ -1,7 +1,7 @@
 import React from "react";
 import { useResort } from "@/components/useclient/ContextEditor";
 
-export default function FacilityModal({ activeIndex, onClose }) {
+export default function AmenitiesModal({ activeIndex, onClose }) {
   const { resort } = useResort();
   const facility = resort?.facilities?.[activeIndex];
 

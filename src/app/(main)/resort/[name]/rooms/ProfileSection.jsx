@@ -1,11 +1,9 @@
-import FacilitiesGallery from "../gallery/FacilitiesGallery";
-import ServicesTable from "./ServicesTable";
 import { MapPin, Mail, Phone, Facebook, DollarSign } from "lucide-react";
 import { useResort } from "@/components/useclient/ContextEditor";
 
-export default function ResortInfo({ onFacilityOpen }) {
+export default function ProfileSection() {
   const { resort } = useResort(); 
-  
+
   if (!resort) return null;
 
   return (
@@ -66,15 +64,6 @@ export default function ResortInfo({ onFacilityOpen }) {
         <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-600 leading-relaxed whitespace-pre-line">
           {resort.description?.summary}
         </div>
-      </div>
-
-      {/* Facilities and Services */}
-      <div className="mt-10">
-        <FacilitiesGallery facilities={resort.facilities} onOpen={onFacilityOpen} />
-      </div>
-
-      <div className="mt-10">
-        <ServicesTable services={resort.extraServices} />
       </div>
     </div>
   );

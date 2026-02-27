@@ -2,7 +2,7 @@ export default function ServicesTable({ services }) {
   if (!services?.length) return null;
 
   return (
-    <div className="max-w-5xl mx-auto mt-10">
+    <div id="extra-services" className="max-w-6xl mx-auto px-4 my-4">
       <h2 className="text-2xl font-semibold mb-4">Extra Services</h2>
 
       <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">

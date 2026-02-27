@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import GalleryModal from "../components/GalleryModal";
 
-export default function FacilitiesGallery({ facilities }) {
+export default function AmenitiesSection({ facilities }) {
   const maxVisible = 10;
   const visibleFacilities = facilities.slice(0, maxVisible);
   const hasMore = facilities.length > maxVisible;
@@ -40,7 +40,7 @@ export default function FacilitiesGallery({ facilities }) {
   };
 
   return (
-    <div id="amenities" className="mt-8">
+    <div id="amenities" className="max-w-6xl mx-auto px-4">
       <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
 
       {/* Horizontal Gallery */}

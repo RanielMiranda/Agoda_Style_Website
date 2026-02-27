@@ -3,15 +3,18 @@
 import React, { useState, useEffect } from "react";
 import { useResort } from "@/components/useclient/ContextEditor";
 
-import HeroGallery from "./gallery/HeroGallery";
-import ResortInfo from "./rooms/ResortInfo";
+import HeroSection from "./rooms/HeroSection";
+import ProfileSection from "./rooms/ProfileSection";
 import RoomsSection from "./rooms/RoomsSection";
 import ShortcutBar from "./rooms/ShortcutBar";
+import AmenitiesSection from "./rooms/AmenitiesSection";
+import ServicesSection from "./rooms/ServicesSection";
 
 import GalleryModal from "./components/GalleryModal";
-import FacilityModal from "./components/FacilityModal";
+import AmenitiesModal from "./components/AmenitiesModal";
+
 import ContactOwnerModal from "./components/ContactOwnerModal";
-import RoomFilterPanel from "./rooms/RoomFilterPanel";
+import RoomFilterPanel from "./rooms/filters/RoomFilterPanel";
 
 export default function ResortDetailPage({ name }) {
   const { resort, setResort, loadResort, loading } = useResort();
@@ -28,15 +31,12 @@ export default function ResortDetailPage({ name }) {
 
   useEffect(() => {
     if (!name) return;
-    
-    // Only load if the current resort in context doesn't match the URL name
-    const decodedName = decodeURIComponent(name);
+        const decodedName = decodeURIComponent(name);
     if (!resort || resort.name !== decodedName) {
       loadResort(decodedName, false);
     }
   }, [name, loadResort, resort]);
 
-  // Show loading only if we don't have the resort yet
   if (loading && !resort) {
     return (
       <div className="mt-10 p-20 text-center text-gray-500">
@@ -53,9 +53,14 @@ export default function ResortDetailPage({ name }) {
     );
   }
 
+  const handleOpenFacility = (index) => {
+    setFacilityIndex(index);
+    setFacilityOpen(true);
+  };
+
   return (
     <div className="bg-white min-h-screen mt-10">
-      <HeroGallery
+      <HeroSection
         onOpen={(index) => {
           setActiveIndex(index);
           setGalleryOpen(true);
@@ -64,12 +69,14 @@ export default function ResortDetailPage({ name }) {
 
       <ShortcutBar />
 
-      <ResortInfo
-        onFacilityOpen={(index) => {
-          setFacilityIndex(index);
-          setFacilityOpen(true);
-        }}
+      <ProfileSection/>
+
+      <AmenitiesSection 
+        facilities={resort.facilities} 
+        onOpen={handleOpenFacility} 
       />
+
+      <ServicesSection services={resort.extraServices} />      
 
       <div className="max-w-6xl mx-auto px-4 mb-6 flex flex-col md:flex-row items-center justify-between">
         <h2 className="text-2xl font-semibold mb-4 md:mb-0">Available Rooms</h2>
@@ -108,7 +115,7 @@ export default function ResortDetailPage({ name }) {
       )}
 
       {facilityOpen && (
-        <FacilityModal
+        <AmenitiesModal
           facilities={resort.facilities}
           activeIndex={facilityIndex}
           setActiveIndex={setFacilityIndex}
