@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useResort } from "@/components/useclient/ContextEditor";
+import { CheckCircle2 } from "lucide-react"
 
 import HeroSection from "./rooms/HeroSection";
 import ProfileSection from "./rooms/ProfileSection";
@@ -16,6 +17,9 @@ import AmenitiesModal from "./components/AmenitiesModal";
 import ContactOwnerModal from "./components/ContactOwnerModal";
 import RoomFilterPanel from "./rooms/filters/RoomFilterPanel";
 
+import { useToast } from "@/components/ui/toast/ToastProvider";
+import Toast from "@/components/ui/toast/Toast"
+
 export default function ResortDetailPage({ name }) {
   const { resort, setResort, loadResort, loading } = useResort();
 
@@ -29,6 +33,7 @@ export default function ResortDetailPage({ name }) {
   const [contactOpen, setContactOpen] = useState(false);
   const [price, setPrice] = useState(5000);
 
+  const { toast } = useToast();
   useEffect(() => {
     if (!name) return;
         const decodedName = decodeURIComponent(name);
@@ -56,6 +61,24 @@ export default function ResortDetailPage({ name }) {
   const handleOpenFacility = (index) => {
     setFacilityIndex(index);
     setFacilityOpen(true);
+  };
+
+const handleSubmitInquiry = (submittedData) => {
+    const payload = { 
+      ...submittedData, 
+      resortName: resort.name,
+      location: resort.location 
+    };
+
+    console.log("Final Booking Payload:", payload);
+
+    toast({
+      message: `Inquiry sent to ${resort.name}!`,
+      color: "green",
+      icon: CheckCircle2 
+    });
+
+    setContactOpen(false);
   };
 
   return (
@@ -137,8 +160,10 @@ export default function ResortDetailPage({ name }) {
           isOpen={contactOpen}
           onClose={() => setContactOpen(false)}
           resort={resort}
+          onSubmitInquiry={handleSubmitInquiry}
         />
       )}
+    <Toast/>
     </div>
   );
 }
