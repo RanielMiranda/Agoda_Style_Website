@@ -60,6 +60,17 @@ export default function ProfileSection() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 items-center mt-6">
+        {resort.tags?.map((tag, index) => (
+          <span
+            key={index}
+            className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-100 rounded-full shadow-sm"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
       <div className="mt-8">
         <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-600 leading-relaxed whitespace-pre-line">
           {resort.description?.summary}

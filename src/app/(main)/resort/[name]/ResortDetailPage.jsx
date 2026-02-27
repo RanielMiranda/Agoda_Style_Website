@@ -88,7 +88,7 @@ export default function ResortDetailPage({ name }) {
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-0 max-w-7xl mx-auto pb-10">
+      <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-0 max-w-6xl mx-auto pb-10">
         <div className="lg:w-80 w-full lg:sticky lg:top-24">
           <RoomFilterPanel price={price} setPrice={setPrice} />
         </div>
