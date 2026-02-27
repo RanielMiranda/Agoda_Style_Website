@@ -179,7 +179,11 @@ export default function Dashboard() {
               </div>
             ) : filteredResorts.length > 0 ? (
               filteredResorts.map((resort) => (
-                <ResortCard key={resort.id} resort={resort} onDelete={fetchResorts} onToggleVisibility={handleToggleVisibility} />
+                <ResortCard key={resort.id} 
+                resort={resort} 
+                onDelete={fetchResorts} 
+                onToggleVisibility={handleToggleVisibility} 
+                />
               ))
             ) : (
               <div className="text-center py-20 bg-white rounded-2xl shadow-sm border-2 border-dashed border-slate-200">

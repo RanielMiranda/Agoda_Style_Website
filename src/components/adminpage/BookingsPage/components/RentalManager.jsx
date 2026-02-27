@@ -137,16 +137,15 @@ export default function RentalManager({ onOpenForm }) {
                     <Button size="sm" className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-4">Process Checkout</Button>
                   )}
                   
-                  <div className="h-8 w-px bg-slate-200/60 mx-1 hidden md:block" />
+                  <div className="h-8 w-px bg-blue-200/60 mx-1 hidden md:block" />
                   
-                  {/* CHANGED: This button now opens the confirmation form */}
                   <button 
                     onClick={() => onOpenForm(item)}
-                    className="p-2 text-slate-300 hover:text-blue-600 transition-colors flex items-center gap-2 group/btn" 
+                    className="p-2 text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2 group/btn" 
                     title="View Confirmation Form"
                   >
                     <FileText size={18} />
-                    <span className="text-[10px] font-bold uppercase opacity-0 group-hover/btn:opacity-100 transition-opacity">Form</span>
+                    <span className="text-[10px] font-bold uppercase transition-opacity">Form</span>
                   </button>
                 </div>
               </div>

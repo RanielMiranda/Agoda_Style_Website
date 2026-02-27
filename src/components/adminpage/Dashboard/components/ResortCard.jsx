@@ -70,7 +70,11 @@ export default function ResortCard({ resort, onDelete, onToggleVisibility }) {
           <div className="w-[2px] h-6 bg-slate-100 mx-1" />
 
           {/* Triple Dot Menu (Assign & Delete) */}
-          <ResortActionMenu resort={resort} onDelete={onDelete} onToggleVisibility={onToggleVisibility} />
+          <ResortActionMenu 
+          resort={resort} 
+          onDelete={onDelete} 
+          onToggleVisibility={onToggleVisibility} 
+          />
         </div>
       </div>
     </div>

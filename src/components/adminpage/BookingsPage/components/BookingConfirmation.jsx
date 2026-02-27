@@ -109,7 +109,7 @@ export default function BookingConfirmation({ data, resortName, onBack }) {
         </Button>
         <Button
           variant=""
-          className="rounded-xl px-6"
+          className="rounded-xl px-6 bg-red-600 hover:bg-red-700 font-bold text-white"
         >
           Decline
         </Button>
