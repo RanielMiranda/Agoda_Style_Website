@@ -18,6 +18,7 @@ export default function RentalManager({ onOpenForm }) {
         guestName: "User 1", 
         room: "Room A", 
         dates: "Feb 20 - 22", 
+        number: "123 345 7891",
         email: "User1@example.com",
         pax: "4 Adults",
         status: "Inquiry",
@@ -30,25 +31,36 @@ export default function RentalManager({ onOpenForm }) {
     confirmed: [
       { 
         id: 2, 
-        guestName: "User 2", 
-        room: "Room C", 
-        dates: "Feb 18 - 25", 
-        email: "User2@gmail.com",
-        pax: "2 Adults",
+        guestName: "User 2",
+        address: "123 Mahogany St., Forbes Park, Makati City",
+        email: "name@email.com",
+        phoneNumber: "+63 917 123 4567",
         status: "Confirmed",
-        downpayment: "5,000",
-        paymentMethod: "GCash",
-        checkInDate: "Feb 18, 2024",
+        guestCount: 12,
+        roomCount: 4,
+        sleepingGuests: 10,
+        baseRate: 28000,
+        checkInDate: "Oct 24, 2025",
         checkInTime: "2:00 PM",
-        checkOutDate: "Feb 25, 2024",
-        checkOutTime: "5:00 PM"
+        checkOutDate: "Oct 26, 2025",
+        checkOutTime: "11:00 AM",
+        bookingAgent: "Booking Agent Name",
+        turnoverAuthorizedPerson: "Authorized Person Name",
+        resortServices: [
+          { name: "Catering", cost: 3500 },
+          { name: "Sounds Systems", cost: 1500 },
+          { name: "Food Carts", cost: 1200 }
+        ],
+        downpayment: 4000,
+        paymentMethod: "GCash",
+        totalAmount: 35050
       }
     ],
     overdue: [
       { id: 3, 
         guestName: "User 3", 
         room: "Room B", 
-        status: "Checkout",
+        status: "Checked Out",
         dates: "Feb 10 - 15", 
         email: "User3@example.com" }
     ]
