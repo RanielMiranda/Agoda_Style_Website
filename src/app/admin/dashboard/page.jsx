@@ -158,7 +158,7 @@ export default function Page() {
 
                 {/* 🔴 Notification Badge (design only) */}
                 {tab === "actions" && (
-                  <span className="absolute -top-1 -right-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full h-5 min-w-[20px] px-1">
+                  <span className="absolute -top-1 -right-5 flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full h-5 min-w-5 px-1">
                     3
                   </span>
                 )}

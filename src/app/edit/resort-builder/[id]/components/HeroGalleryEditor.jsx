@@ -132,7 +132,7 @@ export default function HeroGalleryEditor() {
       {localGallery.length > 5 && (
         <div className="mt-6 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
           {localGallery.map((img, idx) => (
-            <div key={idx} className="relative flex-shrink-0 w-40 h-28 rounded-2xl overflow-hidden bg-slate-200 shadow-sm border-2 border-white group">
+            <div key={idx} className="relative shrink-0 w-40 h-28 rounded-2xl overflow-hidden bg-slate-200 shadow-sm border-2 border-white group">
               <img src={safeSrc(img)} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition">
                 <button 

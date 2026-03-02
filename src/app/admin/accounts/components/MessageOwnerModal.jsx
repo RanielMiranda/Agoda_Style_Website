@@ -18,12 +18,12 @@ export default function MessageOwnerModal({ isOpen, onClose, account, onSendMess
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white w-full max-w-lg rounded-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="p-8">
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -73,7 +73,7 @@ export default function MessageOwnerModal({ isOpen, onClose, account, onSendMess
               </Button>
               <Button 
                 type="submit"
-                className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-12 shadow-lg shadow-blue-100 font-bold flex items-center justify-center gap-2"
+                className="flex-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-12 shadow-lg shadow-blue-100 font-bold flex items-center justify-center gap-2"
               >
                 <Send size={18} /> Send Message
               </Button>

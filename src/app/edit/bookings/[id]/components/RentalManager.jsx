@@ -98,7 +98,7 @@ export default function RentalManager({ onOpenForm }) {
       </div>
 
       {/* Panel Content */}
-      <div className="p-6 min-h-[400px]">
+      <div className="p-6 min-h-100">
         {mockData[activeTab].length > 0 ? (
           <div className="space-y-3">
             {mockData[activeTab].map((item) => (

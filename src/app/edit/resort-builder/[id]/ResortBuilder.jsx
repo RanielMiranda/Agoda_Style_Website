@@ -50,7 +50,7 @@ export default function ResortBuilder({ resortId }) {
       <AmenitiesEditor />
       <ServicesEditor />
       <RoomsEditor />
-
+      
       <div className="fixed bottom-6 right-6 z-100 flex items-center justify-center">
         <Button
           onClick={handleSave}

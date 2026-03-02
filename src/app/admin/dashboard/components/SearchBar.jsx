@@ -8,7 +8,7 @@ export default function SearchBar({ searchTerm, setSearchTerm }) {
       <input
         type="text"
         placeholder="Search by name or location..."
-        className="w-full h-[56px] pl-12 pr-4 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white transition-all"
+        className="w-full h-14 pl-12 pr-4 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white transition-all"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

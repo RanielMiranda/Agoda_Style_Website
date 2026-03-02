@@ -66,7 +66,7 @@ function SortableRoomTag({ id, tag, onRemove, onUpdate }) {
         <GripVertical size={12} />
       </button>
       <input 
-        className="bg-transparent border-none p-0 focus:ring-0 text-xs font-medium w-auto max-w-[100px]"
+        className="bg-transparent border-none p-0 focus:ring-0 text-xs font-medium w-auto max-w-25"
         value={localVal}
         placeholder="Tag..."
         onChange={(e) => setLocalVal(e.target.value)}
@@ -158,7 +158,7 @@ export default function RoomsEditor() {
           <Card key={room.id} className="rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-sm border border-slate-100 bg-white">
             
             {/* DYNAMIC IMAGE MOSAIC */}
-            <div className="md:w-1/2 h-[280px] relative group p-1">
+            <div className="md:w-1/2 h-70 relative group p-1">
               {/* Case 1: Only 1 Image */}
               {room.gallery?.length === 1 && (
                 <div className="w-full h-full relative group/item overflow-hidden rounded-2xl bg-slate-100">

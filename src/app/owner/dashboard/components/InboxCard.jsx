@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 
 export default function InboxCard({ messages = [] }) {
   return (
-    <Card className="p-0 mb-10 rounded-2xl shadow-md bg-white border-none flex flex-col h-[350px]">
+    <Card className="p-0 mb-10 rounded-2xl shadow-md bg-white border-none flex flex-col h-87.5">
       {/* Header */}
       <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
         <div className="flex items-center gap-2">
           <MessageSquare size={20} className="text-blue-600" />
-          <h3 className="font-bold text-slate-800">Admin Correspondence</h3>
+          <h3 className="font-bold text-slate-800">Messages Inbox</h3>
         </div>
         <span className="text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200">
           {messages.length} Messages

@@ -75,7 +75,7 @@ export default function ToastContainer() {
   const { toasts, remove } = useToast();
 
   return (
-    <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3">
+    <div className="fixed bottom-6 right-6 z-200 flex flex-col gap-3">
       {toasts.map((toast) => (
         <SingleToast key={toast.id} data={toast} remove={remove} />
       ))}
