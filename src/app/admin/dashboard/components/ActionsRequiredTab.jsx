@@ -23,16 +23,24 @@ export default function ActionsRequiredTab({
       content: "Enable visibility for Resort 1 - Kasbah Villa", 
       requestedBy: "LuxVille Resort",
       isFake: true 
-    }],
-    account: [{ 
+    },
+    { 
       id: "fake-2", 
+      title: "New Resort Request", 
+      content: "New Resort ready to be set up", 
+      requestedBy: "New Owner",
+      isFake: true 
+    }    
+    ],
+    account: [{ 
+      id: "fake-3", 
       title: "Password Reset", 
       content: "Manual override requested for administrative access.", 
       requestedBy: "Kasbah Villa Admin",
       isFake: true 
     }],
     support: [{ 
-      id: "fake-3", 
+      id: "fake-4", 
       title: "Booking Issue", 
       content: "Customer reported a double charge on reservation #1", 
       requestedBy: "Celeste Resort",

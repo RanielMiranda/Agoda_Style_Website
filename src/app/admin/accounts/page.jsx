@@ -12,7 +12,7 @@ import InviteOwnerModal from "./components/InviteOwnerModal";
 import Toast from "@/components/ui/toast/Toast";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 
-export default function AccountManagement() {
+export default function Page() {
   const router = useRouter();
   const { toast } = useToast();  
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);

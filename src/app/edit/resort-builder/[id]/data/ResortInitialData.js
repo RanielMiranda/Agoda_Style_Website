@@ -28,7 +28,7 @@ const resortInitialData = {
   tags: [""],
 
   gallery: [
-    ""
+    "https://cibirdplhynnpqctcjzj.supabase.co/storage/v1/object/public/resort-images/kasbah-villa---hot-spring-resort/hero/1771915023358-gallery-1.jpg"
   ],
 
   rooms: [
@@ -40,7 +40,7 @@ const resortInitialData = {
       price: 5200,
       details: "Airconditioned suite with garden view.",
       gallery: [
-        ""
+        "https://cibirdplhynnpqctcjzj.supabase.co/storage/v1/object/public/resort-images/kasbah-villa---hot-spring-resort/rooms/room-a/1771915025945-room-acd-1.jpg"
       ],
       tags: ["Air Conditioning", "Toilet", "Bath", "Blanket"] 
     }
