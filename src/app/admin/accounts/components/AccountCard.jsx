@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import ActionMenu from "./ActionMenu";
 
 export default function AccountCard(
-  { account, onToggleStatus, onApprove, onViewResort, onResetPassword, onDeleteAccount }) {
+  { account, onToggleStatus, onApprove, onViewResort, onResetPassword, onDeleteAccount, onMessageOwner }
+  ) {
   const statusColors = {
     Active: "bg-green-500",
     Pending: "bg-amber-500",
@@ -90,7 +91,13 @@ export default function AccountCard(
               Approve
             </Button>
           )}
-          <ActionMenu account={account} onViewResort={onViewResort} onResetPassword={onResetPassword} onDeleteAccount={onDeleteAccount}/>
+          <ActionMenu 
+            account={account} 
+            onViewResort={onViewResort} 
+            onResetPassword={onResetPassword} 
+            onDeleteAccount={onDeleteAccount}
+            onMessageOwner={onMessageOwner}
+          />
         </div>
       </div>
     </Card>

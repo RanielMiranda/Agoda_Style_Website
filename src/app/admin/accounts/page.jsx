@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { resorts as resortsData } from "@/components/data/resorts";
+
 import AccountCard from "./components/AccountCard";
 import InviteOwnerModal from "./components/InviteOwnerModal";
+import MessageOwnerModal from "./components/MessageOwnerModal";
 
 import Toast from "@/components/ui/toast/Toast";
 import { useToast } from "@/components/ui/toast/ToastProvider";
@@ -16,7 +18,9 @@ export default function Page() {
   const router = useRouter();
   const { toast } = useToast();  
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  
   const [accounts, setAccounts] = useState(resortsData.map((resort, index) => ({
     id: String(index + 1),
     name: resort.ownerName || `Admin ${index + 1}`,
@@ -33,6 +37,19 @@ export default function Page() {
   const handleViewResort = (resortName) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     router.push(`/resort/${encodeURIComponent(resortName)}`);
+  };
+
+  const handleOpenMessageModal = (account) => {
+    setSelectedAccount(account);
+    setIsMessageModalOpen(true);
+  };
+
+  const handleSendMessage = (accountId, data) => {
+    toast({
+      message: "Message Sent Successfully",
+      color: "green",
+      icon: CheckCircle2,
+    });
   };
 
   const toggleStatus = (id) => {
@@ -205,6 +222,7 @@ export default function Page() {
                 onViewResort={handleViewResort} 
                 onResetPassword={handleResetPassword}
                 onDeleteAccount={handleDeleteAccount}
+                onMessageOwner={handleOpenMessageModal}
               />
             ))
           ) : (
@@ -215,6 +233,12 @@ export default function Page() {
           )}
         </div>
       </div>
+      <MessageOwnerModal
+        isOpen={isMessageModalOpen}
+        onClose={() => setIsMessageModalOpen(false)}
+        account={selectedAccount}
+        onSendMessage={handleSendMessage}
+      />
       <Toast />
     </div>
   );
