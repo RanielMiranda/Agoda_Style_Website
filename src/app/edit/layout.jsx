@@ -1,5 +1,5 @@
 "use client";
-import AdminTopBar from "@/components/ui/layouts/AdminTopBar";
+import AdminTopBar from "@/app/admin/layout/AdminTopBar";
 
 export default function AdminLayout({ children }) {
   return (

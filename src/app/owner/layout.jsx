@@ -1,6 +1,6 @@
 "use client";
 
-import OwnerTopBar from "@/components/ui/layouts/OwnerTopBar";
+import OwnerTopBar from "./layout/OwnerTopBar";
 
 export default function AdminLayout({ children }) {
   return (

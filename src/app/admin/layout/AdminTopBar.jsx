@@ -9,7 +9,8 @@ import {
   Menu, 
   X, 
   ArrowLeft, 
-  Settings2 
+  Settings2,
+  ExternalLink
 } from "lucide-react";
 
 export default function AdminTopBar() {
@@ -17,11 +18,16 @@ export default function AdminTopBar() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
-  // Standard nav links to be used for both Desktop and Mobile
   const navLinks = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Accounts", href: "/admin/accounts", icon: Users },
     { name: "Owner Dashboard", href: "/owner/dashboard", icon: Settings2 },
+    { 
+      name: "Analytics", 
+      href: "https://vercel.com/raniels-projects-2ea24826/agoda-style-website/analytics",
+      icon: ExternalLink, 
+      external: true 
+    },
   ];
 
   // Fixes hydration mismatch by ensuring client-only logic runs after mount
@@ -61,20 +67,33 @@ export default function AdminTopBar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-2 font-medium items-center">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                pathname === link.href 
-                  ? "bg-blue-50 text-blue-600 shadow-sm" 
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <link.icon size={18} />
-              {link.name}
-            </Link>
-          ))}
+          {navLinks.map((link) => 
+            link.external ? (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-all"
+              >
+                <link.icon size={18} />
+                {link.name}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  pathname === link.href 
+                    ? "bg-blue-50 text-blue-600 shadow-sm" 
+                    : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <link.icon size={18} />
+                {link.name}
+              </Link>
+            )
+          )}
           
           <div className="w-[1px] h-6 bg-slate-200 mx-2" />
           
@@ -100,21 +119,35 @@ export default function AdminTopBar() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 p-4 absolute w-full shadow-2xl animate-in fade-in slide-in-from-top-2">
           <div className="flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
-                  pathname === link.href 
-                    ? "bg-blue-50 text-blue-600 font-bold shadow-sm" 
-                    : "text-slate-600 active:bg-slate-50"
-                }`}
-              >
-                <link.icon size={20} />
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.external ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 p-4 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                >
+                  <link.icon size={20} />
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${
+                    pathname === link.href 
+                      ? "bg-blue-50 text-blue-600 font-bold shadow-sm" 
+                      : "text-slate-600 active:bg-slate-50"
+                  }`}
+                >
+                  <link.icon size={20} />
+                  {link.name}
+                </Link>
+              )
+            )}
             
             <div className="h-[1px] bg-slate-100 my-2" />
             

@@ -54,8 +54,8 @@ export default function OwnerTopBar() {
           >
             🍃 Twin Acacia
           </Link>
-          <span className="hidden sm:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">
-            Dashboard
+          <span className="hidden sm:flex items-center gap-2 text-[10px] font-bold uppercase text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">
+            Owner Dashboard
           </span>
         </div>
 
