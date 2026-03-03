@@ -14,9 +14,34 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast";
 
+const BOOKING_TICKET_COLUMNS = [
+  "id",
+  "resort_id",
+  "start_date",
+  "end_date",
+  "check_in_time",
+  "check_out_time",
+  "status",
+  "booking_form",
+].join(", ");
+const TICKET_MESSAGE_COLUMNS = ["id", "booking_id", "sender_role", "sender_name", "message", "created_at"].join(", ");
+const isMissingSupportTableError = (error) =>
+  !!error?.message &&
+  (error.message.includes("Could not find the table") ||
+    error.message.includes("does not exist") ||
+    error.message.includes("schema cache"));
+
+const toSafeSegment = (value) =>
+  String(value || "unknown")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_\s]/g, "")
+    .replace(/\s+/g, "-");
+
 export default function ClientTicketPage() {
   const { bookingId } = useParams();
   const { toast } = useToast();
+  const normalizedBookingId = Array.isArray(bookingId) ? bookingId[0] : bookingId;
 
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,12 +71,16 @@ export default function ClientTicketPage() {
     try {
       const { data, error } = await supabase
         .from("ticket_messages")
-        .select("*")
+        .select(TICKET_MESSAGE_COLUMNS)
         .eq("booking_id", activeBookingId)
         .order("created_at", { ascending: true });
       if (error) throw error;
       setMessages(data || []);
     } catch (err) {
+      if (isMissingSupportTableError(err)) {
+        setMessages([]);
+        return;
+      }
       toast({ message: `Unable to load messages: ${err.message}`, color: "red" });
     } finally {
       setLoadingMessages(false);
@@ -61,12 +90,23 @@ export default function ClientTicketPage() {
   const fetchTicket = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: bookingData, error: bookingError } = await supabase
+      const { data: bookingRows, error: bookingError } = await supabase
         .from("bookings")
-        .select("*")
-        .eq("id", bookingId)
-        .single();
+        .select(BOOKING_TICKET_COLUMNS)
+        .eq("id", normalizedBookingId)
+        .order("created_at", { ascending: false })
+        .limit(2);
       if (bookingError) throw bookingError;
+      if (!bookingRows || bookingRows.length === 0) {
+        throw new Error(`Ticket not found for ID: ${normalizedBookingId}`);
+      }
+      if (bookingRows.length > 1) {
+        toast({
+          message: "Duplicate ticket IDs found. Showing latest record.",
+          color: "amber",
+        });
+      }
+      const bookingData = bookingRows[0];
 
       setBooking(bookingData);
 
@@ -86,18 +126,23 @@ export default function ClientTicketPage() {
     } finally {
       setLoading(false);
     }
-  }, [bookingId, fetchMessages, toast]);
+  }, [fetchMessages, normalizedBookingId, toast]);
 
   useEffect(() => {
-    if (!bookingId) return;
+    if (!normalizedBookingId) return;
     fetchTicket();
-  }, [bookingId, fetchTicket]);
+  }, [fetchTicket, normalizedBookingId]);
 
   const uploadProof = async () => {
     if (!proofFile) return null;
-    const fileName = `${Date.now()}-${proofFile.name.replace(/\s+/g, "-")}`;
-    const path = `payments/${bookingId}/${fileName}`;
-    const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, proofFile);
+    const resortName = resort?.name || form?.resortName || `resort-${booking?.resort_id || "unknown"}`;
+    const safeResort = toSafeSegment(resortName);
+    const safeTicket = toSafeSegment(normalizedBookingId);
+    const path = `resort-bookings/${safeResort}/${safeTicket}/proof.webp`;
+    const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, proofFile, {
+      upsert: true,
+      contentType: proofFile.type || "image/webp",
+    });
     if (error) throw error;
     const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
     return urlData.publicUrl;
@@ -178,6 +223,10 @@ export default function ClientTicketPage() {
       setIssueMessage("");
       toast({ message: "Issue sent to owner support.", color: "green" });
     } catch (err) {
+      if (isMissingSupportTableError(err)) {
+        toast({ message: "Issue table missing. Ask admin to run phase3 SQL.", color: "amber" });
+        return;
+      }
       toast({ message: `Issue send failed: ${err.message}`, color: "red" });
     }
   };
@@ -198,6 +247,10 @@ export default function ClientTicketPage() {
       await fetchMessages(booking.id);
       toast({ message: "Message sent to owner.", color: "green" });
     } catch (err) {
+      if (isMissingSupportTableError(err)) {
+        toast({ message: "Messaging table missing. Ask admin to run phase4 SQL.", color: "amber" });
+        return;
+      }
       toast({ message: `Message send failed: ${err.message}`, color: "red" });
     }
   };
@@ -236,7 +289,6 @@ export default function ClientTicketPage() {
 
       {/* Main Ticket Card */}
       <Card className="p-8 md:p-10 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-[5rem] -z-10" />
         <h2 className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mb-6 border-b border-slate-50 pb-4">Stay Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <TicketRow label="Resort" value={resort?.name} />

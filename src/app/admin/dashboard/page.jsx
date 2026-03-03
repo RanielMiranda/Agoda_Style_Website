@@ -16,6 +16,9 @@ import { useResort } from "@/components/useclient/ContextEditor";
 import { supabase } from "@/lib/supabase";
 import resortInitialData from "@/app/edit/resort-builder/[id]/data/ResortInitialData";
 
+const ADMIN_RESORT_COLUMNS = ["id", "name", "location", "visible", "profileImage", "gallery", "created_at"].join(", ");
+const ADMIN_MESSAGE_COLUMNS = ["id", "title", "content", "requestedBy", "status", "created_at"].join(", ");
+
 export default function Page() {
   const [resorts, setResorts] = useState([]);
   const [fetching, setFetching] = useState(true);
@@ -43,7 +46,7 @@ export default function Page() {
     try {
       const { data, error } = await supabase
         .from("resorts")
-        .select("*")
+        .select(ADMIN_RESORT_COLUMNS)
         .order("created_at", { ascending: false });
       if (error) throw error;
       setResorts(data || []);
@@ -56,9 +59,9 @@ export default function Page() {
 
   const fetchMessages = async () => {
     try {
-      const { data: resortMsgs } = await supabase.from("resort_messages").select("*").eq("status", "pending");
-      const { data: accountMsgs } = await supabase.from("account_messages").select("*").eq("status", "pending");
-      const { data: supportMsgs } = await supabase.from("support_messages").select("*").eq("status", "pending");
+      const { data: resortMsgs } = await supabase.from("resort_messages").select(ADMIN_MESSAGE_COLUMNS).eq("status", "pending");
+      const { data: accountMsgs } = await supabase.from("account_messages").select(ADMIN_MESSAGE_COLUMNS).eq("status", "pending");
+      const { data: supportMsgs } = await supabase.from("support_messages").select(ADMIN_MESSAGE_COLUMNS).eq("status", "pending");
 
       setMessages({
         resort: resortMsgs || [],

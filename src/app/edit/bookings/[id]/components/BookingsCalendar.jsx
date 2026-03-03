@@ -204,7 +204,7 @@ return (
           <div className="flex items-center gap-3">
              <Button
                 onClick={handleToggleRangeMode}
-                className={`${isRangeMode ? "bg-emerald-600 shadow-emerald-100" : " shadow-slate-200"} rounded-2xl h-12 px-6 font-bold gap-2 shadow-lg transition-all`}
+                className={`flex items-center justify-center ${isRangeMode ? "bg-emerald-600 shadow-emerald-100" : " shadow-slate-200"} rounded-2xl h-12 px-6 font-bold gap-2 shadow-lg transition-all`}
               >
                 <Pen size={16} />
                 {isRangeMode ? "Range Mode: Active" : "Enable Range Selection"}

@@ -12,16 +12,6 @@ export default function RoomFilterPanel() {
     endDate, 
     setEndDate 
   } = useFilters();
-  
-  const availableTags = ["Wifi", "Bath", "Pool View", "Aircon", "Toilet", "Airconditioned"];
-
-  const handleTagToggle = (tag) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
 
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -53,26 +43,9 @@ export default function RoomFilterPanel() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
            <Tag size={16} className="text-blue-600" />
-           <p className="font-medium text-sm text-gray-700">Tags</p>
+           <p className="font-medium text-sm text-gray-700">Pax</p>
         </div>
         
-        <div className="flex flex-col gap-2">
-          {availableTags.map((tag) => (
-            <label key={tag} className="flex items-center gap-3 cursor-pointer group">
-              <input 
-                type="checkbox" 
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                checked={selectedTags.includes(tag)}
-                onChange={() => handleTagToggle(tag)}
-              />
-              <span className={`text-sm transition-colors ${
-                selectedTags.includes(tag) ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"
-              }`}>
-                {tag}
-              </span>
-            </label>
-          ))}
-        </div>
       </div>
 
       {selectedTags.length > 0 && (

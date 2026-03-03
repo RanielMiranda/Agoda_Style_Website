@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { X, Calendar, User, CheckCircle2, ArrowRight, ArrowLeft, Phone, MapPin, Clock, PlusCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFilters } from "@/components/useclient/ContextFilter";
-import { useResort } from "@/components/useclient/ContextEditor"; // Import the resort context
 
 export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInquiry }) {
   const [agreed, setAgreed] = useState(false);
@@ -30,7 +29,10 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
     email: "",
     contactNumber: "",
     area: "",
-    pax: (guests?.adults || 0) + (guests?.children || 0) || "",
+    pax: Number((guests?.adults || 0) + (guests?.children || 0)),
+    guestCount: Number((guests?.adults || 0) + (guests?.children || 0)),
+    sleepingGuests: 0,
+    roomCount: 1,
     checkInDate: formatDateForInput(startDate),
     checkOutDate: formatDateForInput(endDate),
     checkInTime: "14:00",
@@ -46,19 +48,6 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
     { id: 3, title: "Add-ons", icon: PlusCircle }, // New Step
     { id: 4, title: "Review Inquiry", icon: CheckCircle2 },
   ];
-
-  useEffect(() => {
-    if (isOpen) {
-      setFormData(prev => ({
-        ...prev,
-        pax: (guests?.adults || 0) + (guests?.children || 0),
-        checkInDate: formatDateForInput(startDate),
-        checkOutDate: formatDateForInput(endDate),
-      }));
-    } else {
-      setStep(1);
-    }
-  }, [isOpen, guests, startDate, endDate]);
 
   if (!resort || !isOpen) return null;
 
@@ -79,15 +68,20 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
 
   const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
+  const handleClose = () => {
+    setStep(1);
+    setAgreed(false);
+    onClose();
+  };
 
   const handleSubmit = () => {
     onSubmitInquiry(formData);
-    onClose();
+    handleClose();
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
       
       <div className="relative bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         
@@ -102,7 +96,7 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+          <button onClick={handleClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
             <X size={24} />
           </button>
         </div>
@@ -255,7 +249,7 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
                     />
                   </div>
                   <label htmlFor="terms" className="text-xs text-slate-500 leading-relaxed cursor-pointer">
-                    I have read and agree to the resort's{" "}
+                    I have read and agree to the resort&apos;s{" "}
                     <button type="button" className="text-blue-600 font-bold underline hover:text-blue-700">Rules and Regulations</button>
                     {" "}and{" "}
                     <button type="button" className="text-blue-600 font-bold underline hover:text-blue-700">Terms and Conditions</button>.

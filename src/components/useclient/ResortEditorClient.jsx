@@ -6,35 +6,85 @@ import { BUCKET_NAME } from "@/lib/utils";
 import { useResortData } from "./ResortDataClient";
 
 const ResortEditorContext = createContext(null);
+const LEGACY_DRAFT_KEY = "resort_builder_draft";
+const DRAFT_SCOPE_KEY = "resort_builder_draft_scope";
+
+const draftStorageKey = (scope) => `resort_builder_draft:${scope || "new"}`;
 
 export function ResortEditorProvider({ children }) {
   const { fetchResortByIdentifier } = useResortData();
   const [resort, setResort] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [draftScope, setDraftScopeState] = useState("new");
+
+  const setDraftScope = useCallback((scope) => {
+    const nextScope = scope || "new";
+    setDraftScopeState(nextScope);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(DRAFT_SCOPE_KEY, nextScope);
+    }
+  }, []);
+
+  const readDraftByScope = useCallback((scope) => {
+    if (typeof window === "undefined") return null;
+    const key = draftStorageKey(scope);
+    const scopedRaw = localStorage.getItem(key);
+    if (scopedRaw) return JSON.parse(scopedRaw);
+    if (scope === "new") {
+      const legacyRaw = localStorage.getItem(LEGACY_DRAFT_KEY);
+      if (legacyRaw) return JSON.parse(legacyRaw);
+    }
+    return null;
+  }, []);
 
   useEffect(() => {
-    const savedDraft = localStorage.getItem("resort_builder_draft");
-    if (savedDraft && !resort) {
+    if (typeof window === "undefined") return;
+    const savedScope = localStorage.getItem(DRAFT_SCOPE_KEY) || "new";
+    setDraftScopeState(savedScope);
+    if (!resort) {
       try {
-        setResort(JSON.parse(savedDraft));
+        const savedDraft = readDraftByScope(savedScope);
+        if (savedDraft) setResort(savedDraft);
       } catch (e) {
         console.error("Failed to parse draft", e);
       }
     }
-  }, [resort]);
+  }, [readDraftByScope, resort]);
 
   useEffect(() => {
-    if (resort) localStorage.setItem("resort_builder_draft", JSON.stringify(resort));
-  }, [resort]);
+    if (!resort || typeof window === "undefined") return;
+    localStorage.setItem(draftStorageKey(draftScope), JSON.stringify(resort));
+    // Keep legacy key for backwards compatibility while migrating old drafts.
+    localStorage.setItem(LEGACY_DRAFT_KEY, JSON.stringify(resort));
+  }, [draftScope, resort]);
 
-  const resetResort = useCallback((initialData = null) => {
-    localStorage.removeItem("resort_builder_draft");
+  const resetResort = useCallback((initialData = null, scope = "new") => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(draftStorageKey(draftScope));
+      if (scope === "new") {
+        localStorage.removeItem(LEGACY_DRAFT_KEY);
+      }
+    }
+    setDraftScope(scope);
     setResort(initialData);
-  }, []);
+  }, [draftScope, setDraftScope]);
 
   const loadResort = useCallback(
     async (identifier, isId = true) => {
       if (!identifier) return;
+      const scope = isId ? `id:${identifier}` : `name:${identifier}`;
+      setDraftScope(scope);
+      if (typeof window !== "undefined") {
+        try {
+          const cachedDraft = readDraftByScope(scope);
+          if (cachedDraft) {
+            setResort(cachedDraft);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to parse resort scoped draft", e);
+        }
+      }
       setLoading(true);
       try {
         const data = await fetchResortByIdentifier(identifier, isId);
@@ -43,7 +93,7 @@ export function ResortEditorProvider({ children }) {
         setLoading(false);
       }
     },
-    [fetchResortByIdentifier]
+    [fetchResortByIdentifier, readDraftByScope, setDraftScope]
   );
 
   const uploadImage = async (file, resortName, category, subFolder = "") => {
@@ -145,7 +195,10 @@ export function ResortEditorProvider({ children }) {
       if (error) throw error;
 
       setResort(finalPayload);
-      localStorage.removeItem("resort_builder_draft");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(draftStorageKey(draftScope));
+        localStorage.removeItem(LEGACY_DRAFT_KEY);
+      }
       return true;
     } catch (err) {
       alert("Error saving: " + err.message);
@@ -153,9 +206,15 @@ export function ResortEditorProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [resort]);
+  }, [draftScope, resort]);
 
-  const updateResort = (field, value) => setResort((prev) => ({ ...prev, [field]: value }));
+  const updateResort = useCallback((fieldOrUpdater, value) => {
+    if (typeof fieldOrUpdater === "function") {
+      setResort((prev) => fieldOrUpdater(prev));
+      return;
+    }
+    setResort((prev) => ({ ...prev, [fieldOrUpdater]: value }));
+  }, []);
   const safeSrc = (src) => (src instanceof File ? URL.createObjectURL(src) : src);
 
   const value = useMemo(
@@ -170,8 +229,10 @@ export function ResortEditorProvider({ children }) {
       resetResort,
       setVisibility,
       uploadImage,
+      draftScope,
+      setDraftScope,
     }),
-    [loadResort, loading, resetResort, resort, saveResort, setVisibility]
+    [draftScope, loadResort, loading, resetResort, resort, saveResort, setDraftScope, setVisibility, updateResort]
   );
 
   return <ResortEditorContext.Provider value={value}>{children}</ResortEditorContext.Provider>;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -46,8 +46,19 @@ export default function BookingConfirmation({
   onSave,
   onCancel,
   onDelete,
+  storageKey,
 }) {
-  const [formData, setFormData] = useState(() => ({ ...DEFAULT_FORM, ...(data || {}) }));
+  const [formData, setFormData] = useState(() => {
+    if (typeof window !== "undefined" && storageKey) {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) return { ...DEFAULT_FORM, ...(data || {}), ...JSON.parse(raw) };
+      } catch {
+        // ignore draft parse errors
+      }
+    }
+    return { ...DEFAULT_FORM, ...(data || {}) };
+  });
 
   const balanceDue = useMemo(
     () => Math.max(0, Number(formData.totalAmount || 0) - Number(formData.downpayment || 0)),
@@ -76,8 +87,16 @@ export default function BookingConfirmation({
       return;
     }
 
+    if (storageKey && typeof window !== "undefined") {
+      localStorage.removeItem(storageKey);
+    }
     onSave(formData);
   };
+
+  useEffect(() => {
+    if (!storageKey || typeof window === "undefined") return;
+    localStorage.setItem(storageKey, JSON.stringify(formData));
+  }, [formData, storageKey]);
 
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-500";
@@ -175,7 +194,10 @@ export default function BookingConfirmation({
             </Button>
           )}
           {!readOnly && onDelete && (
-            <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={onDelete}>
+            <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+              if (storageKey && typeof window !== "undefined") localStorage.removeItem(storageKey);
+              onDelete();
+            }}>
               Delete Form
             </Button>
           )}

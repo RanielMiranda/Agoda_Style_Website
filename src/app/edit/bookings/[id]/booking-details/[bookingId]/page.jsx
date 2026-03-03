@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   AlertCircle,
   Ticket,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useResort } from "@/components/useclient/ContextEditor";
@@ -39,13 +40,20 @@ const STATUS_PHASES = [
 ];
 
 const PAYMENT_CHANNELS = ["Pending", "GCash", "Bank", "Cash"];
+const TICKET_MESSAGE_COLUMNS = ["id", "booking_id", "sender_role", "sender_name", "message", "created_at"].join(", ");
+const TICKET_ISSUE_COLUMNS = ["id", "booking_id", "subject", "message", "status", "created_at"].join(", ");
+const isMissingSupportTableError = (error) =>
+  !!error?.message &&
+  (error.message.includes("Could not find the table") ||
+    error.message.includes("does not exist") ||
+    error.message.includes("schema cache"));
 
 export default function BookingDetailsPage() {
   const { id, bookingId } = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const { resort } = useResort();
-  const { bookings, updateBookingById, deleteBookingById } = useBookings();
+  const { bookings, updateBookingById, deleteBookingById, refreshBookings, loadingBookings, lastFetchedAt } = useBookings();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
   const [ownerReply, setOwnerReply] = useState("");
@@ -71,20 +79,26 @@ export default function BookingDetailsPage() {
       const [{ data: messageRows, error: messageError }, { data: issueRows, error: issueError }] = await Promise.all([
         supabase
           .from("ticket_messages")
-          .select("*")
+          .select(TICKET_MESSAGE_COLUMNS)
           .eq("booking_id", activeBookingId)
           .order("created_at", { ascending: true }),
         supabase
           .from("ticket_issues")
-          .select("*")
+          .select(TICKET_ISSUE_COLUMNS)
           .eq("booking_id", activeBookingId)
           .order("created_at", { ascending: false }),
       ]);
 
-      if (messageError) throw messageError;
-      if (issueError) throw issueError;
+      if (messageError && !isMissingSupportTableError(messageError)) throw messageError;
+      if (issueError && !isMissingSupportTableError(issueError)) throw issueError;
       setMessages(messageRows || []);
       setIssues(issueRows || []);
+      if (messageError || issueError) {
+        toast({
+          message: "Support tables are not installed yet. Run phase3 + phase4 SQL.",
+          color: "amber",
+        });
+      }
     } catch (err) {
       toast({ message: `Unable to load support data: ${err.message}`, color: "red" });
     }
@@ -117,6 +131,10 @@ export default function BookingDetailsPage() {
       await loadSupportData(booking.id);
       toast({ message: "Reply sent to client.", color: "green" });
     } catch (err) {
+      if (isMissingSupportTableError(err)) {
+        toast({ message: "Messaging table missing. Run phase4_messaging.sql first.", color: "amber" });
+        return;
+      }
       toast({ message: `Reply failed: ${err.message}`, color: "red" });
     }
   };
@@ -135,6 +153,9 @@ export default function BookingDetailsPage() {
       onOpenForm={() => router.push(`/edit/bookings/${id}/booking-details/${booking.id}/form`)}
       onOpenTicket={() => router.push(`/ticket/${booking.id}`)}
       onPrint={() => window.print()}
+      onRefresh={refreshBookings}
+      loadingBookings={loadingBookings}
+      lastFetchedAt={lastFetchedAt}
       messages={messages}
       issues={issues}
       ownerReply={ownerReply}
@@ -153,6 +174,9 @@ function BookingModernEditor({
   onOpenForm,
   onOpenTicket,
   onPrint,
+  onRefresh,
+  loadingBookings,
+  lastFetchedAt,
   messages,
   issues,
   ownerReply,
@@ -161,8 +185,17 @@ function BookingModernEditor({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const inlineDraftKey = `booking_inline_draft:${booking.id}`;
 
   const [draft, setDraft] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem(inlineDraftKey);
+        if (raw) return JSON.parse(raw);
+      } catch {
+        // ignore invalid draft
+      }
+    }
     const form = booking.bookingForm || {};
     return {
       ...form,
@@ -182,6 +215,11 @@ function BookingModernEditor({
       resortServices: form.resortServices || [],
     };
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(inlineDraftKey, JSON.stringify(draft));
+  }, [draft, inlineDraftKey]);
 
   const status = draft.status || "Inquiry";
   const hasProof = !!draft.paymentProofUrl;
@@ -208,6 +246,7 @@ function BookingModernEditor({
 
   const handleSaveInline = () => {
     persist(draft);
+    if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
     setIsEditing(false);
   };
 
@@ -233,10 +272,7 @@ function BookingModernEditor({
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex justify-between items-center no-print">
           <button onClick={onBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-xs uppercase tracking-widest">
-            <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-all">
-              <ChevronLeft size={16} />
-            </div>
-            Back to Overview
+            <ChevronLeft size={16} /> Back to Overview
           </button>
 
           <div className="flex gap-3 items-center justify-center">
@@ -249,8 +285,14 @@ function BookingModernEditor({
             <Button variant="outline" onClick={onPrint} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
               <Printer size={16} className="mr-2" /> Export
             </Button>
+            <Button variant="outline" onClick={onRefresh} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+              <Database size={16} className="mr-2" /> {loadingBookings ? "Querying..." : "Query DB"}
+            </Button>
           </div>
         </div>
+        <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+          Booking sync: {lastFetchedAt ? new Date(lastFetchedAt).toLocaleString() : "Never"}
+        </p>
 
         {(status === "Inquiry" || status === "Pending Payment") && (
           <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center justify-between">
@@ -472,7 +514,10 @@ function BookingModernEditor({
         ) : (
           <>
             <Button onClick={handleSaveInline} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-10 h-12 font-bold shadow-lg">Save Changes</Button>
-            <Button variant="outline" onClick={onDelete} className="rounded-full px-8 h-12 text-red-600 border-red-200">Delete</Button>
+            <Button variant="outline" onClick={() => {
+              if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
+              onDelete();
+            }} className="rounded-full px-8 h-12 text-red-600 border-red-200">Delete</Button>
           </>
         )}
       </div>
@@ -521,6 +566,7 @@ function StatusBadge({ status }) {
         <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Status</span>
         <span className="text-sm font-black uppercase tracking-wider">{status}</span>
       </div>
+      <Toast />
     </div>
   );
 }

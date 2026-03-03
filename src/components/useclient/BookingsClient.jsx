@@ -5,6 +5,19 @@ import { supabase } from "@/lib/supabase";
 import { useResort } from "./ResortEditorClient";
 
 const BookingsContext = createContext(null);
+const BOOKING_COLUMNS = [
+  "id",
+  "resort_id",
+  "room_ids",
+  "start_date",
+  "end_date",
+  "check_in_time",
+  "check_out_time",
+  "color_class",
+  "status",
+  "booking_form",
+  "created_at",
+].join(", ");
 
 function toModel(row) {
   return {
@@ -40,13 +53,23 @@ export function BookingsProvider({ children }) {
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState(null);
+  const [lastFetchedAt, setLastFetchedAt] = useState(null);
+
+  const getCacheKey = (resortId) => `bookings_cache:${resortId}`;
 
   const syncResortBookings = useCallback(
     (nextBookings) => {
       setBookings(nextBookings);
-      updateResort("bookings", nextBookings);
+      updateResort((prev) => {
+        if (!prev) return prev;
+        if (prev.bookings === nextBookings) return prev;
+        return { ...prev, bookings: nextBookings };
+      });
+      if (typeof window !== "undefined" && resort?.id) {
+        localStorage.setItem(getCacheKey(resort.id), JSON.stringify(nextBookings));
+      }
     },
-    [updateResort]
+    [resort?.id, updateResort]
   );
 
   const refreshBookings = useCallback(async () => {
@@ -56,13 +79,18 @@ export function BookingsProvider({ children }) {
     try {
       const { data, error } = await supabase
         .from("bookings")
-        .select("*")
+        .select(BOOKING_COLUMNS)
         .eq("resort_id", resort.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       const mapped = (data || []).map(toModel);
       syncResortBookings(mapped);
+      const fetchedAt = new Date().toISOString();
+      setLastFetchedAt(fetchedAt);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`bookings_cache_ts:${resort.id}`, fetchedAt);
+      }
     } catch (err) {
       setBookingsError(err.message);
       const fallback = resort.bookings || [];
@@ -74,8 +102,31 @@ export function BookingsProvider({ children }) {
 
   useEffect(() => {
     if (!resort?.id) return;
-    refreshBookings();
-  }, [refreshBookings, resort?.id]);
+    if (typeof window === "undefined") return;
+    try {
+      const cached = localStorage.getItem(getCacheKey(resort.id));
+      const cachedTs = localStorage.getItem(`bookings_cache_ts:${resort.id}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setBookings(parsed);
+        updateResort((prev) => {
+          if (!prev) return prev;
+          const current = prev.bookings || [];
+          const isSame =
+            current.length === parsed.length &&
+            current.every((item, index) => item?.id?.toString() === parsed[index]?.id?.toString());
+          if (isSame) return prev;
+          return { ...prev, bookings: parsed };
+        });
+      } else {
+        const local = resort.bookings || [];
+        setBookings(local);
+      }
+      if (cachedTs) setLastFetchedAt(cachedTs);
+    } catch (err) {
+      console.error("Bookings cache read error:", err.message);
+    }
+  }, [resort?.id, resort?.bookings, updateResort]);
 
   const createBooking = useCallback(
     async (booking) => {
@@ -138,6 +189,7 @@ export function BookingsProvider({ children }) {
       bookings,
       loadingBookings,
       bookingsError,
+      lastFetchedAt,
       refreshBookings,
       createBooking,
       updateBookingById,
@@ -149,6 +201,7 @@ export function BookingsProvider({ children }) {
       bookingsError,
       createBooking,
       deleteBookingById,
+      lastFetchedAt,
       loadingBookings,
       refreshBookings,
       syncResortBookings,

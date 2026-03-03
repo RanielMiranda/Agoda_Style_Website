@@ -19,6 +19,7 @@ import RoomFilterPanel from "./rooms/filters/RoomFilterPanel";
 
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast"
+import { supabase } from "@/lib/supabase";
 
 export default function ResortDetailPage({ name }) {
   const { resort, setResort, loadResort, loading } = useResort();
@@ -63,20 +64,65 @@ export default function ResortDetailPage({ name }) {
     setFacilityOpen(true);
   };
 
-const handleSubmitInquiry = (submittedData) => {
+const handleSubmitInquiry = async (submittedData) => {
     const payload = { 
       ...submittedData, 
       resortName: resort.name,
       location: resort.location 
     };
 
-    console.log("Final Booking Payload:", payload);
+    try {
+      const selectedServices = (resort.extraServices || []).filter((service) =>
+        submittedData.selectedServices?.includes(service.name)
+      );
 
-    toast({
-      message: `Inquiry sent to ${resort.name}!`,
-      color: "green",
-      icon: CheckCircle2 
-    });
+      const bookingId = Date.now().toString();
+      const bookingForm = {
+        guestName: submittedData.guestName || "",
+        email: submittedData.email || "",
+        phoneNumber: submittedData.contactNumber || "",
+        address: submittedData.area || "",
+        guestCount: Number(submittedData.guestCount || submittedData.pax || 0),
+        roomCount: Number(submittedData.roomCount || 1),
+        sleepingGuests: Number(submittedData.sleepingGuests || 0),
+        checkInDate: submittedData.checkInDate || "",
+        checkOutDate: submittedData.checkOutDate || "",
+        checkInTime: submittedData.checkInTime || "14:00",
+        checkOutTime: submittedData.checkOutTime || "11:00",
+        status: "Inquiry",
+        paymentMethod: "Pending",
+        downpayment: 0,
+        totalAmount: Number(resort.price || 0),
+        resortServices: selectedServices,
+        notes: submittedData.message || "",
+      };
+
+      const { error } = await supabase.from("bookings").upsert({
+        id: bookingId,
+        resort_id: Number(resort.id),
+        room_ids: resort.rooms?.[0]?.id ? [resort.rooms[0].id] : [],
+        start_date: submittedData.checkInDate || null,
+        end_date: submittedData.checkOutDate || null,
+        check_in_time: submittedData.checkInTime || "14:00",
+        check_out_time: submittedData.checkOutTime || "11:00",
+        color_class: "bg-blue-600",
+        status: "Inquiry",
+        booking_form: bookingForm,
+      });
+
+      if (error) throw error;
+
+      toast({
+        message: `Inquiry sent to ${resort.name}!`,
+        color: "green",
+        icon: CheckCircle2,
+      });
+    } catch (err) {
+      toast({
+        message: `Failed to send inquiry: ${err.message}`,
+        color: "red",
+      });
+    }
 
     setContactOpen(false);
   };

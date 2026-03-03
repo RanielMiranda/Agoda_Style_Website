@@ -28,6 +28,7 @@ export default function BookingDetailsFormPage() {
   const currentResort = resort?.id?.toString() === resortId?.toString() ? resort : fallbackResort;
   const bookingList = bookings || currentResort?.bookings || [];
   const isNewBooking = bookingId === "new";
+  const storageKey = `booking_form_draft:${resortId}:${bookingId}`;
 
   let draftData = null;
   if (typeof window !== "undefined" && draftKey) {
@@ -102,6 +103,7 @@ export default function BookingDetailsFormPage() {
         title={isNewBooking ? "New Booking Form" : "Booking Form"}
         data={initialData}
         resortName={currentResort?.name}
+        storageKey={storageKey}
         onCancel={() => router.back()}
         onSave={handleSave}
         onDelete={!isNewBooking ? handleDelete : undefined}

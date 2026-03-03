@@ -16,16 +16,18 @@ import resortInitialData from "./data/ResortInitialData";
 
 export default function ResortBuilder({ resortId }) {
   // saveResort must be destructured from useResort()
-  const { resort, setResort, loadResort, saveResort, loading } = useResort();
+  const { resort, setResort, loadResort, saveResort, loading, setDraftScope } = useResort();
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     if (resortId) {
+      setDraftScope(`id:${resortId}`);
       loadResort(resortId);
     } else if (!resort) {
+      setDraftScope("new");
       setResort(resortInitialData);
     } 
-  }, [resortId, loadResort, setResort]);
+  }, [resort, resortId, loadResort, setDraftScope, setResort]);
   
   if (loading && !resort) return <div className="mt-10 p-20 text-center">Fetching Resort Data...</div>;
   if (!resort) return <div className="mt-10 p-20 text-center">No resort found.</div>;

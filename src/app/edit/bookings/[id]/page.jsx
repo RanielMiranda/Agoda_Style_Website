@@ -5,12 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { resorts } from "@/components/data/resorts";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
-import { 
+import {
   Plus, 
   Calendar as CalendarIcon, 
   ClipboardList, 
   LayoutDashboard,
-  ChevronRight
+  ChevronRight,
+  Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +23,7 @@ export default function BookingManagementPage() {
   const { id } = useParams();
   const router = useRouter();
   const { resort, setResort, loadResort } = useResort();
-  const { bookings } = useBookings();
+  const { bookings, refreshBookings, loadingBookings, lastFetchedAt } = useBookings();
   
   const [activeTab, setActiveTab] = useState("workflow"); // "workflow" | "calendar"
 
@@ -77,13 +78,26 @@ export default function BookingManagementPage() {
             </div>
           </div>
 
-          <Button 
-            onClick={() => openForm({ status: "Inquiry" })}
-            className="bg-blue-600 items-center justify-center hover:bg-blue-700 text-white rounded-2xl px-8 h-14 font-black shadow-lg shadow-blue-100 transition-all hover:scale-105 flex gap-3"
-          >
-            <Plus size={20} /> Create New Entry
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={refreshBookings}
+              variant="outline"
+              className="items-center justify-center rounded-2xl px-6 h-14 font-black flex gap-2"
+            >
+              <Database size={18} />
+              {loadingBookings ? "Querying..." : "Query DB"}
+            </Button>
+            <Button 
+              onClick={() => openForm({ status: "Inquiry" })}
+              className="bg-blue-600 items-center justify-center hover:bg-blue-700 text-white rounded-2xl px-8 h-14 font-black shadow-lg shadow-blue-100 transition-all hover:scale-105 flex gap-3"
+            >
+              <Plus size={20} /> Create New Entry
+            </Button>
+          </div>
         </header>
+        <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-4">
+          Booking cache sync: {lastFetchedAt ? new Date(lastFetchedAt).toLocaleString() : "Never"}
+        </p>
 
         {/* ADMIN STYLE TABS */}
         <div className="flex items-center gap-8 border-b border-slate-200 mb-8">
