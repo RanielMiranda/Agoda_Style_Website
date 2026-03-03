@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Users, UserPlus, Search, ShieldCheck, ShieldAlert, ShieldX, CheckCircle2  } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { resorts as resortsData } from "@/components/data/resorts";
+import { useResortData } from "@/components/useclient/ResortDataClient";
 
 import AccountCard from "./components/AccountCard";
 import InviteOwnerModal from "./components/InviteOwnerModal";
@@ -17,19 +17,34 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 export default function Page() {
   const router = useRouter();
   const { toast } = useToast();  
+  const { allResorts, fetchResorts, loading } = useResortData();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  
-  const [accounts, setAccounts] = useState(resortsData.map((resort, index) => ({
-    id: String(index + 1),
-    name: resort.ownerName || `Admin ${index + 1}`,
-    email: resort.contactEmail || "contact@resort.com",
-    phone: resort.contactPhone || "+63 000 000 0000",
-    resortName: resort.name,
-    status: resort.status || (index % 3 === 0 ? "Active" : index % 3 === 1 ? "Pending" : "Suspended"),
-    profileImage: resort.profileImage
-  })));
+  const [statusOverrides, setStatusOverrides] = useState({});
+
+  useEffect(() => {
+    if (allResorts.length === 0) fetchResorts();
+  }, [allResorts.length, fetchResorts]);
+
+  const accounts = useMemo(
+    () =>
+      (allResorts || []).map((resortItem, index) => {
+        const id = String(resortItem.id);
+        const baseStatus = resortItem.visible === false ? "Suspended" : "Active";
+        const derivedStatus = statusOverrides[id] || resortItem.status || baseStatus;
+        return {
+          id,
+          name: resortItem.ownerName || `Owner ${index + 1}`,
+          email: resortItem.contactEmail || "contact@resort.com",
+          phone: resortItem.contactPhone || "+63 000 000 0000",
+          resortName: resortItem.name,
+          status: derivedStatus,
+          profileImage: resortItem.profileImage,
+        };
+      }),
+    [allResorts, statusOverrides]
+  );
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -75,17 +90,11 @@ export default function Page() {
     }
 
     // 3. Update the state purely
-    setAccounts((prev) =>
-      prev.map((acc) =>
-        acc.id === id ? { ...acc, status: newStatus } : acc
-      )
-    );
+    setStatusOverrides((prev) => ({ ...prev, [id]: newStatus }));
   };
 
   const handleApprove = (id) => {
-    setAccounts(prev => prev.map(acc => 
-      acc.id === id ? { ...acc, status: 'Active' } : acc
-    ));
+    setStatusOverrides((prev) => ({ ...prev, [id]: "Active" }));
     toast({
       message: "Account Approved",
       color: "green",
@@ -212,7 +221,11 @@ export default function Page() {
 
         {/* List */}
         <div className="flex flex-col gap-4">
-          {filteredAccounts.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-24 bg-white rounded-[40px] shadow-inner border-2 border-dashed border-slate-100">
+              <p className="text-slate-400 font-medium">Loading accounts...</p>
+            </div>
+          ) : filteredAccounts.length > 0 ? (
             filteredAccounts.map((account) => (
               <AccountCard 
                 key={account.id} 

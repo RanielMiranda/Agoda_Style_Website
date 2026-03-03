@@ -10,6 +10,20 @@ const LEGACY_DRAFT_KEY = "resort_builder_draft";
 const DRAFT_SCOPE_KEY = "resort_builder_draft_scope";
 
 const draftStorageKey = (scope) => `resort_builder_draft:${scope || "new"}`;
+const sanitizeSegment = (value) =>
+  String(value || "unknown")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_\s]/g, "")
+    .replace(/\s+/g, "-");
+
+const toStoragePathFromUrl = (url) => {
+  if (!url || typeof url !== "string") return null;
+  const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  return decodeURIComponent(url.slice(index + marker.length));
+};
 
 export function ResortEditorProvider({ children }) {
   const { fetchResortByIdentifier } = useResortData();
@@ -129,6 +143,96 @@ export function ResortEditorProvider({ children }) {
     [resort]
   );
 
+  const listStorageFilesRecursively = useCallback(async (prefix) => {
+    const filePaths = [];
+    const walk = async (folderPath) => {
+      let offset = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase.storage.from(BUCKET_NAME).list(folderPath, {
+          limit: 100,
+          offset,
+          sortBy: { column: "name", order: "asc" },
+        });
+        if (error) throw error;
+        const entries = data || [];
+        for (const entry of entries) {
+          const currentPath = folderPath ? `${folderPath}/${entry.name}` : entry.name;
+          if (entry.id) {
+            filePaths.push(currentPath);
+          } else {
+            await walk(currentPath);
+          }
+        }
+        hasMore = entries.length === 100;
+        offset += 100;
+      }
+    };
+    if (prefix) await walk(prefix);
+    return filePaths;
+  }, []);
+
+  const deleteResort = useCallback(
+    async (resortId) => {
+      if (!resortId) return { ok: false, error: "Missing resort id." };
+      setLoading(true);
+      try {
+        const { data: resortRow, error: resortError } = await supabase
+          .from("resorts")
+          .select("id, name, profileImage, gallery, facilities, rooms")
+          .eq("id", Number(resortId))
+          .single();
+        if (resortError) throw resortError;
+        if (!resortRow) throw new Error("Resort not found.");
+
+        const explicitPaths = new Set();
+        const addUrlPath = (value) => {
+          const path = toStoragePathFromUrl(value);
+          if (path) explicitPaths.add(path);
+        };
+        addUrlPath(resortRow.profileImage);
+        (resortRow.gallery || []).forEach(addUrlPath);
+        (resortRow.facilities || []).forEach((facility) => addUrlPath(facility?.image));
+        (resortRow.rooms || []).forEach((room) => (room?.gallery || []).forEach(addUrlPath));
+
+        const safeResortName = sanitizeSegment(resortRow.name);
+        const [resortAssetPaths, bookingProofPaths] = await Promise.all([
+          listStorageFilesRecursively(safeResortName),
+          listStorageFilesRecursively(`resort-bookings/${safeResortName}`),
+        ]);
+
+        const allPaths = Array.from(new Set([...explicitPaths, ...resortAssetPaths, ...bookingProofPaths])).filter(Boolean);
+        if (allPaths.length > 0) {
+          for (let i = 0; i < allPaths.length; i += 100) {
+            const chunk = allPaths.slice(i, i + 100);
+            const { error: storageError } = await supabase.storage.from(BUCKET_NAME).remove(chunk);
+            if (storageError) throw storageError;
+          }
+        }
+
+        await supabase.from("bookings").delete().eq("resort_id", Number(resortId));
+        const { error: deleteResortError } = await supabase.from("resorts").delete().eq("id", Number(resortId));
+        if (deleteResortError) throw deleteResortError;
+
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(draftStorageKey(`id:${resortId}`));
+          if (resort?.id?.toString() === resortId.toString()) {
+            localStorage.removeItem(draftStorageKey(draftScope));
+            localStorage.removeItem(LEGACY_DRAFT_KEY);
+            setResort(null);
+          }
+        }
+        return { ok: true };
+      } catch (err) {
+        console.error("Failed to delete resort:", err.message);
+        return { ok: false, error: err.message };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [draftScope, listStorageFilesRecursively, resort?.id]
+  );
+
   const saveResort = useCallback(async () => {
     if (!resort) return false;
     setLoading(true);
@@ -228,11 +332,12 @@ export function ResortEditorProvider({ children }) {
       safeSrc,
       resetResort,
       setVisibility,
+      deleteResort,
       uploadImage,
       draftScope,
       setDraftScope,
     }),
-    [draftScope, loadResort, loading, resetResort, resort, saveResort, setDraftScope, setVisibility, updateResort]
+    [deleteResort, draftScope, loadResort, loading, resetResort, resort, saveResort, setDraftScope, setVisibility, updateResort]
   );
 
   return <ResortEditorContext.Provider value={value}>{children}</ResortEditorContext.Provider>;

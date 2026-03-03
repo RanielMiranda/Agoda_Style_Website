@@ -271,7 +271,12 @@ return (
                       <span className="text-[10px] text-slate-500 flex items-center gap-1"><Clock3 size={10} /> {checkIn} to {checkOut}</span>
                     </div>
                     <button onClick={(event) => { event.stopPropagation(); navigateToForm(booking.id); }} className="ml-1 text-slate-400 hover:text-blue-600" title="Edit booking form"><Edit2 size={14} /></button>
-                    <button onClick={(event) => { event.stopPropagation(); deleteBookingById(booking.id); }} className="text-slate-400 hover:text-red-500" title="Delete booking range"><Trash2 size={14} /></button>
+                    <button onClick={(event) => {
+                      event.stopPropagation();
+                      const confirmed = window.confirm("Delete this booking range?");
+                      if (!confirmed) return;
+                      deleteBookingById(booking.id);
+                    }} className="text-slate-400 hover:text-red-500" title="Delete booking range"><Trash2 size={14} /></button>
                   </div>
                 );
               })}

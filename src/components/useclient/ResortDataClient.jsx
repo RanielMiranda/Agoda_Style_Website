@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const ResortDataContext = createContext(null);
@@ -40,21 +40,10 @@ const RESORT_DETAIL_COLUMNS = [
 ].join(", ");
 
 export function ResortDataProvider({ children }) {
-  const [allResorts, setAllResorts] = useState(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = localStorage.getItem(RESORT_CACHE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [allResorts, setAllResorts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingResort, setLoadingResort] = useState(false);
-  const [lastFetchedAt, setLastFetchedAt] = useState(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(RESORT_CACHE_TS_KEY) || null;
-  });
+  const [lastFetchedAt, setLastFetchedAt] = useState(null);
 
   const [priceRange, setPriceRange] = useState({ min: 10000, max: 30000 });
   const [selectedTags, setSelectedTags] = useState([]);
@@ -116,6 +105,10 @@ export function ResortDataProvider({ children }) {
       console.error("Resort cache hydrate error:", err.message);
     }
   }, []);
+
+  useEffect(() => {
+    hydrateCachedResorts();
+  }, [hydrateCachedResorts]);
 
   const filteredResorts = useMemo(() => {
     const { min, max } = priceRange;

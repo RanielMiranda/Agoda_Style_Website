@@ -213,6 +213,8 @@ export default function BookingConfirmation({
           )}
           {!readOnly && onDelete && (
             <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+              const confirmed = window.confirm("Delete this booking form?");
+              if (!confirmed) return;
               if (storageKey && typeof window !== "undefined") localStorage.removeItem(storageKey);
               onDelete();
             }}>

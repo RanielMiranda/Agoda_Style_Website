@@ -2,9 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { resorts } from "@/components/data/resorts";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
+import { useSupport } from "@/components/useclient/SupportClient";
 import {
   Plus, 
   Calendar as CalendarIcon, 
@@ -16,7 +16,6 @@ import {
   Clock4,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
 
 // Components
 import BookingCalendar from "./components/BookingsCalendar";
@@ -26,8 +25,9 @@ import LiveConcernsPanel from "./components/LiveConcernsPanel";
 export default function BookingManagementPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { resort, setResort, loadResort } = useResort();
-  const { bookings } = useBookings();
+  const { resort, loadResort, setResort, loading } = useResort();
+  const { bookings, refreshBookings } = useBookings();
+  const { listResortConcerns, updateConcernStatus } = useSupport();
   const [concerns, setConcerns] = useState([]);
   const [loadingConcerns, setLoadingConcerns] = useState(false);
   
@@ -37,17 +37,24 @@ export default function BookingManagementPage() {
     if (id) loadResort(id, true);
   }, [id, loadResort]);
 
-  const fallbackResort = useMemo(
-    () => resorts.find((r) => r.id.toString() === id?.toString()),
-    [id]
-  );
-
   useEffect(() => {
-    if (!resort && fallbackResort) setResort(fallbackResort);
-  }, [resort, fallbackResort, setResort]);
+    if (!id || loading) return;
+    if (resort?.id?.toString() === id?.toString()) return;
+    const numericId = Number(id);
+    if (!Number.isFinite(numericId)) return;
+    setResort((prev) => {
+      if (prev?.id?.toString() === id?.toString()) return prev;
+      return {
+        id: numericId,
+        name: prev?.name || `Resort ${id}`,
+        rooms: prev?.rooms || [],
+        bookings: prev?.bookings || [],
+      };
+    });
+  }, [id, loading, resort?.id, setResort]);
 
-  const currentResort = resort?.id?.toString() === id?.toString() ? resort : fallbackResort;
-  const resortId = Number(currentResort?.id || id || 0);
+  const currentResort = resort?.id?.toString() === id?.toString() ? resort : null;
+  const resortId = Number(currentResort?.id || 0);
 
   const workflowCounts = useMemo(() => {
     const source = bookings || [];
@@ -66,21 +73,8 @@ export default function BookingManagementPage() {
     if (!resortId) return;
     setLoadingConcerns(true);
     try {
-      const cutoffIso = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
-      await supabase
-        .from("ticket_issues")
-        .delete()
-        .eq("resort_id", resortId)
-        .eq("status", "resolved")
-        .lt("created_at", cutoffIso);
-
-      const { data, error } = await supabase
-        .from("ticket_issues")
-        .select("id, booking_id, guest_name, guest_email, subject, message, status, created_at")
-        .eq("resort_id", resortId)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      setConcerns(data || []);
+      const rows = await listResortConcerns(resortId, { pruneResolvedOlderThanDays: 10 });
+      setConcerns(rows);
     } catch (error) {
       console.error("Concerns load error:", error.message);
     } finally {
@@ -94,22 +88,36 @@ export default function BookingManagementPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resortId]);
 
+  useEffect(() => {
+    if (!resortId) return;
+    refreshBookings();
+    const interval = setInterval(() => {
+      refreshBookings();
+    }, 30000);
+    const handleFocus = () => refreshBookings();
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refreshBookings, resortId]);
+
   const handleResolveConcern = async (issueId) => {
-    const { error } = await supabase.from("ticket_issues").update({ status: "resolved" }).eq("id", issueId);
-    if (error) {
+    try {
+      await updateConcernStatus(issueId, "resolved");
+      setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "resolved" } : entry)));
+    } catch (error) {
       console.error("Resolve concern error:", error.message);
-      return;
     }
-    setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "resolved" } : entry)));
   };
 
   const handleReopenConcern = async (issueId) => {
-    const { error } = await supabase.from("ticket_issues").update({ status: "open" }).eq("id", issueId);
-    if (error) {
+    try {
+      await updateConcernStatus(issueId, "open");
+      setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "open" } : entry)));
+    } catch (error) {
       console.error("Reopen concern error:", error.message);
-      return;
     }
-    setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "open" } : entry)));
   };
 
   const openForm = (guestData = {}, targetBookingId = null) => {
@@ -127,7 +135,8 @@ export default function BookingManagementPage() {
     router.push(`/edit/bookings/${id}/booking-details/${targetBookingId}`);
   };
 
-  if (!currentResort) return <div className="p-20 text-center">Loading Management Console...</div>;
+  if (!currentResort && loading) return <div className="p-20 text-center">Loading Management Console...</div>;
+  if (!currentResort) return <div className="p-20 text-center">Unable to load resort profile. Showing booking data by resort ID.</div>;
 
   return (
     <div className="mt-10 min-h-screen bg-slate-50">

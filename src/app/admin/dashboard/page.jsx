@@ -11,7 +11,6 @@ import ResortCard from "./components/ResortCard";
 import SearchBar from "./components/SearchBar";
 import ActionsRequiredTab from "./components/ActionsRequiredTab"; 
 
-import { fakeData } from "./components/data/data";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { supabase } from "@/lib/supabase";
 import resortInitialData from "@/app/edit/resort-builder/[id]/data/ResortInitialData";
@@ -33,10 +32,10 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("resorts");
   const [activeActionTab, setActiveActionTab] = useState("resort");
   const { toast } = useToast();
-  const [messages, setMessages] = useState(fakeData);
+  const [messages, setMessages] = useState({ resort: [], account: [], support: [] });
   
   const router = useRouter();
-  const { resetResort } = useResort();
+  const { resetResort, deleteResort } = useResort();
 
   const [archives, setArchives] = useState({
     resort: [],
@@ -209,6 +208,28 @@ export default function Page() {
       });
     }
   };
+
+  const handleDeleteResort = async (resortId, resortName) => {
+    const confirmed = window.confirm(
+      `Delete ${resortName}? This will remove resort data, related bookings, and uploaded proof/images from storage.`
+    );
+    if (!confirmed) return;
+    const result = await deleteResort(resortId);
+    if (!result?.ok) {
+      toast({
+        message: `Failed to delete resort: ${result?.error || "Unknown error"}`,
+        color: "red",
+      });
+      return;
+    }
+    toast({
+      message: `${resortName} deleted successfully.`,
+      color: "green",
+      icon: CheckCircle2,
+    });
+    fetchResorts();
+    fetchMessages();
+  };
     
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
@@ -269,7 +290,7 @@ export default function Page() {
               filteredResorts.map((resort) => (
                 <ResortCard key={resort.id} 
                 resort={resort} 
-                onDelete={fetchResorts} 
+                onDelete={handleDeleteResort} 
                 onToggleVisibility={handleToggleVisibility} 
                 />
               ))

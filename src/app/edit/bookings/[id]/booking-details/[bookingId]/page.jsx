@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Printer,
@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
-import { resorts } from "@/components/data/resorts";
+import { useSupport } from "@/components/useclient/SupportClient";
 import { supabase } from "@/lib/supabase";
 import { BUCKET_NAME } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast/ToastProvider";
@@ -41,14 +41,6 @@ const STATUS_PHASES = [
 ];
 
 const PAYMENT_CHANNELS = ["Pending", "GCash", "Bank", "Cash"];
-const TICKET_MESSAGE_COLUMNS = ["id", "booking_id", "sender_role", "sender_name", "message", "created_at"].join(", ");
-const TICKET_ISSUE_COLUMNS = ["id", "booking_id", "subject", "message", "status", "created_at"].join(", ");
-const isMissingSupportTableError = (error) =>
-  !!error?.message &&
-  (error.message.includes("Could not find the table") ||
-    error.message.includes("does not exist") ||
-    error.message.includes("schema cache"));
-
 function buildDraftFromBooking(booking) {
   const form = booking.bookingForm || {};
   return {
@@ -87,19 +79,35 @@ export default function BookingDetailsPage() {
   const { id, bookingId } = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { resort } = useResort();
-  const { bookings, updateBookingById, deleteBookingById } = useBookings();
+  const { resort, loadResort, setResort, loading } = useResort();
+  const { bookings, updateBookingById, deleteBookingById, loadingBookings } = useBookings();
+  const { loadBookingSupport, sendTicketMessage, isMissingSupportTableError } = useSupport();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
   const [ownerReply, setOwnerReply] = useState("");
 
-  const fallbackResort = useMemo(
-    () => resorts.find((entry) => entry.id.toString() === id?.toString()),
-    [id]
-  );
+  useEffect(() => {
+    if (id) loadResort(id, true);
+  }, [id, loadResort]);
 
-  const currentResort = resort?.id?.toString() === id?.toString() ? resort : fallbackResort;
-  const booking = (bookings || currentResort?.bookings || []).find(
+  useEffect(() => {
+    if (!id || loading) return;
+    if (resort?.id?.toString() === id?.toString()) return;
+    const numericId = Number(id);
+    if (!Number.isFinite(numericId)) return;
+    setResort((prev) => {
+      if (prev?.id?.toString() === id?.toString()) return prev;
+      return {
+        id: numericId,
+        name: prev?.name || `Resort ${id}`,
+        rooms: prev?.rooms || [],
+        bookings: prev?.bookings || [],
+      };
+    });
+  }, [id, loading, resort?.id, setResort]);
+
+  const currentResort = resort?.id?.toString() === id?.toString() ? resort : null;
+  const booking = (bookings || []).find(
     (entry) => entry.id.toString() === bookingId?.toString()
   );
 
@@ -111,24 +119,10 @@ export default function BookingDetailsPage() {
 
   const loadSupportData = async (activeBookingId) => {
     try {
-      const [{ data: messageRows, error: messageError }, { data: issueRows, error: issueError }] = await Promise.all([
-        supabase
-          .from("ticket_messages")
-          .select(TICKET_MESSAGE_COLUMNS)
-          .eq("booking_id", activeBookingId)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("ticket_issues")
-          .select(TICKET_ISSUE_COLUMNS)
-          .eq("booking_id", activeBookingId)
-          .order("created_at", { ascending: false }),
-      ]);
-
-      if (messageError && !isMissingSupportTableError(messageError)) throw messageError;
-      if (issueError && !isMissingSupportTableError(issueError)) throw issueError;
-      setMessages(messageRows || []);
-      setIssues(issueRows || []);
-      if (messageError || issueError) {
+      const { messages: messageRows, issues: issueRows, missingTables } = await loadBookingSupport(activeBookingId);
+      setMessages(messageRows);
+      setIssues(issueRows);
+      if (missingTables) {
         toast({
           message: "Support tables are not installed yet. Run phase3 + phase4 SQL.",
           color: "amber",
@@ -138,6 +132,10 @@ export default function BookingDetailsPage() {
       toast({ message: `Unable to load support data: ${err.message}`, color: "red" });
     }
   };
+
+  if ((loading && !currentResort) || loadingBookings) {
+    return <div className="p-10 text-center text-slate-500">Loading booking details...</div>;
+  }
 
   if (!booking) {
     return (
@@ -160,8 +158,7 @@ export default function BookingDetailsPage() {
         sender_name: "Owner",
         message: ownerReply.trim(),
       };
-      const { error } = await supabase.from("ticket_messages").insert(payload);
-      if (error) throw error;
+      await sendTicketMessage(payload);
       setOwnerReply("");
       await loadSupportData(booking.id);
       toast({ message: "Reply sent to client.", color: "green" });
@@ -300,6 +297,14 @@ function BookingModernEditor({
     setIsEditing(false);
   };
 
+  const handleCancelInline = () => {
+    const base = buildDraftFromBooking(booking);
+    setDraft(base);
+    setProofPreviewUrl(base.paymentProofUrl || null);
+    if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
+    setIsEditing(false);
+  };
+
   const handleSetStatus = (nextStatus) => {
     const next = { ...draft, status: nextStatus };
     if (nextStatus === "Confirmed" && !next.confirmationStub?.code) {
@@ -347,6 +352,18 @@ function BookingModernEditor({
             </Button>
             <Button variant="outline" onClick={onPrint} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
               <Printer size={16} className="mr-2" /> Export
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const confirmed = window.confirm("Delete this booking and all related form data?");
+                if (!confirmed) return;
+                if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
+                onDelete();
+              }}
+              className="rounded-full flex items-center justify-center bg-white shadow-sm border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs px-6"
+            >
+              Delete Booking
             </Button>
           </div>
         </div>
@@ -596,11 +613,8 @@ function BookingModernEditor({
           </Button>
         ) : (
           <>
-            <Button onClick={handleSaveInline} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-10 h-12 font-bold shadow-lg">Save Changes</Button>
-            <Button variant="outline" onClick={() => {
-              if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
-              onDelete();
-            }} className="rounded-full px-8 h-12 text-red-600 border-red-200">Delete</Button>
+            <Button onClick={handleSaveInline} className="bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white rounded-full px-10 h-12 font-bold shadow-lg">Save Changes</Button>
+            <Button variant="outline" onClick={handleCancelInline} className="rounded-full px-8 h-12 text-slate-600 border-slate-300">Cancel</Button>
           </>
         )}
       </div>
