@@ -139,11 +139,7 @@ export default function RentalManager({ onOpenForm }) {
                   )}
                   {activeTab === "confirmed" && (
                     <>
-                    <Button size="sm" variant = "" 
-                     className="hover:scale-105 flex items-center gap-2 bg-slate-200 hover:bg-slate-400 text-slate-700 rounded-xl h-10 px-4 font-bold transition-all"
-                    >
-                      <Edit2 size={14} /> Edit Details
-                    </Button>
+                    <Button size="sm" variant="" onClick={() => onOpenForm(item)} className="hover:scale-105 flex items-center gap-2 bg-slate-200 hover:bg-slate-400 text-slate-700 rounded-xl h-10 px-4 font-bold transition-all"><Edit2 size={14} /> Edit Details</Button>
                     </>
                   )}
                   {activeTab === "overdue" && (
