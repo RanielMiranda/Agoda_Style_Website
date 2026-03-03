@@ -27,6 +27,17 @@ const DEFAULT_FORM = {
   notes: "",
 };
 
+const STATUS_PHASES = [
+  "Inquiry",
+  "Pending Payment",
+  "Confirmed",
+  "Ongoing",
+  "Pending Checkout",
+  "Checked Out",
+  "Cancelled",
+  "Declined",
+];
+
 export default function BookingConfirmation({
   data,
   resortName,
@@ -119,10 +130,23 @@ export default function BookingConfirmation({
                   <option value="hourly">Hourly</option>
                 </select>
               </Field>
-              <Field label="Payment Method"><input disabled={readOnly} className={inputClass} value={formData.paymentMethod || ""} onChange={(e) => handleChange("paymentMethod", e.target.value)} /></Field>
+              <Field label="Payment Method">
+                <select disabled={readOnly} className={inputClass} value={formData.paymentMethod || "Pending"} onChange={(e) => handleChange("paymentMethod", e.target.value)}>
+                  <option value="Pending">Pending</option>
+                  <option value="GCash">GCash</option>
+                  <option value="Bank">Bank</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </Field>
               <Field label="Total Amount"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.totalAmount} onChange={(e) => handleNumberChange("totalAmount", e.target.value)} /></Field>
               <Field label="Downpayment"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.downpayment} onChange={(e) => handleNumberChange("downpayment", e.target.value)} /></Field>
-              <Field label="Status"><input disabled={readOnly} className={inputClass} value={formData.status || ""} onChange={(e) => handleChange("status", e.target.value)} /></Field>
+              <Field label="Status">
+                <select disabled={readOnly} className={inputClass} value={formData.status || "Inquiry"} onChange={(e) => handleChange("status", e.target.value)}>
+                  {STATUS_PHASES.map((phase) => (
+                    <option key={phase} value={phase}>{phase}</option>
+                  ))}
+                </select>
+              </Field>
               <Field label="Balance Due"><input disabled className={`${inputClass} bg-slate-50`} value={balanceDue} /></Field>
             </div>
           </section>

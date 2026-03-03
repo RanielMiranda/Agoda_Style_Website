@@ -189,48 +189,64 @@ export default function BookingCalendar() {
     );
   }
 
-  return (
-    <Card className="max-w-4xl mx-auto p-6 bg-white shadow-xl rounded-3xl mt-8">
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row justify-between gap-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <CalendarIcon size={20} className="text-blue-600" /> Multi-Room Booking
-          </h2>
-          <Button
-            onClick={handleToggleRangeMode}
-            size="sm"
-            className={`${isRangeMode ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"} rounded-xl gap-2 flex items-center justify-center`}
-          >
-            <Pen size={16} />
-            {isRangeMode ? "Set Range: ON" : "Set Range: OFF"}
-          </Button>
+return (
+    <Card className="w-full p-8 bg-white shadow-2xl rounded-[2.5rem] border-none">
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <h2 className="text-2xl font-black text-blue-600 flex items-center gap-3 uppercase tracking-tight">
+              <CalendarIcon size={28} className="text-blue-600" /> 
+              Resort Schedule
+            </h2>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Select dates to manage room availability</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <Button
+                onClick={handleToggleRangeMode}
+                className={`${isRangeMode ? "bg-emerald-600 shadow-emerald-100" : " shadow-slate-200"} rounded-2xl h-12 px-6 font-bold gap-2 shadow-lg transition-all`}
+              >
+                <Pen size={16} />
+                {isRangeMode ? "Range Mode: Active" : "Enable Range Selection"}
+              </Button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-100">
-          {rooms.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => toggleRoomSelection(room.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                selectedRooms.includes(room.id)
-                  ? "bg-white border-blue-200 text-blue-600 shadow-sm"
-                  : "bg-transparent border-transparent text-slate-400 hover:text-slate-600"
-              }`}
-            >
-              {selectedRooms.includes(room.id) && <Check size={12} />}
-              {room.name}
-            </button>
-          ))}
+        {/* Room Filter Bar */}
+        <div className="p-2 bg-slate-50 rounded-2xl border border-slate-100 flex flex-wrap gap-2">
+            {rooms.map((room) => (
+               <button
+                  key={room.id}
+                  onClick={() => toggleRoomSelection(room.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                    selectedRooms.includes(room.id)
+                      ? "bg-white text-blue-600 shadow-md ring-1 ring-blue-100"
+                      : "text-slate-400 hover:text-slate-600"
+                  }`}
+               >
+                 {room.name}
+               </button>
+            ))}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 bg-slate-50 p-6 rounded-2xl border border-slate-100 relative">
-          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white rounded-full z-10"><ChevronLeft size={18} /></button>
-          {renderMonth(0)}
-          {renderMonth(1)}
-          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white rounded-full z-10"><ChevronRight size={18} /></button>
+        {/* THE CALENDAR GRID - Now much larger */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 relative">
+          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))} className="absolute -left-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronLeft size={24} /></button>
+          
+          <div className="scale-105 origin-top">
+            {renderMonth(0)}
+          </div>
+          <div className="scale-105 origin-top">
+            {renderMonth(1)}
+          </div>
+          
+          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))} className="absolute -right-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronRight size={24} /></button>
         </div>
-
-        <div className="space-y-2">
+        
+        {/* Active Ranges Summary at bottom of calendar */}
+        {/* ... (keep your existing active ranges list) */}
+      </div>
+              <div className="space-y-2">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Ranges for these rooms</p>
           <div className="flex flex-wrap gap-3">
             {bookingList
@@ -261,7 +277,7 @@ export default function BookingCalendar() {
               })}
           </div>
         </div>
-      </div>
+
     </Card>
   );
 }

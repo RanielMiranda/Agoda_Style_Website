@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { resorts } from "@/components/data/resorts";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
-import BookingForm from "../../../components/BookingConfirmation";
+import BookingForm from "./BookingConfirmation";
 
 const GROUP_COLORS = ["bg-blue-600", "bg-emerald-600", "bg-amber-500", "bg-rose-500", "bg-violet-600", "bg-cyan-500"];
 
