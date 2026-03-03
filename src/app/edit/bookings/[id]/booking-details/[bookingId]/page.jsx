@@ -1,230 +1,250 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { resorts } from "@/components/data/resorts";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useResort } from "@/components/useclient/ContextEditor";
-import { useBookings } from "@/components/useclient/BookingsClient";
+import { 
+  Printer, CheckCircle, Inbox, Clock, 
+  ChevronLeft, User, Calendar, CreditCard, 
+  MapPin, Phone, Mail, Users, BedDouble, 
+  Briefcase, ReceiptText, Wallet, Edit3, 
+  FileText, Image as ImageIcon, ExternalLink, ShieldCheck, AlertCircle
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const DEFAULT_FORM = {
-  status: "Inquiry",
-  guestName: "",
-  roomName: "",
-  address: "",
-  email: "",
-  phoneNumber: "",
-  checkInDate: "",
-  checkInTime: "14:00",
-  checkOutDate: "",
-  checkOutTime: "11:00",
-  guestCount: 0,
-  roomCount: 1,
-  totalAmount: 0,
-  downpayment: 0,
-  paymentMethod: "Pending",
-  notes: "",
-};
-
-export default function BookingDetailsPage() {
-  const { id, bookingId } = useParams();
+export default function BookingModernView({ data, resortName, onBack }) {
   const router = useRouter();
-  const { resort } = useResort();
-  const { bookings, updateBookingById, deleteBookingById } = useBookings();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const fallbackResort = useMemo(
-    () => resorts.find((entry) => entry.id.toString() === id?.toString()),
-    [id]
-  );
-
-  const currentResort = resort?.id?.toString() === id?.toString() ? resort : fallbackResort;
-  const booking = (bookings || currentResort?.bookings || []).find((b) => b.id.toString() === bookingId?.toString());
-
-  const [draft, setDraft] = useState(() => normalizeBooking(booking));
-
-  if (!booking) {
-    return (
-      <div className="p-10 text-center">
-        <p className="text-slate-500">Booking range not found.</p>
-        <Button className="mt-4" onClick={() => router.push(`/edit/bookings/${id}`)}>
-          Back to Booking Page
-        </Button>
-      </div>
-    );
-  }
-
-  const status = draft.status || "Inquiry";
-  const statusStyle = getStatusStyle(status);
-
-  const handleFieldChange = (field, value) => {
-    setDraft((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const persist = (nextData) => {
-    updateBookingById(bookingId, (entry) => ({
-      ...entry,
-      startDate: nextData.checkInDate || entry.startDate,
-      endDate: nextData.checkOutDate || entry.endDate,
-      checkInTime: nextData.checkInTime || entry.checkInTime,
-      checkOutTime: nextData.checkOutTime || entry.checkOutTime,
-      bookingForm: nextData,
-      status: nextData.status || entry.status,
-    }));
-  };
-
-  const handleSave = () => {
-    persist(draft);
-    setIsEditing(false);
-  };
-
-  const updateStatus = (nextStatus) => {
-    const next = { ...draft, status: nextStatus };
-    setDraft(next);
-    persist(next);
-  };
-
-  const handleDeleteBooking = () => {
-    deleteBookingById(bookingId);
-    router.push(`/edit/bookings/${id}`);
-  };
+  const { id } = useParams();
+  const bookingId = data?.id;
+  const [isVerifying, setIsVerifying] = useState(false);
+  
+  const status = data?.status || "Inquiry";
+  // Logic to check if payment is sent
+  const hasProof = !!data?.proofOfPaymentUrl; 
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 mt-[9vh]">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900">Booking Details</h1>
-            <p className="text-sm text-blue-600 font-bold">{currentResort?.name}</p>
-          </div>
-          <div className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider ${statusStyle}`}>
-            {status}
+    <div className="min-h-screen bg-slate-50/50 pb-32 mt-10 pt-10 px-4 md:px-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* TOP BAR: Navigation & Actions */}
+        <div className="flex justify-between items-center no-print">
+          <button onClick={onBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-xs uppercase tracking-widest">
+            <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-all">
+              <ChevronLeft size={16} />
+            </div>
+            Back to Overview
+          </button>
+
+          <div className="flex gap-3 items-center justify-center">
+            <Button 
+              variant="outline" 
+              onClick={() => router.push(`/edit/bookings/${id}/booking-details/${bookingId}/form`)} 
+              className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+              <FileText size={16} className="mr-2" /> View Form
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.print()} 
+              className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+              <Printer size={16} className="mr-2" /> Export
+            </Button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={() => router.push(`/edit/bookings/${id}`)}>
-            Back
-          </Button>
-          <Button variant="outline" onClick={() => router.push(`/edit/bookings/${id}/booking-details/${bookingId}/form`)}>
-            View Form
-          </Button>
 
-          {!isEditing ? (
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsEditing(true)}>
-              Edit Inline
-            </Button>
-          ) : (
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleSave}>
-              Save Changes
-            </Button>
-          )}
+        {/* 24-HOUR DEADLINE ALERT (Requirement 3) */}
+        {status === "Inquiry" && (
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3 text-amber-700">
+              <AlertCircle size={18} />
+              <p className="text-xs font-bold uppercase tracking-wider">Payment Deadline: 24 Hours from Approval</p>
+            </div>
+            <span className="text-[10px] font-black text-amber-500 bg-white px-3 py-1 rounded-full border border-amber-100">AUTO-CANCEL ACTIVE</span>
+          </div>
+        )}
 
-          <div className="w-px h-8 bg-slate-200 mx-2" />
-          <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => updateStatus("Confirmed")}>
-            Approve
-          </Button>
-          <Button className="bg-red-500 hover:bg-red-600 text-white" onClick={() => updateStatus("Declined")}>
-            Decline
-          </Button>
-          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDeleteBooking}>
-            Delete Booking
-          </Button>
-        </div>          
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* MAIN COLUMN (LHS) */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* HERO SECTION */}
+            <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex justify-between items-center">
+               <div className="flex items-center gap-6">
+                  <div className="h-16 w-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-100">
+                    <User size={28} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-1">{resortName}</p>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">{data?.guestName || "name"}</h1>
+                  </div>
+               </div>
+               <StatusBadge status={status} />
+            </div>
 
+            {/* DATA GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
+                  <SectionLabel icon={<Mail size={14}/>} label="Contact" />
+                  <InfoItem label="Email" value={data?.email} />
+                  <InfoItem label="Phone" value={data?.phoneNumber} />
+               </div>
+               <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
+                  <SectionLabel icon={<Calendar size={14}/>} label="Stay" />
+                  <InfoItem label="Dates" value={`${data?.checkInDate} - ${data?.checkOutDate}`} />
+                  <InfoItem label="Rooms" value={`${data?.roomCount} Units`} />
+               </div>
+            </div>
 
-        <Card className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InlineField label="Guest Name" value={draft.guestName} editing={isEditing} onChange={(val) => handleFieldChange("guestName", val)} />
-            <InlineField label="Room" value={draft.roomName || getRoomName(booking, currentResort)} editing={isEditing} onChange={(val) => handleFieldChange("roomName", val)} />
-            <InlineField label="Email" value={draft.email} editing={isEditing} onChange={(val) => handleFieldChange("email", val)} />
-            <InlineField label="Check-In Date" type="date" value={toDateValue(draft.checkInDate)} editing={isEditing} onChange={(val) => handleFieldChange("checkInDate", val)} />
-            <InlineField label="Check-In Time" type="time" value={draft.checkInTime} editing={isEditing} onChange={(val) => handleFieldChange("checkInTime", val)} />
-            <InlineField label="Check-Out Date" type="date" value={toDateValue(draft.checkOutDate)} editing={isEditing} onChange={(val) => handleFieldChange("checkOutDate", val)} />
-            <InlineField label="Check-Out Time" type="time" value={draft.checkOutTime} editing={isEditing} onChange={(val) => handleFieldChange("checkOutTime", val)} />
-            <InlineField label="Guests" type="number" value={String(draft.guestCount || 0)} editing={isEditing} onChange={(val) => handleFieldChange("guestCount", Number(val) || 0)} />
-            <InlineField label="Rooms" type="number" value={String(draft.roomCount || 1)} editing={isEditing} onChange={(val) => handleFieldChange("roomCount", Number(val) || 1)} />
-            <InlineField label="Total Amount" type="number" value={String(draft.totalAmount || 0)} editing={isEditing} onChange={(val) => handleFieldChange("totalAmount", Number(val) || 0)} />
-            <InlineField label="Downpayment" type="number" value={String(draft.downpayment || 0)} editing={isEditing} onChange={(val) => handleFieldChange("downpayment", Number(val) || 0)} />
-            <InlineField label="Payment Method" value={draft.paymentMethod || "Pending"} editing={isEditing} onChange={(val) => handleFieldChange("paymentMethod", val)} />
+            {/* ADDITIONAL SERVICES */}
+            <div className="space-y-4">
+              <SectionLabel icon={<Briefcase size={14}/>} label="Add-ons" />
+              <div className="flex flex-wrap gap-3">
+                {data?.resortServices?.map((s, i) => (
+                  <div key={i} className="bg-white px-4 py-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
+                    <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md"><CheckCircle size={14}/></div>
+                    <span className="text-xs font-bold text-slate-700">{s.name} (₱{s.cost})</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <InlineTextArea
-            label="Notes"
-            value={draft.notes || ""}
-            editing={isEditing}
-            onChange={(val) => handleFieldChange("notes", val)}
-          />
-        </Card>
+          {/* SIDEBAR (RHS): PAYMENT & PROOF */}
+          <div className="space-y-6">
+            
+            {/* NEW: PROOF OF PAYMENT CARD */}
+            <div className={`p-6 rounded-[2rem] border-2 transition-all shadow-xl ${
+              hasProof ? "bg-white border-emerald-100 shadow-emerald-50" : "bg-slate-50 border-dashed border-slate-200 shadow-none"
+            }`}>
+              <div className="flex justify-between items-center mb-6">
+                <SectionLabel icon={<ImageIcon size={14}/>} label="Proof of Payment" />
+                {hasProof ? (
+                  <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-1 rounded-md animate-pulse">RECEIVED</span>
+                ) : (
+                  <span className="bg-slate-200 text-slate-500 text-[9px] font-black px-2 py-1 rounded-md">AWAITING</span>
+                )}
+              </div>
+
+              {hasProof ? (
+                <div className="space-y-4">
+                  <div className="relative group cursor-pointer overflow-hidden rounded-2xl border border-slate-100">
+                    <img 
+                      src={data.proofOfPaymentUrl} 
+                      alt="Payment Receipt" 
+                      className="w-full h-40 object-cover group-hover:scale-105 transition-transform" 
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button variant="secondary" size="sm" className="rounded-full text-xs" onClick={() => window.open(data.proofOfPaymentUrl)}>
+                         View Fullscreen <ExternalLink size={12} className="ml-2"/>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                    <p className="text-[10px] text-emerald-700 font-bold mb-1">Owner Verification</p>
+                    <button 
+                      onClick={() => setIsVerifying(!isVerifying)}
+                      className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-tighter"
+                    >
+                      {isVerifying ? <CheckCircle size={14}/> : <ShieldCheck size={14}/>}
+                      {isVerifying ? "Transaction Verified" : "Mark as Verified"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center flex flex-col items-center">
+                  <div className="p-4 bg-slate-100 rounded-full mb-3 text-slate-400">
+                    <ImageIcon size={24} />
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                    Client has not uploaded <br/> proof yet
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* FINANCIAL SUMMARY */}
+            <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-2xl space-y-6 relative overflow-hidden">
+               <div className="absolute -top-4 -right-4 p-4 opacity-5">
+                 <ReceiptText size={120} />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Due</p>
+                  <p className="text-4xl font-black italic">₱{data?.totalAmount?.toLocaleString()}</p>
+               </div>
+               <div className="space-y-3 pt-4 border-t border-white/10 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Downpayment</span>
+                    <span className="font-bold">₱{data?.downpayment?.toLocaleString() || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Channel</span>
+                    <span className="font-black text-blue-400 text-[10px] tracking-widest">{data?.paymentMethod}</span>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-2xl mt-4">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Balance to Pay</p>
+                    <p className="text-2xl font-black">₱{(data?.totalAmount - (data?.downpayment || 0)).toLocaleString()}</p>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FLOATING ACTION BAR */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-slate-200 shadow-2xl no-print">
+        {status === "Inquiry" ? (
+          <>
+            <Button variant="ghost" className="rounded-full px-8 h-12 text-slate-400 hover:text-rose-600 font-bold">Decline</Button>
+            <Button className={`rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 ${
+              hasProof ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}>
+              <CheckCircle size={18} />
+              {hasProof ? "Confirm & Book" : "Approve Inquiry"}
+            </Button>
+          </>
+        ) : (
+          <Button 
+            onClick={() => router.push(`/edit/bookings/${id}/booking-details/${bookingId}`)}
+            className="bg-slate-900 hover:bg-black text-white rounded-full px-10 h-12 font-bold shadow-lg flex gap-2"
+          >
+            <Edit3 size={18} /> Edit Booking
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
-function InlineField({ label, value, editing, onChange, type = "text" }) {
+/* SUB-COMPONENTS */
+
+function SectionLabel({ icon, label }) {
   return (
-    <div className="rounded-xl border border-slate-200 p-4 bg-white">
-      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">{label}</p>
-      {editing ? (
-        <input
-          type={type}
-          value={value || ""}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      ) : (
-        <p className="text-sm font-bold text-slate-800 break-words">{value || "-"}</p>
-      )}
+    <div className="flex items-center gap-2 px-1">
+      <div className="text-blue-600">{icon}</div>
+      <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{label}</span>
     </div>
   );
 }
 
-function InlineTextArea({ label, value, editing, onChange }) {
+function InfoItem({ label, value }) {
   return (
-    <div className="rounded-xl border border-slate-200 p-4 bg-white">
-      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">{label}</p>
-      {editing ? (
-        <textarea
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full min-h-24 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      ) : (
-        <p className="text-sm font-bold text-slate-800 whitespace-pre-wrap">{value || "-"}</p>
-      )}
+    <div>
+      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="text-sm font-bold text-slate-900 truncate">{value || "—"}</p>
     </div>
   );
 }
 
-function getStatusStyle(status) {
-  const current = (status || "").toLowerCase();
-  if (current.includes("confirm")) return "bg-emerald-100 text-emerald-700";
-  if (current.includes("pending") || current.includes("inquiry")) return "bg-amber-100 text-amber-700";
-  if (current.includes("declin")) return "bg-red-100 text-red-700";
-  return "bg-blue-100 text-blue-700";
-}
-
-function getRoomName(booking, resort) {
-  if (!booking?.roomIds?.length) return "";
-  const room = resort?.rooms?.find((entry) => entry.id === booking.roomIds[0]);
-  return room?.name || "";
-}
-
-function toDateValue(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toISOString().slice(0, 10);
-}
-
-function normalizeBooking(booking) {
-  const form = booking?.bookingForm || {};
-  return {
-    ...DEFAULT_FORM,
-    ...form,
-    checkInDate: form.checkInDate || booking?.startDate || "",
-    checkOutDate: form.checkOutDate || booking?.endDate || "",
-    checkInTime: form.checkInTime || booking?.checkInTime || "14:00",
-    checkOutTime: form.checkOutTime || booking?.checkOutTime || "11:00",
-  };
+function StatusBadge({ status }) {
+  const isConfirmed = status === "Confirmed";
+  return (
+    <div className={`flex items-center gap-3 px-6 py-3 rounded-2xl border-2 ${
+      isConfirmed ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-blue-50 border-blue-100 text-blue-700"
+    }`}>
+      {isConfirmed ? <CheckCircle size={20} /> : <Clock size={20} />}
+      <div className="flex flex-col">
+        <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Status</span>
+        <span className="text-sm font-black uppercase tracking-wider">{status}</span>
+      </div>
+    </div>
+  );
 }

@@ -82,7 +82,7 @@ export default function BookingCalendar() {
   };
 
   const navigateToDetails = (bookingId) => router.push(`/edit/bookings/${params.id}/booking-details/${bookingId}`);
-  const navigateToForm = (bookingId) => router.push(`/edit/bookings/${params.id}/booking-details/${bookingId}/form`);
+  const navigateToForm = (bookingId) => router.push(`/edit/bookings/${params.id}/booking-details/${bookingId}`);
 
   const handleDateClick = (dateString) => {
     const clickedBooking = getDateBooking(dateString);
@@ -157,20 +157,20 @@ export default function BookingCalendar() {
             const day = index + 1;
             const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const booking = getDateBooking(dateString);
-            const isActive = booking?.id?.toString() === activeRangeId?.toString();
+            const isActive = booking && activeRangeId && booking.id?.toString() === activeRangeId?.toString();
+
 
             return (
               <button
                 key={day}
-                title={!isRangeMode && booking ? getBookingTooltip(booking) : ""}
                 onClick={() => handleDateClick(dateString)}
-                className={`h-9 w-full rounded-lg text-sm transition-all relative ${
-                  booking ? `${booking.colorClass} text-white` : "hover:bg-slate-100 text-slate-600"
-                } ${isActive ? "ring-2 ring-offset-2 ring-slate-400 scale-90" : ""} ${
-                  booking?.startDate === dateString ? "rounded-r-none" : ""
-                } ${booking?.endDate === dateString ? "rounded-l-none" : ""} ${
-                  booking && booking.startDate !== dateString && booking.endDate !== dateString ? "rounded-none opacity-80" : ""
-                }`}
+                className={`h-9 w-full rounded-lg text-sm transition-all relative 
+                  ${booking ? `${booking.colorClass} text-white` : "hover:bg-slate-100 text-slate-600"} 
+                  ${isActive ? "ring-2 ring-offset-2 ring-slate-400 scale-90 z-10" : ""} 
+                  ${booking?.startDate === dateString ? "rounded-r-none" : ""} 
+                  ${booking?.endDate === dateString ? "rounded-l-none" : ""} 
+                  ${booking && booking.startDate !== dateString && booking.endDate !== dateString ? "rounded-none opacity-80" : ""}
+                `}
               >
                 {day}
               </button>
