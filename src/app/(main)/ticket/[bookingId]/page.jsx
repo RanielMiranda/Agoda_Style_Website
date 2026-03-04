@@ -303,6 +303,8 @@ export default function ClientTicketPage() {
           <TicketRow label="Resort" value={resort?.name} />
           <TicketRow label="Guest Name" value={form.guestName} />
           <TicketRow label="Status" value={booking.status || "Inquiry"} isStatus />
+          <TicketRow label="Pax" value={form.guestCount || 0} />
+          <TicketRow label="Rooms" value={form.roomCount || 0} />
           <TicketRow label="Check-In" value={booking.start_date || form.checkInDate} subValue={booking.check_in_time || form.checkInTime} />
           <TicketRow label="Check-Out" value={booking.end_date || form.checkOutDate} subValue={booking.check_out_time || form.checkOutTime} />
           <TicketRow label="Location" value={resort?.location} />
@@ -395,7 +397,7 @@ export default function ClientTicketPage() {
         </div>
       </Card>
 
-      {/* Support Section */}
+      {/* Messaging Section */}
       <Card className="p-8 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] space-y-6">
         <div className="flex justify-between items-start">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -450,25 +452,30 @@ export default function ClientTicketPage() {
             </p>
           )}
 
-          <input
-            className="w-full rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-            placeholder="Subject of concern"
-            value={issueSubject}
-            onChange={(e) => setIssueSubject(e.target.value)}
-          />
-          <textarea
-            className="w-full min-h-32 rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-            placeholder="Please describe your concern or any issues with your stay..."
-            value={issueMessage}
-            onChange={(e) => setIssueMessage(e.target.value)}
-          />
-          <Button 
-            className="rounded-full px-10 h-12 bg-slate-900 font-bold uppercase text-[10px] tracking-widest hover:bg-black transition-all"
-            onClick={handleSendIssue}
-          >
-            Send Issue Report
-          </Button>
         </div>
+      </Card>
+
+      {/* Issue Report Section */}
+      <Card className="p-8 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] space-y-4">
+        <h3 className="text-sm font-black text-rose-600 uppercase tracking-[0.2em]">Issue Report</h3>
+        <input
+          className="w-full rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+          placeholder="Subject of concern"
+          value={issueSubject}
+          onChange={(e) => setIssueSubject(e.target.value)}
+        />
+        <textarea
+          className="w-full min-h-32 rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+          placeholder="Please describe your concern or any issues with your stay..."
+          value={issueMessage}
+          onChange={(e) => setIssueMessage(e.target.value)}
+        />
+        <Button
+          className="rounded-full px-10 h-12 bg-slate-900 font-bold uppercase text-[10px] tracking-widest hover:bg-black transition-all"
+          onClick={handleSendIssue}
+        >
+          Send Issue Report
+        </Button>
       </Card>
 
       <Toast />

@@ -449,6 +449,8 @@ function BookingModernEditor({
                   <InfoItem label="Check-Out" value={draft.checkOutDate} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
                   <InfoItem label="Time In" value={draft.checkInTime} editing={isEditing} type="time" onChange={(val) => setField("checkInTime", val)} />
                   <InfoItem label="Time Out" value={draft.checkOutTime} editing={isEditing} type="time" onChange={(val) => setField("checkOutTime", val)} />
+                  <InfoItem label="Pax" value={draft.guestCount} editing={isEditing} type="number" onChange={(val) => setField("guestCount", Number(val) || 0)} />
+                  <InfoItem label="Rooms" value={draft.roomCount} editing={isEditing} type="number" onChange={(val) => setField("roomCount", Number(val) || 0)} />
                 </div>
                 <div className={`rounded-xl px-3 py-2 border ${conflicts.length > 0 ? "border-rose-200 bg-rose-50" : "border-emerald-200 bg-emerald-50"}`}>
                   <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">Availability Check</p>
@@ -580,61 +582,51 @@ function BookingModernEditor({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-3">
-            <SectionLabel icon={<AlertCircle size={14} />} label="Inquiry / Client Messages" />
-            <div className="max-h-52 overflow-auto space-y-2">
-              {issues.length === 0 && !draft.notes ? (
-                <p className="text-xs text-slate-400">No messages sent yet.</p>
-              ) : (
-                <>
-                  {draft.notes ? (
-                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                      <p className="text-[10px] font-black uppercase text-blue-700">Inquiry Message</p>
-                      <p className="text-xs text-slate-700 mt-1">{draft.notes}</p>
-                    </div>
-                  ) : null}
-                  {issues.map((issue) => (
-                    <div key={issue.id} className="p-3 rounded-xl bg-amber-50 border border-amber-100">
-                      <p className="text-[10px] font-black uppercase text-amber-700">{issue.subject || "Concern"}</p>
-                      <p className="text-xs text-slate-700 mt-1">{issue.message}</p>
-                    </div>
-                  ))}
-                </>
-              )}
+        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+          <SectionLabel icon={<Mail size={14} />} label="Client Messaging" />
+          {draft.notes ? (
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+              <p className="text-[10px] font-black uppercase text-blue-700">Inquiry</p>
+              <p className="text-xs text-slate-700 mt-1">{draft.notes}</p>
             </div>
+          ) : null}
+          {issues.length > 0 && (
+            <div className="space-y-2">
+              {issues.map((issue) => (
+                <div key={issue.id} className="p-3 rounded-xl bg-amber-50 border border-amber-100">
+                  <p className="text-[10px] font-black uppercase text-amber-700">{issue.subject || "Concern"}</p>
+                  <p className="text-xs text-slate-700 mt-1">{issue.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="max-h-52 overflow-auto space-y-2">
+            {messages.length === 0 ? (
+              <p className="text-xs text-slate-400">No messages sent yet.</p>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`p-2.5 rounded-xl text-xs ${
+                    msg.sender_role === "owner"
+                      ? "bg-blue-50 text-blue-700 ml-8"
+                      : "bg-slate-50 text-slate-700 mr-8"
+                  }`}
+                >
+                  <p className="font-black uppercase text-[9px] mb-1">{msg.sender_role}</p>
+                  <p>{msg.message}</p>
+                </div>
+              ))
+            )}
           </div>
-
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-3">
-            <SectionLabel icon={<Mail size={14} />} label="Client Messaging" />
-            <div className="max-h-44 overflow-auto space-y-2">
-              {messages.length === 0 ? (
-                <p className="text-xs text-slate-400">No thread messages yet.</p>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`p-2.5 rounded-xl text-xs ${
-                      msg.sender_role === "owner"
-                        ? "bg-blue-50 text-blue-700 ml-8"
-                        : "bg-slate-50 text-slate-700 mr-8"
-                    }`}
-                  >
-                    <p className="font-black uppercase text-[9px] mb-1">{msg.sender_role}</p>
-                    <p>{msg.message}</p>
-                  </div>
-                ))
-              )}
-            </div>
-            <div className="flex gap-2">
-              <input
-                className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                placeholder="Reply to client"
-                value={ownerReply}
-                onChange={(e) => setOwnerReply(e.target.value)}
-              />
-              <Button onClick={onSendReply}>Send</Button>
-            </div>
+          <div className="flex gap-2">
+            <input
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              placeholder="Reply to client"
+              value={ownerReply}
+              onChange={(e) => setOwnerReply(e.target.value)}
+            />
+            <Button onClick={onSendReply}>Send</Button>
           </div>
         </div>
       </div>

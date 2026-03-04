@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calendar, Tag } from "lucide-react";
+import { Calendar, Tag, Users } from "lucide-react";
 import SideRangeCalendar from "./SideRangeCalendar";
 import { useFilters } from "@/components/useclient/ContextFilter"; 
 
@@ -7,6 +7,8 @@ export default function RoomFilterPanel() {
   const { 
     selectedTags, 
     setSelectedTags, 
+    guests,
+    setGuests,
     startDate, 
     setStartDate, 
     endDate, 
@@ -42,10 +44,14 @@ export default function RoomFilterPanel() {
       {/* AMENITIES TAGS */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-           <Tag size={16} className="text-blue-600" />
-           <p className="font-medium text-sm text-gray-700">Pax</p>
+           <Users size={16} className="text-blue-600" />
+           <p className="font-medium text-sm text-gray-700">Guest Group</p>
         </div>
-        
+        <div className="grid grid-cols-3 gap-2 text-xs font-bold">
+          <GuestCounter label="Adults" value={guests.adults} min={1} onChange={(value) => setGuests((prev) => ({ ...prev, adults: value }))} />
+          <GuestCounter label="Children" value={guests.children} min={0} onChange={(value) => setGuests((prev) => ({ ...prev, children: value }))} />
+          <GuestCounter label="Rooms" value={guests.rooms} min={1} onChange={(value) => setGuests((prev) => ({ ...prev, rooms: value }))} />
+        </div>
       </div>
 
       {selectedTags.length > 0 && (
@@ -92,6 +98,19 @@ function DateRangeField({
           />
         </div>
       )}
+    </div>
+  );
+}
+
+function GuestCounter({ label, value, min = 0, onChange }) {
+  return (
+    <div className="rounded-xl border border-slate-200 p-2 text-center">
+      <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
+      <div className="mt-1 flex items-center justify-center gap-2">
+        <button className="h-6 w-6 rounded-md bg-slate-100" onClick={() => onChange(Math.max(min, Number(value || 0) - 1))}>-</button>
+        <span className="w-5 text-center">{value || 0}</span>
+        <button className="h-6 w-6 rounded-md bg-slate-100" onClick={() => onChange(Number(value || 0) + 1)}>+</button>
+      </div>
     </div>
   );
 }

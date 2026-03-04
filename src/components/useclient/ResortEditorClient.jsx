@@ -88,12 +88,20 @@ export function ResortEditorProvider({ children }) {
       if (!identifier) return;
       const scope = isId ? `id:${identifier}` : `name:${identifier}`;
       setDraftScope(scope);
+      const identifierText = String(identifier).trim();
       if (typeof window !== "undefined") {
         try {
           const cachedDraft = readDraftByScope(scope);
-          if (cachedDraft) {
+          const draftMatchesTarget = isId
+            ? String(cachedDraft?.id ?? "").trim() === identifierText
+            : String(cachedDraft?.name ?? "").trim().toLowerCase() === identifierText.toLowerCase();
+          const hasMinimumFields = !!cachedDraft?.name || !!cachedDraft?.id;
+          if (cachedDraft && hasMinimumFields && draftMatchesTarget) {
             setResort(cachedDraft);
             return;
+          }
+          if (cachedDraft && (!hasMinimumFields || !draftMatchesTarget)) {
+            localStorage.removeItem(draftStorageKey(scope));
           }
         } catch (e) {
           console.error("Failed to parse resort scoped draft", e);

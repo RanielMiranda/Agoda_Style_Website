@@ -5,6 +5,7 @@ import { useFilters } from "@/components/useclient/ContextFilter";
 
 export default function FilterPanel() {
   const {
+    allResorts,
     priceRange,
     setPriceRange,
     selectedTags,
@@ -19,6 +20,27 @@ export default function FilterPanel() {
       prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
     );
   };
+  const [tagSearch, setTagSearch] = React.useState("");
+
+  const amenityOptions = React.useMemo(() => {
+    const tagSet = new Set();
+    (allResorts || []).forEach((resort) => {
+      (resort.tags || []).forEach((tag) => {
+        if (tag) tagSet.add(String(tag));
+      });
+      (resort.facilities || []).forEach((facility) => {
+        const name = facility?.name;
+        if (name) tagSet.add(String(name));
+      });
+    });
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
+  }, [allResorts]);
+
+  const filteredAmenityOptions = React.useMemo(() => {
+    const query = tagSearch.trim().toLowerCase();
+    if (!query) return amenityOptions;
+    return amenityOptions.filter((tag) => tag.toLowerCase().includes(query));
+  }, [amenityOptions, tagSearch]);
 
   return (
     <div className="w-full lg:w-80 bg-white shadow rounded-2xl p-6 h-fit lg:sticky lg:top-24">
@@ -59,8 +81,15 @@ export default function FilterPanel() {
 
       <div>
         <p className="font-medium mb-2">Amenities</p>
+        <input
+          type="text"
+          value={tagSearch}
+          onChange={(e) => setTagSearch(e.target.value)}
+          placeholder="Search amenities..."
+          className="w-full mb-3 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+        />
         <div className="flex flex-col gap-2">
-          {["Wifi", "Kitchen", "Swimming Pool", "Videoke", "Natural Hot Spring", "Billiard Table"].map((tag) => (
+          {filteredAmenityOptions.map((tag) => (
             <label key={tag} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -70,6 +99,9 @@ export default function FilterPanel() {
               {tag}
             </label>
           ))}
+          {filteredAmenityOptions.length === 0 && (
+            <p className="text-xs text-slate-400">No amenities found.</p>
+          )}
         </div>
       </div>
 

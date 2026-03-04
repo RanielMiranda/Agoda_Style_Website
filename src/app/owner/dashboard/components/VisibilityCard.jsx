@@ -2,7 +2,7 @@ import { AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function VisibilityCard({ status, onRequestPublish }) {
+export default function VisibilityCard({ status, onRequestPublish, submitting = false }) {
   const statusColor = {
     Draft: "bg-amber-100 text-amber-700",
     "Pending Approval": "bg-blue-100 text-blue-700",
@@ -10,7 +10,7 @@ export default function VisibilityCard({ status, onRequestPublish }) {
   };
 
   // Button is only clickable if it's currently in 'Draft' mode
-  const isPending = status === "Pending Approval";
+  const isPending = status === "Pending Approval" || submitting;
 
   return (
     <Card className="p-6 rounded-2xl shadow-md bg-white flex flex-col md:flex-row justify-between items-center gap-6">

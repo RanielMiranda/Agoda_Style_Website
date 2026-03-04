@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle } from "lucide-react"; 
 
@@ -22,20 +22,111 @@ const isMissingOwnerAdminTableError = (error) =>
 
 export default function Page() {
   const [resortStatus, setResortStatus] = useState("Draft");
+  const [submittingPublish, setSubmittingPublish] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [adminMessages, setAdminMessages] = useState([]);
+  const [bookingsAlertCount, setBookingsAlertCount] = useState(0);
   const router = useRouter();
   const { toast } = useToast();
   const OWNER_RESORT_ID = 1;
 
-  const handleRequestPublish = () => {
-    setResortStatus("Pending Approval");
-    toast({
-      message: `Kasbah Villa publication request sent!`,
-      color: "blue",
-      icon: CheckCircle,
-    });
-  };
+  const loadDashboardStatus = useCallback(async () => {
+    const { data: resortRow, error: resortError } = await supabase
+      .from("resorts")
+      .select("id, name, visible")
+      .eq("id", OWNER_RESORT_ID)
+      .single();
+    if (resortError) {
+      console.error("Failed to load owner resort status:", resortError.message);
+      return;
+    }
+
+    const { data: pendingRequest, error: pendingError } = await supabase
+      .from("resort_messages")
+      .select("id")
+      .eq("status", "pending")
+      .eq("requestedBy", resortRow?.name || `Resort #${OWNER_RESORT_ID}`)
+      .ilike("title", "Publication Request%")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (pendingError) {
+      console.error("Failed to load publication request status:", pendingError.message);
+      return;
+    }
+
+    if (pendingRequest?.length) {
+      setResortStatus("Pending Approval");
+    } else if (resortRow?.visible) {
+      setResortStatus("Published");
+    } else {
+      setResortStatus("Draft");
+    }
+  }, [OWNER_RESORT_ID, toast]);
+
+  const loadBookingsAlertCount = useCallback(async () => {
+    let total = 0;
+    const { count: inquiryCount, error: inquiryErr } = await supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("resort_id", OWNER_RESORT_ID)
+      .in("status", ["Inquiry", "Pending Payment", "Pending"]);
+
+    if (!inquiryErr) total += Number(inquiryCount || 0);
+
+    const { count: openIssueCount, error: issueErr } = await supabase
+      .from("ticket_issues")
+      .select("id", { count: "exact", head: true })
+      .eq("resort_id", OWNER_RESORT_ID)
+      .eq("status", "open");
+
+    if (!issueErr) total += Number(openIssueCount || 0);
+    setBookingsAlertCount(total);
+  }, [OWNER_RESORT_ID]);
+
+  const handleRequestPublish = useCallback(async () => {
+    setSubmittingPublish(true);
+    try {
+      const { data: resortRow, error: resortErr } = await supabase
+        .from("resorts")
+        .select("id, name")
+        .eq("id", OWNER_RESORT_ID)
+        .single();
+      if (resortErr) throw resortErr;
+
+      const requestedBy = resortRow?.name || `Resort #${OWNER_RESORT_ID}`;
+      const title = `Publication Request - ${requestedBy}`;
+      const content = `${requestedBy} requested publication review from owner dashboard.`;
+
+      const { error: messageError } = await supabase.from("resort_messages").insert({
+        title,
+        content,
+        requestedBy,
+        status: "pending",
+      });
+      if (messageError) throw messageError;
+
+      const { error: visibilityError } = await supabase
+        .from("resorts")
+        .update({ visible: false })
+        .eq("id", OWNER_RESORT_ID);
+      if (visibilityError) throw visibilityError;
+
+      setResortStatus("Pending Approval");
+      toast({
+        message: `${requestedBy} publication request sent for admin review.`,
+        color: "blue",
+        icon: CheckCircle,
+      });
+    } catch (error) {
+      toast({
+        message: `Failed to send publication request: ${error.message}`,
+        color: "red",
+      });
+    } finally {
+      setSubmittingPublish(false);
+    }
+  }, [OWNER_RESORT_ID, toast]);
 
   const loadOwnerAdminMessages = useCallback(async () => {
     const { data, error } = await supabase
@@ -106,6 +197,12 @@ export default function Page() {
     loadOwnerAdminMessages();
   };
 
+  useEffect(() => {
+    loadDashboardStatus();
+    loadBookingsAlertCount();
+    loadOwnerAdminMessages();
+  }, [loadBookingsAlertCount, loadDashboardStatus, loadOwnerAdminMessages]);
+
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
@@ -127,6 +224,7 @@ export default function Page() {
           <div className="lg:col-span-2">
             <VisibilityCard 
               status={resortStatus} 
+              submitting={submittingPublish}
               onRequestPublish={handleRequestPublish} 
             />
           </div>
@@ -134,7 +232,10 @@ export default function Page() {
           {/* 2. Bookings Card: Top Right (Height 3)
               This pushes things down in its own column without affecting the left side */}
           <div className="lg:col-span-1">
-            <BookingsCard onBookings={() => router.push("/edit/bookings/1")} />
+            <BookingsCard
+              alertCount={bookingsAlertCount}
+              onBookings={() => router.push("/edit/bookings/1")}
+            />
           </div>
 
           {/* 3. Resort Card: "The Spacer" 
