@@ -138,7 +138,7 @@ export default function AdminAnalyticsPage() {
               className="inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
             >
               <ExternalLink size={16} />
-              Vercel Analytics
+              Webpage Traffic Analytics
             </a>
             <Button onClick={loadAnalytics} disabled={refreshing} className="h-11 rounded-xl flex items-center justify-center">
               <RefreshCw size={16} className={refreshing ? "animate-spin mr-2" : "mr-2"} />

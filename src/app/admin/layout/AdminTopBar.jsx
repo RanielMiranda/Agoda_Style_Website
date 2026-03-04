@@ -16,12 +16,6 @@ export default function AdminTopBar() {
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Accounts", href: "/admin/accounts", icon: Users },
     { name: "Analytics", href: "/admin/analytics", icon: Activity },
-    {
-      name: "Vercel",
-      href: "https://vercel.com/raniels-projects-2ea24826/agoda-style-website/analytics",
-      icon: ExternalLink,
-      external: true,
-    },
   ];
 
   const closeMenu = () => setIsMenuOpen(false);

@@ -18,6 +18,7 @@ import {
   ExternalLink,
   ShieldCheck,
   AlertCircle,
+  Phone,
   Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,13 @@ function getStoragePathFromUrl(url) {
   const idx = url.indexOf(marker);
   if (idx === -1) return null;
   return decodeURIComponent(url.slice(idx + marker.length));
+}
+
+function formatWeekdayLabel(dateValue) {
+  if (!dateValue) return "No date selected";
+  const parsed = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return "Invalid date";
+  return parsed.toLocaleDateString(undefined, { weekday: "long" });
 }
 
 export default function BookingDetailsPage() {
@@ -190,22 +198,6 @@ export default function BookingDetailsPage() {
     }
   };
 
-  const sendClientTicketNotice = async (message) => {
-    if (!booking?.id) return;
-    try {
-      await sendTicketMessage({
-        booking_id: booking.id,
-        resort_id: booking.resortId || booking.resort_id || Number(id),
-        sender_role: "owner",
-        sender_name: "Owner",
-        message: `${message} Ticket: /ticket/${booking.id}`,
-      });
-      await loadSupportData(booking.id);
-    } catch (err) {
-      console.error("Auto ticket notice error:", err.message);
-    }
-  };
-
   return (
     <BookingModernEditor
       key={booking.id}
@@ -225,7 +217,6 @@ export default function BookingDetailsPage() {
       ownerReply={ownerReply}
       setOwnerReply={setOwnerReply}
       onSendReply={handleSendReply}
-      onNotifyClient={sendClientTicketNotice}
       conflicts={bookingConflicts}
     />
   );
@@ -245,7 +236,6 @@ function BookingModernEditor({
   ownerReply,
   setOwnerReply,
   onSendReply,
-  onNotifyClient,
   conflicts = [],
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -359,9 +349,6 @@ function BookingModernEditor({
     }
     setDraft(next);
     persist(next);
-    if (nextStatus === "Confirmed") {
-      onNotifyClient?.("Your booking has been approved.");
-    }
   };
 
   const handleRequestPayment = () => {
@@ -373,14 +360,12 @@ function BookingModernEditor({
     };
     setDraft(next);
     persist(next);
-    onNotifyClient?.("Inquiry approved. Please proceed with payment upload.");
   };
 
   const handleApproveInquiry = () => {
     const next = { ...draft, status: "Approved Inquiry" };
     setDraft(next);
     persist(next);
-    onNotifyClient?.("Inquiry approved. Use your ticket link to continue messaging and payment steps.");
   };
 
   const handleVerifyProof = () => {
@@ -394,7 +379,7 @@ function BookingModernEditor({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-32 mt-10 pt-10 px-4 md:px-8">
+    <div className="min-h-screen bg-slate-50/50 pb-32 pt-10 px-4 md:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex justify-between items-center no-print">
           <button onClick={onBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-xs uppercase tracking-widest">
@@ -454,22 +439,50 @@ function BookingModernEditor({
                   ) : (
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">{draft.guestName || "Guest"}</h1>
                   )}
+                  <div className="mt-3 space-y-1">
+                    {isEditing ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input
+                          type="email"
+                          className="text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100"
+                          value={draft.email || ""}
+                          onChange={(e) => setField("email", e.target.value)}
+                          placeholder="Email"
+                        />
+                        <input
+                          type="text"
+                          className="text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100"
+                          value={draft.phoneNumber || ""}
+                          onChange={(e) => setField("phoneNumber", e.target.value)}
+                          placeholder="Phone"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          <Mail size={12} />
+                          {draft.email || "No email"}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Phone size={12} />
+                          {draft.phoneNumber || "No phone"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <StatusBadge status={status} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
-                <SectionLabel icon={<Mail size={14} />} label="Contact" />
-                <InfoItem label="Email" value={draft.email} editing={isEditing} onChange={(val) => setField("email", val)} />
-                <InfoItem label="Phone" value={draft.phoneNumber} editing={isEditing} onChange={(val) => setField("phoneNumber", val)} />
-              </div>
+            <div>
               <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
                 <SectionLabel icon={<Calendar size={14} />} label="Stay" />
                 <div className="grid grid-cols-2 gap-2">
                   <InfoItem label="Check-In" value={draft.checkInDate} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
                   <InfoItem label="Check-Out" value={draft.checkOutDate} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
+                  <InfoItem label="Check-In-Day" value={formatWeekdayLabel(draft.checkInDate)} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
+                  <InfoItem label="Check-Out-Day" value={formatWeekdayLabel(draft.checkOutDate)} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
                   <InfoItem label="Time In" value={draft.checkInTime} editing={isEditing} type="time" onChange={(val) => setField("checkInTime", val)} />
                   <InfoItem label="Time Out" value={draft.checkOutTime} editing={isEditing} type="time" onChange={(val) => setField("checkOutTime", val)} />
                   <InfoItem label="Pax" value={draft.guestCount} editing={isEditing} type="number" onChange={(val) => setField("guestCount", Number(val) || 0)} />

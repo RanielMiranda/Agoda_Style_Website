@@ -3,16 +3,22 @@ import { NextResponse } from 'next/server'
 export async function middleware(request) {
   const { pathname } = request.nextUrl
   const appAuth = request.cookies.get("app_auth")?.value
-  const appRole = request.cookies.get("app_role")?.value
+  const appRole = String(request.cookies.get("app_role")?.value || "").toLowerCase()
   const isAdminRoute = pathname.startsWith("/admin")
   const isOwnerRoute = pathname.startsWith("/owner")
   const isEditRoute = pathname.startsWith("/edit")
+  const isPublicEntry = pathname === "/" || pathname === "/auth/login"
+
+  if (isPublicEntry && appAuth && ["admin", "owner"].includes(appRole)) {
+    const target = appRole === "admin" ? "/admin/dashboard" : "/owner/dashboard";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
 
   if (isAdminRoute || isOwnerRoute || isEditRoute) {
     if (!appAuth) {
       return NextResponse.redirect(new URL("/", request.url))
     }
-    if (!["admin", "owner"].includes(String(appRole || "").toLowerCase())) {
+    if (!["admin", "owner"].includes(appRole)) {
       return NextResponse.redirect(new URL("/", request.url))
     }
     if (isAdminRoute && appRole === "owner") {
@@ -27,5 +33,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/owner/:path*', '/edit/:path*'],
+  matcher: ['/', '/auth/login', '/admin/:path*', '/owner/:path*', '/edit/:path*'],
 }
