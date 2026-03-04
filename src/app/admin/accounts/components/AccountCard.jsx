@@ -57,7 +57,10 @@ export default function AccountCard({ account, onToggleStatus, onApprove, onView
 
         <div>
           <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Password</p>
-          <p className="text-sm font-medium text-slate-700 flex items-center gap-1"><Lock size={12} />{account.password ? "••••••••" : "-"}</p>
+          <p className="text-sm font-semibold text-slate-700 flex items-center gap-1 break-all">
+            <Lock size={12} />
+            <span className="font-mono">{account.password || "-"}</span>
+          </p>
         </div>
 
         <div className="flex items-center justify-end gap-3">

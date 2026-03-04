@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Inbox, CheckCircle2, AlertCircle, User, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Inbox, CheckCircle2, AlertCircle, User, ChevronRight, ArrowUpRight, Mail, CalendarDays, BedDouble } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { useResort } from "@/components/useclient/ContextEditor";
@@ -27,6 +27,7 @@ export default function RentalManager({ onOpenDetails }) {
         guestName: form.guestName || "Guest",
         room: roomName,
         email: form.email || "No email",
+        pax: Number(form.guestCount || form.pax || 0),
         status: form.status || booking.status || "Inquiry",
         normalizedStatus: (form.status || booking.status || "Inquiry").toLowerCase(),
         checkInDate: booking.startDate || form.checkInDate || "",
@@ -52,8 +53,8 @@ export default function RentalManager({ onOpenDetails }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-                isActive ? "bg-white text-slate-900 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
+              className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-transparent focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                isActive ? "bg-white text-slate-900 shadow-sm border-slate-100" : "text-slate-400 hover:text-slate-600"
               }`}
             >
               <tab.icon size={16} className={isActive ? tab.color : ""} />
@@ -76,26 +77,45 @@ export default function RentalManager({ onOpenDetails }) {
           grouped[activeTab].map((item) => (
             <div
               key={item.bookingId}
-              className="group grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-center p-3 rounded-xl border border-slate-100 bg-white hover:border-blue-200 transition-all"
+              className="group grid grid-cols-1 lg:grid-cols-[240px_180px_1fr_220px_auto] gap-3 items-center p-4 rounded-2xl border border-slate-100 bg-white hover:border-blue-200 transition-all"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shrink-0">
                   <User size={16} />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-md text-slate-500 uppercase tracking-tight">{item.room}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 uppercase tracking-tight">
-                      {item.status}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                     <p className="text-[11px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                       {item.checkInDate} <ChevronRight size={10}/> {item.checkOutDate}
-                     </p>
-                     <span className="text-[11px] text-slate-400 truncate">{item.email}</span>
-                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Guest</p>
+                  <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Room / Pax</p>
+                <p className="text-sm font-bold text-slate-700 truncate flex items-center gap-2">
+                  <BedDouble size={14} className="text-slate-400" />
+                  {item.room}
+                  <span className="text-xs text-slate-500">({item.pax} pax)</span>
+                </p>
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Stay Dates</p>
+                <p className="text-[11px] font-bold text-slate-600 uppercase flex items-center gap-1 truncate">
+                  <CalendarDays size={12} className="text-slate-400" />
+                  {item.checkInDate || "-"} <ChevronRight size={10}/> {item.checkOutDate || "-"}
+                </p>
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Status / Email</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 uppercase tracking-tight">
+                    {item.status}
+                  </span>
+                  <span className="text-[11px] text-slate-500 truncate flex items-center gap-1">
+                    <Mail size={12} className="text-slate-400" />
+                    {item.email}
+                  </span>
                 </div>
               </div>
 

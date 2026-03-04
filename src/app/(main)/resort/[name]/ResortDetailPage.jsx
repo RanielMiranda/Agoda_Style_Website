@@ -158,6 +158,7 @@ const handleSubmitInquiry = async (submittedData) => {
 
       <FacilitySection 
         facilities={resort.facilities} 
+        summary={resort.description?.facilitiesSummary || ""}
         onOpen={handleOpenFacility} 
       />
 

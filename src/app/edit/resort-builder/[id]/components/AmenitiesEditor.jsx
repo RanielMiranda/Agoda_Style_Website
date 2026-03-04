@@ -2,24 +2,23 @@
 
 import { Plus, Trash2, Camera, GripVertical } from "lucide-react";
 import { useResort } from "@/components/useclient/ContextEditor";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import FacilityGalleryModal from "./FacilityGalleryModal";
 
-function SortableFacilityCard({
+function SortableAmenity({
   id,
   facility,
   onRemove,
   onReplace,
-  onOpenModal,
   onNameChange,
   onDescriptionChange,
   safeSrc,
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -29,6 +28,7 @@ function SortableFacilityCard({
 
   return (
     <div ref={setNodeRef} style={style} className={`flex-shrink-0 w-48 snap-start group relative ${isDragging ? "opacity-50" : ""}`}>
+      {/* Drag Handle */}
       <div
         {...attributes}
         {...listeners}
@@ -37,18 +37,7 @@ function SortableFacilityCard({
         <GripVertical size={12} />
       </div>
 
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={onOpenModal}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onOpenModal();
-          }
-        }}
-        className="w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-slate-200 block text-left cursor-pointer"
-      >
+      <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-slate-200">
         {facility.image ? (
           <img src={safeSrc(facility.image)} className="w-full h-full object-cover" alt="" />
         ) : (
@@ -58,24 +47,10 @@ function SortableFacilityCard({
         )}
 
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onReplace();
-            }}
-            className="p-1 bg-white rounded-full text-black"
-          >
+          <button onClick={onReplace} className="p-1 bg-white rounded-full text-black">
             <Camera size={12} />
           </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRemove();
-            }}
-            className="p-1 bg-white rounded-full text-red-500"
-          >
+          <button onClick={onRemove} className="p-1 bg-white rounded-full text-red-500">
             <Trash2 size={12} />
           </button>
         </div>
@@ -97,32 +72,33 @@ function SortableFacilityCard({
   );
 }
 
-export default function FacilityEditor() {
+export default function AmenitiesEditor() {
   const { resort, updateResort, safeSrc } = useResort();
   const fileInputRefs = useRef({});
   const bulkInputRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const facilities = resort?.facilities || [];
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = facilities.findIndex((_, i) => `facility-${i}` === active.id);
-    const newIndex = facilities.findIndex((_, i) => `facility-${i}` === over.id);
+    const oldIndex = facilities.findIndex((_, i) => `amenity-${i}` === active.id);
+    const newIndex = facilities.findIndex((_, i) => `amenity-${i}` === over.id);
+
     updateResort("facilities", arrayMove(facilities, oldIndex, newIndex));
   };
 
-  const updateFacility = (index, field, value) => {
+  const updateAmenity = (index, field, value) => {
     const updated = [...facilities];
     updated[index] = { ...updated[index], [field]: value };
     updateResort("facilities", updated);
   };
 
-  const removeFacility = (index) => {
+  const removeAmenity = (index) => {
     if (window.confirm(`Remove ${facilities[index].name}?`)) {
       updateResort("facilities", facilities.filter((_, i) => i !== index));
     }
@@ -130,7 +106,7 @@ export default function FacilityEditor() {
 
   const handleImageReplace = (index, e) => {
     const file = e.target.files[0];
-    if (file) updateFacility(index, "image", file);
+    if (file) updateAmenity(index, "image", file);
     e.target.value = "";
   };
 
@@ -138,27 +114,23 @@ export default function FacilityEditor() {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    const newFacilities = files.map((file) => ({
+    const newAmenities = files.map((file) => ({
       name: "New Facility",
       description: "",
       image: file,
     }));
 
-    updateResort("facilities", [...facilities, ...newFacilities]);
+    updateResort("facilities", [...facilities, ...newAmenities]);
     e.target.value = "";
-  };
-
-  const setFacilitiesSummary = (value) => {
-    updateResort("description", {
-      ...(resort.description || {}),
-      facilitiesSummary: value,
-    });
   };
 
   return (
     <div id="facilities" className="max-w-6xl mx-auto px-4 mt-8">
+
+      {/* Header with Add Button */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Facilities</h2>
+
         <button
           onClick={() => bulkInputRef.current?.click()}
           className="flex items-center hover:scale-105 gap-2 px-4 py-3 rounded-lg bg-blue-600 text-white text-md font-medium hover:bg-blue-700 transition"
@@ -177,29 +149,31 @@ export default function FacilityEditor() {
         accept="image/*"
       />
 
+      {/* Scroll Container */}
       <div className="relative">
+
         <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory py-4 pb-6 scrollbar-hide scroll-smooth">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={facilities.map((_, i) => `facility-${i}`)} strategy={horizontalListSortingStrategy}>
+            <SortableContext
+              items={facilities.map((_, i) => `amenity-${i}`)}
+              strategy={horizontalListSortingStrategy}
+            >
               {facilities.map((facility, idx) => (
-                <SortableFacilityCard
-                  key={`facility-${idx}`}
-                  id={`facility-${idx}`}
+                <SortableAmenity
+                  key={`amenity-${idx}`}
+                  id={`amenity-${idx}`}
                   facility={facility}
                   safeSrc={safeSrc}
-                  onOpenModal={() => {
-                    setActiveIndex(idx);
-                    setModalOpen(true);
-                  }}
-                  onRemove={() => removeFacility(idx)}
+                  onRemove={() => removeAmenity(idx)}
                   onReplace={() => fileInputRefs.current[idx]?.click()}
-                  onNameChange={(val) => updateFacility(idx, "name", val)}
-                  onDescriptionChange={(val) => updateFacility(idx, "description", val)}
+                  onNameChange={(val) => updateAmenity(idx, "name", val)}
+                  onDescriptionChange={(val) => updateAmenity(idx, "description", val)}
                 />
               ))}
             </SortableContext>
           </DndContext>
 
+          {/* Hidden file inputs */}
           {facilities.map((_, idx) => (
             <input
               key={`file-input-${idx}`}
@@ -210,34 +184,11 @@ export default function FacilityEditor() {
               accept="image/*"
             />
           ))}
-          <button
-            onClick={() => bulkInputRef.current?.click()}
-            className="flex w-48 aspect-square rounded-2xl border-2 border-dashed border-slate-300 flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500 transition hover:bg-blue-50"
-          >
-            <Plus size={24} />
-            <span className="text-xs font-bold mt-1">Add</span>
-          </button>
+        <button onClick={() => bulkInputRef.current?.click()} className="flex-shrink-0 w-48 aspect-square rounded-2xl border-2 border-dashed border-slate-300 flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500 transition hover:bg-blue-50">
+          <Plus size={24} />
+          <span className="text-xs font-bold mt-1">Add</span>
+        </button>          
         </div>
-      </div>
-
-      {modalOpen && (
-        <FacilityGalleryModal
-          facilities={facilities.map((item) => ({ ...item, image: safeSrc(item.image) }))}
-          activeIndex={activeIndex}
-          setActiveIndex={setActiveIndex}
-          onClose={() => setModalOpen(false)}
-        />
-      )}
-
-      <div className="mt-8">
-        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Facilities Description</p>
-        <textarea
-          className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-slate-600 outline-none focus:border-blue-400 focus:bg-white transition"
-          rows={4}
-          value={resort.description?.facilitiesSummary || ""}
-          onChange={(e) => setFacilitiesSummary(e.target.value)}
-          placeholder="Describe overall facility highlights..."
-        />
       </div>
     </div>
   );

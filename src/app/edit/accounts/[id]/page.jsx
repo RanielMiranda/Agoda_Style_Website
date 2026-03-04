@@ -69,7 +69,7 @@ export default function EditAccountPage() {
   if (loading) return <div className="p-10 text-center text-slate-500">Loading account...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mt-10 mx-auto">
       <button
         onClick={() => router.back()}
         className="flex items-center text-slate-500 hover:text-slate-900 mb-6 font-bold text-sm transition-colors"

@@ -48,6 +48,27 @@ const toResortDbPayload = (resort) =>
     return acc;
   }, {});
 
+const collectResortImageUrls = (resortLike) => {
+  const urls = new Set();
+  if (!resortLike) return urls;
+
+  if (typeof resortLike.profileImage === "string" && resortLike.profileImage) {
+    urls.add(resortLike.profileImage);
+  }
+  (resortLike.gallery || []).forEach((img) => {
+    if (typeof img === "string" && img) urls.add(img);
+  });
+  (resortLike.facilities || []).forEach((facility) => {
+    if (typeof facility?.image === "string" && facility.image) urls.add(facility.image);
+  });
+  (resortLike.rooms || []).forEach((room) => {
+    (room?.gallery || []).forEach((img) => {
+      if (typeof img === "string" && img) urls.add(img);
+    });
+  });
+  return urls;
+};
+
 const convertImageFileToWebp = async (file) => {
   if (!file || !(file instanceof File) || !file.type?.startsWith("image/")) return file;
   if (typeof window === "undefined") return file;
@@ -298,11 +319,9 @@ export function ResortEditorProvider({ children }) {
       const rName = resort.name;
       const { data: existingResort } = await supabase
         .from("resorts")
-        .select("gallery")
+        .select("profileImage, gallery, facilities, rooms")
         .eq("id", resort.id)
         .single();
-
-      const oldGallery = existingResort?.gallery || [];
 
       const updatedProfileImage =
         resort.profileImage instanceof File
@@ -314,15 +333,6 @@ export function ResortEditorProvider({ children }) {
           item instanceof File ? await uploadImage(item, rName, "hero") : item
         )
       );
-
-      const removedImages = oldGallery.filter((img) => !updatedGallery.includes(img));
-      if (removedImages.length > 0) {
-        const pathsToDelete = removedImages.map((url) => {
-          const urlParts = url.split(`/storage/v1/object/public/${BUCKET_NAME}/`);
-          return urlParts[1];
-        });
-        await supabase.storage.from(BUCKET_NAME).remove(pathsToDelete);
-      }
 
       const updatedFacilities = await Promise.all(
         (resort.facilities || []).map(async (facility) => ({
@@ -356,6 +366,25 @@ export function ResortEditorProvider({ children }) {
 
       const { error } = await supabase.from("resorts").upsert(dbPayload);
       if (error) throw error;
+
+      // Delete orphaned images: old URLs no longer referenced by latest saved payload.
+      const oldUrls = collectResortImageUrls(existingResort || {});
+      const newUrls = collectResortImageUrls(finalPayload);
+      const orphanedPaths = Array.from(oldUrls)
+        .filter((url) => !newUrls.has(url))
+        .map((url) => toStoragePathFromUrl(url))
+        .filter(Boolean);
+
+      if (orphanedPaths.length > 0) {
+        const uniquePaths = Array.from(new Set(orphanedPaths));
+        for (let i = 0; i < uniquePaths.length; i += 100) {
+          const chunk = uniquePaths.slice(i, i + 100);
+          const { error: removeError } = await supabase.storage.from(BUCKET_NAME).remove(chunk);
+          if (removeError) {
+            console.error("Failed to delete orphaned images:", removeError.message);
+          }
+        }
+      }
 
       setResort(finalPayload);
       if (typeof window !== "undefined") {

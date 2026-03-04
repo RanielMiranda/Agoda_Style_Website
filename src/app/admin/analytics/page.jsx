@@ -148,7 +148,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-6 rounded-2xl border border-slate-100">
+          <Card className="p-6 rounded-2xl border bg-white border-slate-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
                 <Database size={20} />
@@ -167,7 +167,7 @@ export default function AdminAnalyticsPage() {
             </p>
           </Card>
 
-          <Card className="p-6 rounded-2xl border border-slate-100">
+          <Card className="p-6 rounded-2xl border bg-white border-slate-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
                 <HardDrive size={20} />
@@ -199,28 +199,9 @@ export default function AdminAnalyticsPage() {
           </Card>
         )}
 
-        <Card className="p-6 rounded-2xl border border-slate-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-slate-900">Table Record Counts</h3>
-            <p className="text-xs text-slate-500">
-              {lastCheckedAt ? `Last checked: ${lastCheckedAt.toLocaleString()}` : "Not checked yet"}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {TABLES.map((table) => {
-              const found = tableCounts.find((entry) => entry.name === table.name);
-              return (
-                <div key={table.name} className="rounded-xl border border-slate-100 px-4 py-3 bg-white">
-                  <p className="text-xs uppercase tracking-wider text-slate-500">{table.label}</p>
-                  <p className="text-lg font-bold text-slate-900">
-                    {loading ? "Loading..." : found?.error ? "Unavailable" : Number(found?.count || 0).toLocaleString()}
-                  </p>
-                  {found?.error ? <p className="text-[11px] text-amber-600">{found.error}</p> : null}
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+        <p className="text-xs text-slate-500">
+          {lastCheckedAt ? `Last checked: ${lastCheckedAt.toLocaleString()}` : "Not checked yet"}
+        </p>
       </div>
       <Toast />
     </div>
