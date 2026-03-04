@@ -5,24 +5,12 @@ import { useToast } from "./ToastProvider";
 import { useEffect, useState } from "react";
 
 function SingleToast({ data, remove }) {
-  const { id, message, color, icon: Icon, duration } = data;
+  const { id, message, color, icon: Icon } = data;
   const [visible, setVisible] = useState(false);
-  const [progressKey, setProgressKey] = useState(0);
 
   useEffect(() => {
     setVisible(true);
-    setProgressKey((prev) => prev + 1);
-
-    const timer = setTimeout(() => {
-      setVisible(false); // start exit animation
-
-      setTimeout(() => {
-        remove(id); // remove after animation
-      }, 300);
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [id, duration, remove]);
+  }, [id]);
 
   const colors = {
     green: "bg-green-500",
@@ -51,21 +39,16 @@ function SingleToast({ data, remove }) {
           </div>
 
           <button
-            onClick={() => setVisible(false)}
+            onClick={() => {
+              setVisible(false);
+              setTimeout(() => remove(id), 200);
+            }}
             className="ml-auto text-slate-400 hover:text-slate-600"
           >
             <X size={18}/>
           </button>
         </div>
-
-        <div className="h-1 bg-slate-200">
-          <div
-            className={`h-full ${colors[color] || colors.green}`}
-            style={{
-              animation: `toastBar ${duration}ms linear forwards`
-            }}
-          />
-        </div>
+        <div className={`h-1 ${colors[color] || colors.green}`} />
       </div>
     </div>
   );
@@ -75,7 +58,7 @@ export default function ToastContainer() {
   const { toasts, remove } = useToast();
 
   return (
-    <div className="fixed bottom-6 right-6 z-200 flex flex-col gap-3">
+    <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 max-w-sm">
       {toasts.map((toast) => (
         <SingleToast key={toast.id} data={toast} remove={remove} />
       ))}

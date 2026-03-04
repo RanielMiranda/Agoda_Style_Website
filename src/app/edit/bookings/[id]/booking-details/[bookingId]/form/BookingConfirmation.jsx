@@ -33,6 +33,7 @@ const DEFAULT_FORM = {
 
 const STATUS_PHASES = [
   "Inquiry",
+  "Approved Inquiry",
   "Pending Payment",
   "Confirmed",
   "Ongoing",

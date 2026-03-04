@@ -78,7 +78,7 @@ export default function Page() {
       .from("bookings")
       .select("id", { count: "exact", head: true })
       .eq("resort_id", OWNER_RESORT_ID)
-      .in("status", ["Inquiry", "Pending Payment", "Pending"]);
+      .in("status", ["Inquiry", "Approved Inquiry", "Pending Payment", "Pending"]);
 
     if (!inquiryErr) total += Number(inquiryCount || 0);
 
@@ -150,7 +150,10 @@ export default function Page() {
     const rows = (data || []).map((row) => ({
       id: row.id,
       type: row.sender_role === "admin" ? "admin_notice" : "owner_message",
-      text: row.subject ? `${row.subject} - ${row.message}` : row.message,
+      senderRole: row.sender_role,
+      status: row.status || "pending",
+      subject: row.subject || (row.sender_role === "admin" ? "Admin Notice" : "Owner Message"),
+      message: row.message || "",
       date: new Date(row.created_at).toLocaleString(),
       unread: row.sender_role === "admin" && row.status !== "resolved",
     }));

@@ -9,7 +9,7 @@ let idCounter = 0;
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-    const toast = ({ message, color = "green", icon = null, duration = 4000 }) => {
+    const toast = ({ message, color = "green", icon = null, duration = null }) => {
 
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

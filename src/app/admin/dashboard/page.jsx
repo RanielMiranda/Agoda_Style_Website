@@ -149,9 +149,10 @@ export default function Page() {
     }
 
     // Move message to archives
+    const archivedWithResolution = { ...resolvedMsg, status: "resolved" };
     setArchives(prev => ({
       ...prev,
-      [activeActionTab]: [...prev[activeActionTab], resolvedMsg]
+      [activeActionTab]: [...prev[activeActionTab], archivedWithResolution]
     }));
 
     // Remove from active messages

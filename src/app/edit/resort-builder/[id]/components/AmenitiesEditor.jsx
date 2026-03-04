@@ -113,18 +113,18 @@ export default function AmenitiesEditor() {
   };
 
   return (
-    <div id="amenities" className="max-w-6xl mx-auto px-4 mt-8">
+    <div id="facilities" className="max-w-6xl mx-auto px-4 mt-8">
 
       {/* Header with Add Button */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Amenities</h2>
+        <h2 className="text-2xl font-semibold">Facilities</h2>
 
         <button
           onClick={() => bulkInputRef.current?.click()}
           className="flex items-center hover:scale-105 gap-2 px-4 py-3 rounded-lg bg-blue-600 text-white text-md font-medium hover:bg-blue-700 transition"
         >
           <Plus size={16} />
-          Add Amenities
+          Add Facilities
         </button>
       </div>
 

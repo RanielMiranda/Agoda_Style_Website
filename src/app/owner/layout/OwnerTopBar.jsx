@@ -42,7 +42,7 @@ export default function OwnerTopBar() {
         <div className="hidden md:flex gap-2 font-medium items-center">
           {navLinks.map((link) => (
             <Link
-              key={link.href}
+              key={`${link.name}-${link.href}`}
               href={link.href}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                 pathname === link.href ? "bg-blue-50 text-blue-600 shadow-sm" : "text-slate-600 hover:bg-slate-50"
@@ -69,7 +69,7 @@ export default function OwnerTopBar() {
           <div className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <Link
-                key={link.href}
+                key={`${link.name}-${link.href}`}
                 href={link.href}
                 onClick={closeMenu}
                 className={`flex items-center gap-3 p-4 rounded-xl transition-colors ${

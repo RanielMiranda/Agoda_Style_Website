@@ -1,24 +1,17 @@
-import React, { useState, useRef } from "react";
-import GalleryModal from "../components/GalleryModal";
+import React, { useRef } from "react";
 
-export default function AmenitiesSection({ facilities }) {
+export default function AmenitiesSection({ facilities, onOpen }) {
   const safeFacilities = Array.isArray(facilities) ? facilities : [];
   const maxVisible = 10;
   const visibleFacilities = safeFacilities.slice(0, maxVisible);
   const hasMore = safeFacilities.length > maxVisible;
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const scrollRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
 
-  const openModal = (idx) => {
-    setActiveIndex(idx);
-    setModalOpen(true);
-  };
+  const openModal = (idx) => onOpen?.(idx);
 
   const onMouseDown = (e) => {
     isDragging.current = true;
@@ -41,8 +34,8 @@ export default function AmenitiesSection({ facilities }) {
   };
 
   return (
-    <div id="amenities" className="max-w-6xl mx-auto px-4">
-      <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
+    <div id="facilities" className="max-w-6xl mx-auto px-4">
+      <h2 className="text-2xl font-semibold mb-4">Facilities</h2>
 
       {/* Horizontal Gallery */}
       <div
@@ -80,17 +73,6 @@ export default function AmenitiesSection({ facilities }) {
           );
         })}
       </div>
-
-      {/* Modal */}
-      {modalOpen && (
-        <GalleryModal
-          images={safeFacilities.map((f) => f?.image).filter(Boolean)}
-          names={safeFacilities.map((f) => f?.name || "Facility")}
-          activeIndex={activeIndex}
-          setActiveIndex={setActiveIndex}
-          onClose={() => setModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

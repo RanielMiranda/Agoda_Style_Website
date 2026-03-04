@@ -31,6 +31,7 @@ import Toast from "@/components/ui/toast/Toast";
 import { generateConfirmationStub } from "@/lib/bookingFlow";
 const STATUS_PHASES = [
   "Inquiry",
+  "Approved Inquiry",
   "Pending Payment",
   "Confirmed",
   "Ongoing",
@@ -375,6 +376,13 @@ function BookingModernEditor({
     onNotifyClient?.("Inquiry approved. Please proceed with payment upload.");
   };
 
+  const handleApproveInquiry = () => {
+    const next = { ...draft, status: "Approved Inquiry" };
+    setDraft(next);
+    persist(next);
+    onNotifyClient?.("Inquiry approved. Use your ticket link to continue messaging and payment steps.");
+  };
+
   const handleVerifyProof = () => {
     const next = {
       ...draft,
@@ -656,6 +664,11 @@ function BookingModernEditor({
               Decline
             </Button>
             {status === "Inquiry" ? (
+              <Button className="rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleApproveInquiry}>
+                <CheckCircle size={18} />
+                Approve Inquiry
+              </Button>
+            ) : status === "Approved Inquiry" ? (
               <Button className="rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleRequestPayment}>
                 <Clock size={18} />
                 Request Payment
