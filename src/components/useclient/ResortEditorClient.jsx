@@ -10,6 +10,23 @@ const LEGACY_DRAFT_KEY = "resort_builder_draft";
 const DRAFT_SCOPE_KEY = "resort_builder_draft_scope";
 
 const draftStorageKey = (scope) => `resort_builder_draft:${scope || "new"}`;
+const RESORT_DB_COLUMNS = [
+  "id",
+  "name",
+  "location",
+  "visible",
+  "price",
+  "contactPhone",
+  "contactEmail",
+  "contactMedia",
+  "profileImage",
+  "description",
+  "extraServices",
+  "facilities",
+  "tags",
+  "gallery",
+  "rooms",
+];
 const sanitizeSegment = (value) =>
   String(value || "unknown")
     .trim()
@@ -24,6 +41,12 @@ const toStoragePathFromUrl = (url) => {
   if (index === -1) return null;
   return decodeURIComponent(url.slice(index + marker.length));
 };
+
+const toResortDbPayload = (resort) =>
+  RESORT_DB_COLUMNS.reduce((acc, key) => {
+    if (resort?.[key] !== undefined) acc[key] = resort[key];
+    return acc;
+  }, {});
 
 export function ResortEditorProvider({ children }) {
   const { fetchResortByIdentifier } = useResortData();
@@ -302,8 +325,9 @@ export function ResortEditorProvider({ children }) {
         facilities: updatedFacilities,
         rooms: updatedRooms,
       };
+      const dbPayload = toResortDbPayload(finalPayload);
 
-      const { error } = await supabase.from("resorts").upsert(finalPayload);
+      const { error } = await supabase.from("resorts").upsert(dbPayload);
       if (error) throw error;
 
       setResort(finalPayload);

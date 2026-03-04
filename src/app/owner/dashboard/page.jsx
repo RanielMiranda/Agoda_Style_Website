@@ -19,6 +19,12 @@ const isMissingOwnerAdminTableError = (error) =>
   (error.message.includes("Could not find the table") ||
     error.message.includes("does not exist") ||
     error.message.includes("schema cache"));
+const isMissingResortMessagesTableError = (error) =>
+  !!error?.message &&
+  error.message.includes("resort_messages") &&
+  (error.message.includes("Could not find the table") ||
+    error.message.includes("does not exist") ||
+    error.message.includes("schema cache"));
 
 export default function Page() {
   const [resortStatus, setResortStatus] = useState("Draft");
@@ -51,6 +57,10 @@ export default function Page() {
       .limit(1);
 
     if (pendingError) {
+      if (isMissingResortMessagesTableError(pendingError)) {
+        setResortStatus(resortRow?.visible ? "Published" : "Draft");
+        return;
+      }
       console.error("Failed to load publication request status:", pendingError.message);
       return;
     }
@@ -104,7 +114,16 @@ export default function Page() {
         requestedBy,
         status: "pending",
       });
-      if (messageError) throw messageError;
+      if (messageError) {
+        if (isMissingResortMessagesTableError(messageError)) {
+          toast({
+            message: "Publication request table is missing. Create public.resort_messages first.",
+            color: "amber",
+          });
+          return;
+        }
+        throw messageError;
+      }
 
       const { error: visibilityError } = await supabase
         .from("resorts")
