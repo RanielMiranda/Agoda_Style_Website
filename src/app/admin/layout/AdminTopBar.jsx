@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Menu, X, ArrowLeft, ExternalLink, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Menu, X, ArrowLeft, Activity, ExternalLink, LogOut } from "lucide-react";
 import { useAccounts } from "@/components/useclient/AccountsClient";
 
 export default function AdminTopBar() {
@@ -15,8 +15,9 @@ export default function AdminTopBar() {
   const navLinks = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Accounts", href: "/admin/accounts", icon: Users },
+    { name: "Analytics", href: "/admin/analytics", icon: Activity },
     {
-      name: "Analytics",
+      name: "Vercel",
       href: "https://vercel.com/raniels-projects-2ea24826/agoda-style-website/analytics",
       icon: ExternalLink,
       external: true,

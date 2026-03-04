@@ -37,9 +37,17 @@ function SortableFacilityCard({
         <GripVertical size={12} />
       </div>
 
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onOpenModal}
-        className="w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-slate-200 block text-left"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpenModal();
+          }
+        }}
+        className="w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 relative shadow-sm border border-slate-200 block text-left cursor-pointer"
       >
         {facility.image ? (
           <img src={safeSrc(facility.image)} className="w-full h-full object-cover" alt="" />
@@ -71,7 +79,7 @@ function SortableFacilityCard({
             <Trash2 size={12} />
           </button>
         </div>
-      </button>
+      </div>
 
       <input
         className="mt-3 text-sm font-semibold w-full bg-white border border-slate-200 px-3 py-2 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
