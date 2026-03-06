@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Lock, Camera, CheckCircle2, ArrowRight, Loader2, Building2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 import { supabase } from "@/lib/supabase";
 import { BUCKET_NAME } from "@/lib/utils";
 
-export default function Page() {
+function SetupResortPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -137,6 +137,14 @@ export default function Page() {
   );
 }
 
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <SetupResortPageContent />
+    </Suspense>
+  );
+}
+
 function BrandingSidebar() {
   return (
     <div className="lg:w-1/3 bg-blue-600 p-12 flex flex-col justify-between text-white relative overflow-hidden shrink-0">
@@ -230,4 +238,3 @@ function SuccessState({ onGoHome }) {
     </div>
   );
 }
-

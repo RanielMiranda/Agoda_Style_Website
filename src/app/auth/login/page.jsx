@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Lock, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { useAccounts } from "@/components/useclient/AccountsClient";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast";
 
-export default function Page() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn } = useAccounts();
@@ -189,5 +189,13 @@ export default function Page() {
       </div>
       <Toast />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
