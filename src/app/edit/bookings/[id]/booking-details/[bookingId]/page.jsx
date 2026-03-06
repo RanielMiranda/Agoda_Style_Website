@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   AlertCircle,
   Phone,
-  Copy,
   Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -527,39 +526,22 @@ function BookingModernEditor({
     }
   };
 
-  const handleCopyTicketLink = async () => {
-    if (typeof window === "undefined") return;
-    const token = draft.ticketAccessToken;
-    const link = token
-      ? `${window.location.origin}/ticket/${booking.id}?token=${encodeURIComponent(token)}`
-      : `${window.location.origin}/ticket/${booking.id}`;
-    try {
-      await navigator.clipboard.writeText(link);
-      alert("Ticket link copied to clipboard.");
-    } catch {
-      window.prompt("Copy ticket link:", link);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-32 pt-10 px-4 md:px-8">
+    <div className="min-h-screen bg-slate-50/50 pb-52 md:pb-32 pt-10 px-4 md:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex justify-between items-center no-print">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center no-print">
           <button onClick={onBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-xs uppercase tracking-widest">
             <ChevronLeft size={16} /> Back to Overview
           </button>
 
-          <div className="flex gap-3 items-center justify-center">
-            <Button variant="outline" onClick={onOpenForm} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+          <div className="flex flex-wrap gap-2 sm:gap-3 items-center justify-start sm:justify-center">
+            <Button variant="outline" onClick={onOpenForm} className="rounded-full w-full sm:w-auto flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-4 sm:px-6">
               <FileText size={16} className="mr-2" /> View Form
             </Button>
-            <Button variant="outline" onClick={onOpenTicket} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+            <Button variant="outline" onClick={onOpenTicket} className="rounded-full w-full sm:w-auto flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-4 sm:px-6">
               <Ticket size={16} className="mr-2" /> Client Ticket
             </Button>
-            <Button variant="outline" onClick={handleCopyTicketLink} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
-              <Copy size={16} className="mr-2" /> Copy Ticket Link
-            </Button>
-            <Button variant="outline" onClick={onPrint} className="rounded-full flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-6">
+            <Button variant="outline" onClick={onPrint} className="rounded-full w-full sm:w-auto flex items-center justify-center bg-white shadow-sm border-slate-200 hover:bg-slate-50 font-bold text-xs px-4 sm:px-6">
               <Printer size={16} className="mr-2" /> Export
             </Button>
             <Button
@@ -570,7 +552,7 @@ function BookingModernEditor({
                 if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
                 onDelete();
               }}
-              className="rounded-full flex items-center justify-center bg-white shadow-sm border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs px-6"
+              className="rounded-full w-full sm:w-auto flex items-center justify-center bg-white shadow-sm border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs px-4 sm:px-6"
             >
               Delete Booking
             </Button>
@@ -593,8 +575,8 @@ function BookingModernEditor({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex justify-between items-center">
-              <div className="flex items-center gap-6">
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+              <div className="flex items-start sm:items-center gap-4 sm:gap-6">
                 <div className="h-16 w-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-100">
                   <User size={28} />
                 </div>
@@ -644,7 +626,7 @@ function BookingModernEditor({
             <div>
               <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
                 <SectionLabel icon={<Calendar size={14} />} label="Stay" />
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <InfoItem label="Check-In" value={draft.checkInDate} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
                   <InfoItem label="Check-Out" value={draft.checkOutDate} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
                   <InfoItem label="Check-In-Day" value={formatWeekdayLabel(draft.checkInDate)} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
@@ -922,43 +904,43 @@ function BookingModernEditor({
         </div>
       </div>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-slate-200 shadow-2xl no-print">
+      <div className="fixed bottom-3 left-3 right-3 md:bottom-8 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 flex flex-col md:flex-row items-stretch md:items-center justify-center md:justify-start gap-2 bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-slate-200 shadow-2xl no-print max-h-[55vh] overflow-y-auto">
         {showDecisionActions && (
-          <>
-            <Button variant="ghost" className="rounded-full px-8 h-12 text-slate-400 hover:text-rose-600 font-bold" onClick={() => handleSetStatus("Declined")}>
-              Decline
-            </Button>
-            {status === "Inquiry" ? (
-              <Button className="rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleApproveInquiry}>
-                <CheckCircle size={18} />
-                Approve Inquiry
-              </Button>
-            ) : status === "Approved Inquiry" ? (
-              <Button className="rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleRequestPayment}>
-                <Clock size={18} />
-                Request Payment
-              </Button>
-            ) : (
-              <Button className="rounded-full flex items-center justify-center px-10 h-12 font-bold shadow-lg transition-all flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleSetStatus("Confirmed")}>
-                <CheckCircle size={18} />
-                {status === "Pending Payment" ? "Confirm Stay" : "Approve"}
-              </Button>
-            )}
-          </>
+          <Button variant="ghost" className="rounded-full w-full md:w-auto px-6 md:px-8 h-11 md:h-12 text-slate-400 hover:text-rose-600 font-bold" onClick={() => handleSetStatus("Declined")}>
+            Decline
+          </Button>
         )}
         {PREVIOUS_STATUS[draft.status] ? (
-          <Button variant="outline" className="rounded-full px-8 h-12 font-bold text-xs border-slate-300 text-slate-600 hover:bg-slate-50" onClick={handleRevertStep}>
+          <Button variant="outline" className="rounded-full w-full md:w-auto px-6 md:px-8 h-11 md:h-12 font-bold text-xs border-slate-300 text-slate-600 hover:bg-slate-50" onClick={handleRevertStep}>
             Back One Step
           </Button>
         ) : null}
+        {showDecisionActions ? (
+          status === "Inquiry" ? (
+            <Button className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleApproveInquiry}>
+              <CheckCircle size={18} />
+              Approve Inquiry
+            </Button>
+          ) : status === "Approved Inquiry" ? (
+            <Button className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleRequestPayment}>
+              <Clock size={18} />
+              Request Payment
+            </Button>
+          ) : (
+            <Button className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleSetStatus("Confirmed")}>
+              <CheckCircle size={18} />
+              {status === "Pending Payment" ? "Confirm Stay" : "Approve"}
+            </Button>
+          )
+        ) : null}
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)} className="items-center justify-center bg-slate-900 hover:bg-black text-white rounded-full px-10 h-12 font-bold shadow-lg flex gap-2">
+          <Button onClick={() => setIsEditing(true)} className="items-center justify-center w-full md:w-auto bg-slate-900 hover:bg-black text-white rounded-full px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg flex gap-2">
             <Edit3 size={18} /> Edit Inline
           </Button>
         ) : (
           <>
-            <Button onClick={handleSaveInline} className="bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white rounded-full px-10 h-12 font-bold shadow-lg">Save Changes</Button>
-            <Button variant="outline" onClick={handleCancelInline} className="rounded-full px-8 h-12 text-slate-600 border-slate-300">Cancel</Button>
+            <Button onClick={handleSaveInline} className="w-full md:w-auto bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white rounded-full px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg">Save Changes</Button>
+            <Button variant="outline" onClick={handleCancelInline} className="w-full md:w-auto rounded-full px-6 md:px-8 h-11 md:h-12 text-slate-600 border-slate-300">Cancel</Button>
           </>
         )}
       </div>

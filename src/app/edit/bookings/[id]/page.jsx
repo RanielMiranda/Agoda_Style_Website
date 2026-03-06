@@ -142,7 +142,7 @@ export default function BookingManagementPage() {
     <div className="mt-10 min-h-screen bg-slate-50">
       {/* Header Area */}
       <div className="max-w-[1600px] mx-auto pt-12 px-4 md:px-8">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-8">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
               <LayoutDashboard size={28} />
@@ -157,10 +157,10 @@ export default function BookingManagementPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <Button 
               onClick={() => openForm({ status: "Inquiry" })}
-              className="bg-blue-600 items-center justify-center hover:bg-blue-700 text-white rounded-2xl px-8 h-14 font-black shadow-lg shadow-blue-100 transition-all hover:scale-105 flex gap-3"
+              className="w-full md:w-auto bg-blue-600 items-center justify-center hover:bg-blue-700 text-white rounded-2xl px-6 md:px-8 h-12 md:h-14 font-black shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] md:hover:scale-105 flex gap-3"
             >
               <Plus size={20} /> Create New Entry
             </Button>
@@ -201,10 +201,10 @@ export default function BookingManagementPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-8 border-b border-slate-200 mb-8">
+        <div className="flex items-center gap-4 md:gap-8 border-b border-slate-200 mb-8 overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab("workflow")}
-            className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
+            className={`shrink-0 flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
               activeTab === "workflow" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -215,7 +215,7 @@ export default function BookingManagementPage() {
 
           <button
             onClick={() => setActiveTab("calendar")}
-            className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
+            className={`shrink-0 flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
               activeTab === "calendar" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -226,7 +226,7 @@ export default function BookingManagementPage() {
 
           <button
             onClick={() => setActiveTab("concerns")}
-            className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
+            className={`shrink-0 flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-widest transition-all relative ${
               activeTab === "concerns" ? "text-rose-600" : "text-slate-400 hover:text-slate-600"
             }`}
           >

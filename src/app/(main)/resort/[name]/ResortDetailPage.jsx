@@ -66,12 +66,6 @@ export default function ResortDetailPage({ name }) {
   };
 
 const handleSubmitInquiry = async (submittedData) => {
-    const payload = { 
-      ...submittedData, 
-      resortName: resort.name,
-      location: resort.location 
-    };
-
     try {
       const selectedServices = (resort.extraServices || []).filter((service) =>
         submittedData.selectedServices?.includes(service.name)
@@ -126,15 +120,6 @@ const handleSubmitInquiry = async (submittedData) => {
       });
 
       if (error) throw error;
-      await supabase.from("ticket_messages").insert({
-        booking_id: bookingId,
-        resort_id: Number(resort.id),
-        sender_role: "client",
-        sender_name: submittedData.guestName || "Client",
-        message:
-          submittedData.message?.trim() ||
-          "Inquiry sent. Can we confirm rates, inclusions, and availability?",
-      });
       if (typeof window !== "undefined") {
         const ticketUrl = `${window.location.origin}/ticket/${bookingId}?token=${ticketAccessToken}`;
         console.info("Client ticket link (for testing until email is enabled):", ticketUrl);

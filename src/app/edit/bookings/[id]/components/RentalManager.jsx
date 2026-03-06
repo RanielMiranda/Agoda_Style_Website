@@ -44,7 +44,7 @@
     return (
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
         {/* Tab Navigation */}
-        <div className="flex p-2 bg-slate-50/50 border-b border-slate-50">
+        <div className="flex p-2 bg-slate-50/50 border-b border-slate-50 overflow-x-auto gap-2">
           {TABS.map((tab) => {
             const count = grouped[tab.id].length;
             const isActive = activeTab === tab.id;
@@ -52,7 +52,7 @@
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+                className={`min-w-max flex-1 flex items-center justify-center gap-2 px-3 py-3 md:py-4 rounded-2xl text-[11px] md:text-xs font-black uppercase tracking-widest transition-all ${
                   isActive ? "bg-white text-slate-900 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
                 }`}
               >

@@ -232,9 +232,9 @@ export default function BookingCalendar() {
   }
 
 return (
-    <Card className="w-full p-8 bg-white shadow-2xl rounded-[2.5rem] border-none">
+    <Card className="w-full p-4 sm:p-8 bg-white shadow-2xl rounded-3xl sm:rounded-[2.5rem] border-none">
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
           <div>
             <h2 className="text-2xl font-black text-blue-600 flex items-center gap-3 uppercase tracking-tight">
               <CalendarIcon size={28} className="text-blue-600" /> 
@@ -243,10 +243,10 @@ return (
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Select dates to manage room availability</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto">
              <Button
                 onClick={handleToggleRangeMode}
-                className={`flex items-center justify-center ${isRangeMode ? "bg-emerald-600 shadow-emerald-100" : " shadow-slate-200"} rounded-2xl h-12 px-6 font-bold gap-2 shadow-lg transition-all`}
+                className={`w-full md:w-auto flex items-center justify-center ${isRangeMode ? "bg-emerald-600 shadow-emerald-100" : " shadow-slate-200"} rounded-2xl h-11 md:h-12 px-4 md:px-6 font-bold gap-2 shadow-lg transition-all`}
               >
                 <Pen size={16} />
                 {isRangeMode ? "Range Mode: Active" : "Enable Range Selection"}
@@ -272,17 +272,17 @@ return (
         </div>
 
         {/* THE CALENDAR GRID - Now much larger */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100 relative">
-          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))} className="absolute -left-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronLeft size={24} /></button>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-12 bg-slate-50/50 p-4 sm:p-8 rounded-[2rem] border border-slate-100 relative">
+          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))} className="absolute left-2 top-2 md:-left-4 md:top-1/2 md:-translate-y-1/2 h-10 w-10 md:h-12 md:w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronLeft size={20} /></button>
           
-          <div className="scale-105 origin-top">
+          <div className="scale-100 md:scale-105 origin-top mt-12 md:mt-0">
             {renderMonth(0)}
           </div>
-          <div className="scale-105 origin-top">
+          <div className="scale-100 md:scale-105 origin-top">
             {renderMonth(1)}
           </div>
           
-          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))} className="absolute -right-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronRight size={24} /></button>
+          <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))} className="absolute right-2 top-2 md:-right-4 md:top-1/2 md:-translate-y-1/2 h-10 w-10 md:h-12 md:w-12 flex items-center justify-center bg-white shadow-xl rounded-full hover:scale-110 transition-all z-20 border border-slate-100"><ChevronRight size={20} /></button>
         </div>
         
         {/* Active Ranges Summary at bottom of calendar */}
