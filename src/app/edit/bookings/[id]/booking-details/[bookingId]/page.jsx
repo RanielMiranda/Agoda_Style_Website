@@ -41,6 +41,14 @@ const STATUS_PHASES = [
   "Cancelled",
   "Declined",
 ];
+const PREVIOUS_STATUS = {
+  "Approved Inquiry": "Inquiry",
+  "Pending Payment": "Approved Inquiry",
+  "Confirmed": "Pending Payment",
+  "Ongoing": "Confirmed",
+  "Pending Checkout": "Ongoing",
+  "Checked Out": "Pending Checkout",
+};
 
 const PAYMENT_CHANNELS = ["Pending", "GCash", "Bank", "Cash"];
 function buildDraftFromBooking(booking) {
@@ -382,6 +390,16 @@ function BookingModernEditor({
 
   const handleApproveInquiry = () => {
     const next = { ...draft, status: "Approved Inquiry" };
+    setDraft(next);
+    persist(next);
+  };
+
+  const handleRevertStep = () => {
+    const previous = PREVIOUS_STATUS[draft.status];
+    if (!previous) return;
+    const confirmed = window.confirm(`Revert status from "${draft.status}" to "${previous}"?`);
+    if (!confirmed) return;
+    const next = { ...draft, status: previous };
     setDraft(next);
     persist(next);
   };
@@ -752,6 +770,11 @@ function BookingModernEditor({
             )}
           </>
         )}
+        {PREVIOUS_STATUS[draft.status] ? (
+          <Button variant="outline" className="rounded-full px-8 h-12 font-bold text-xs border-slate-300 text-slate-600 hover:bg-slate-50" onClick={handleRevertStep}>
+            Back One Step
+          </Button>
+        ) : null}
         {!isEditing ? (
           <Button onClick={() => setIsEditing(true)} className="items-center justify-center bg-slate-900 hover:bg-black text-white rounded-full px-10 h-12 font-bold shadow-lg flex gap-2">
             <Edit3 size={18} /> Edit Inline

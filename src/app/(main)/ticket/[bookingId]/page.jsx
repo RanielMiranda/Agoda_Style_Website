@@ -159,8 +159,11 @@ export default function ClientTicketPage() {
       const proofUrl = await uploadProof();
       const bookingForm = {
         ...(booking.booking_form || {}),
-        paymentMethod,
-        downpayment: Number(downpayment || 0),
+        pendingPaymentMethod: paymentMethod,
+        pendingDownpayment: Number(downpayment || 0),
+        paymentPendingApproval: true,
+        paymentVerified: false,
+        paymentVerifiedAt: null,
         paymentProofUrl: proofUrl || booking.booking_form?.paymentProofUrl || null,
         paymentSubmittedAt: new Date().toISOString(),
       };
@@ -177,25 +180,11 @@ export default function ClientTicketPage() {
 
       if (error) throw error;
 
-      const balanceAfter = Math.max(
-        0,
-        Number(bookingForm.totalAmount || 0) - Number(bookingForm.downpayment || 0)
-      );
-
-      const { error: transactionError } = await supabase.from("booking_transactions").insert({
-        booking_id: booking.id,
-        method: paymentMethod,
-        amount: Number(downpayment || 0),
-        balance_after: balanceAfter,
-        note: "Downpayment submitted by client ticket page",
-      });
-      if (transactionError) throw transactionError;
-
       setBooking((prev) => ({ ...prev, booking_form: bookingForm, status: nextStatus }));
       await fetchTicket();
 
       toast({
-        message: "Downpayment submitted. Please wait for owner validation.",
+        message: "Payment proof submitted. Waiting for owner approval.",
         color: "green",
       });
     } catch (err) {
@@ -362,6 +351,7 @@ export default function ClientTicketPage() {
       </Card>
 
       {/* Payment Section */}
+      {status.includes("pending payment") ? (
       <Card className="p-8 md:p-10 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem]">
         <h3 className="text-sm font-black text-emerald-600 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
           <CreditCard size={18} /> Payment & Verification
@@ -445,6 +435,7 @@ export default function ClientTicketPage() {
           </div>
         </div>
       </Card>
+      ) : null}
 
       {/* Messaging Section */}
       <Card className="p-8 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] space-y-6">
