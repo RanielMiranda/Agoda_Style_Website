@@ -26,8 +26,6 @@ import { Button } from "@/components/ui/button";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { useSupport } from "@/components/useclient/SupportClient";
-import { supabase } from "@/lib/supabase";
-import { BUCKET_NAME } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast";
 import { generateConfirmationStub } from "@/lib/bookingFlow";
@@ -94,14 +92,6 @@ function buildDraftFromBooking(booking) {
   };
 }
 
-function getStoragePathFromUrl(url) {
-  if (!url || typeof url !== "string") return null;
-  const marker = `/object/public/${BUCKET_NAME}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return decodeURIComponent(url.slice(idx + marker.length));
-}
-
 function formatWeekdayLabel(dateValue) {
   if (!dateValue) return "No date selected";
   const parsed = new Date(`${dateValue}T00:00:00`);
@@ -131,7 +121,7 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { resort, loadResort, setResort, loading } = useResort();
-  const { bookings, updateBookingById, deleteBookingById, loadingBookings } = useBookings();
+  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction } = useBookings();
   const { loadBookingSupport, updateConcernStatus, sendTicketMessage, isMissingSupportTableError } = useSupport();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -259,6 +249,8 @@ export default function BookingDetailsPage() {
       onSendReply={handleSendReply}
       onResolveIssue={handleResolveIssue}
       conflicts={bookingConflicts}
+      createSignedProofUrl={createSignedProofUrl}
+      createBookingTransaction={createBookingTransaction}
     />
   );
 }
@@ -279,6 +271,8 @@ function BookingModernEditor({
   onSendReply,
   onResolveIssue,
   conflicts = [],
+  createSignedProofUrl,
+  createBookingTransaction,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [renderedAt] = useState(() => Date.now());
@@ -331,11 +325,12 @@ function BookingModernEditor({
   }, [draft.paymentProofUrl]);
 
   const resolveSignedProofUrl = async () => {
-    const path = getStoragePathFromUrl(draft.paymentProofUrl);
-    if (!path) return;
-    const { data, error } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(path, 60 * 60);
-    if (!error && data?.signedUrl) {
-      setProofPreviewUrl(data.signedUrl);
+    if (!draft.paymentProofUrl) return;
+    try {
+      const signed = await createSignedProofUrl?.(draft.paymentProofUrl, 60 * 60);
+      if (signed) setProofPreviewUrl(signed);
+    } catch {
+      // Keep original URL when signing fails.
     }
   };
 
@@ -454,14 +449,15 @@ function BookingModernEditor({
 
     if (approvedAmount > 0) {
       const balanceAfter = Math.max(0, Number(next.totalAmount || 0) - Number(next.downpayment || 0));
-      const { error } = await supabase.from("booking_transactions").insert({
+      try {
+        await createBookingTransaction?.({
         booking_id: booking.id,
         method: nextMethod || "Pending",
         amount: approvedAmount,
         balance_after: balanceAfter,
         note: "Downpayment approved by owner",
-      });
-      if (error) {
+        });
+      } catch (error) {
         console.error("Failed to log booking transaction:", error.message);
       }
       await notifyCaretakerOnPaymentApproval({

@@ -63,6 +63,14 @@ function LoginPageContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      {isLoading && (
+        <div className="fixed inset-0 z-[120] bg-slate-900/35 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-xl px-6 py-5 flex items-center gap-3 border border-slate-100">
+            <Loader2 className="animate-spin text-blue-600" size={20} />
+            <div className="text-sm font-semibold text-slate-700">Signing in, please wait...</div>
+          </div>
+        </div>
+      )}
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-xl shadow-blue-200 mb-4">

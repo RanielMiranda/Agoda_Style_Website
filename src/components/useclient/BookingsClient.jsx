@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useResort } from "./ResortEditorClient";
+import { BUCKET_NAME } from "@/lib/utils";
 
 const BookingsContext = createContext(null);
 const BOOKING_COLUMNS = [
@@ -24,6 +25,14 @@ const BOOKING_COLUMNS = [
   "created_at",
   "updated_at",
 ].join(", ");
+
+function getStoragePathFromUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  const marker = `/object/public/${BUCKET_NAME}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return decodeURIComponent(url.slice(idx + marker.length));
+}
 
 function toModel(row) {
   return {
@@ -272,6 +281,19 @@ export function BookingsProvider({ children }) {
     [bookings, resort?.id, syncResortBookings]
   );
 
+  const createSignedProofUrl = useCallback(async (publicUrl, expiresIn = 60 * 60) => {
+    const path = getStoragePathFromUrl(publicUrl);
+    if (!path) return null;
+    const { data, error } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(path, expiresIn);
+    if (error) throw error;
+    return data?.signedUrl || null;
+  }, []);
+
+  const createBookingTransaction = useCallback(async (payload) => {
+    const { error } = await supabase.from("booking_transactions").insert(payload);
+    if (error) throw error;
+  }, []);
+
   const value = useMemo(
     () => ({
       bookings,
@@ -282,6 +304,8 @@ export function BookingsProvider({ children }) {
       createBooking,
       updateBookingById,
       deleteBookingById,
+      createSignedProofUrl,
+      createBookingTransaction,
       setBookings: syncResortBookings,
     }),
     [
@@ -294,6 +318,8 @@ export function BookingsProvider({ children }) {
       refreshBookings,
       syncResortBookings,
       updateBookingById,
+      createBookingTransaction,
+      createSignedProofUrl,
     ]
   );
 

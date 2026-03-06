@@ -6,14 +6,20 @@ import { useEffect, useState } from "react";
 
 function SingleToast({ data, remove }) {
   const { id, message, color, icon: Icon, duration = 4000, persistent = false } = data;
-  const [visible, setVisible] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
-    setVisible(true);
+    if (!persistent) {
+      const frame = requestAnimationFrame(() => setProgress(0));
+      return () => cancelAnimationFrame(frame);
+    }
+    return undefined;
+  }, [id, persistent]);
+
+  useEffect(() => {
     if (persistent) return undefined;
     const timer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(() => remove(id), 200);
+      remove(id);
     }, duration);
     return () => clearTimeout(timer);
   }, [duration, id, persistent, remove]);
@@ -26,15 +32,7 @@ function SingleToast({ data, remove }) {
   };
 
   return (
-    <div
-      className={`
-        transition-all duration-300
-        ${visible
-          ? "translate-y-0 opacity-100"
-          : "-translate-y-6 opacity-0"
-        }
-      `}
-    >
+    <div className="translate-y-0 opacity-100">
       <div className="bg-white shadow-xl rounded-2xl overflow-hidden min-w-[320px]">
         <div className="p-4 flex items-center gap-3">
 
@@ -46,8 +44,7 @@ function SingleToast({ data, remove }) {
 
           <button
             onClick={() => {
-              setVisible(false);
-              setTimeout(() => remove(id), 200);
+              remove(id);
             }}
             className="ml-auto text-slate-400 hover:text-slate-600"
           >
@@ -55,26 +52,19 @@ function SingleToast({ data, remove }) {
           </button>
         </div>
         <div
-          className={`h-1 ${colors[color] || colors.green} ${persistent ? "" : "toast-progress"}`}
-          style={!persistent ? { animationDuration: `${duration}ms` } : undefined}
+          className={`h-1 ${colors[color] || colors.green}`}
+          style={
+            persistent
+              ? undefined
+              : {
+                  width: `${progress}%`,
+                  transitionProperty: "width",
+                  transitionTimingFunction: "linear",
+                  transitionDuration: `${duration}ms`,
+                }
+          }
         />
       </div>
-      <style jsx>{`
-        .toast-progress {
-          transform-origin: left;
-          animation-name: shrink;
-          animation-timing-function: linear;
-          animation-fill-mode: forwards;
-        }
-        @keyframes shrink {
-          from {
-            transform: scaleX(1);
-          }
-          to {
-            transform: scaleX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

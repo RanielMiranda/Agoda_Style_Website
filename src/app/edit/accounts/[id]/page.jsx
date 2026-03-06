@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, ShieldCheck, UserCircle } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Save, ShieldCheck, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAccounts } from "@/components/useclient/AccountsClient";
 import { useToast } from "@/components/ui/toast/ToastProvider";
@@ -12,10 +12,14 @@ export default function EditAccountPage() {
   const { id } = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { getAccountById, updateAccount, activeAccount } = useAccounts();
+  const { getAccountById, saveAccountProfile, activeAccount } = useAccounts();
   const isLoggedAdmin = (activeAccount?.role || "").toLowerCase() === "admin";
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [existingProfileImage, setExistingProfileImage] = useState("");
+  const [profileFile, setProfileFile] = useState(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState("");
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -40,6 +44,7 @@ export default function EditAccountPage() {
           status: row.status || "pending",
           setup_token: row.setup_token || "",
         });
+        setExistingProfileImage(row.profile_image || "");
       } catch (error) {
         toast({ message: `Load failed: ${error.message}`, color: "red" });
       } finally {
@@ -49,27 +54,48 @@ export default function EditAccountPage() {
     load();
   }, [getAccountById, id, toast]);
 
+  useEffect(() => {
+    if (!profileFile) {
+      setProfilePreviewUrl("");
+      return;
+    }
+    const objectUrl = URL.createObjectURL(profileFile);
+    setProfilePreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [profileFile]);
+
   const handleSave = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      await updateAccount(id, {
+      const saved = await saveAccountProfile(
+        id,
+        {
         full_name: form.full_name,
         email: form.email,
         phone: form.phone,
         password: form.password,
         role: form.role,
         status: form.status,
-      });
+        },
+        profileFile,
+        existingProfileImage
+      );
+
+      setExistingProfileImage(saved?.profile_image || "");
+      setProfileFile(null);
       toast({ message: "Account updated.", color: "green" });
     } catch (error) {
       toast({ message: `Save failed: ${error.message}`, color: "red" });
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) return <div className="p-10 text-center text-slate-500">Loading account...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mt-10 mx-auto">
+    <div className="p-8 max-w-4xl mx-auto">
       <button
         onClick={() => router.back()}
         className="flex items-center text-slate-500 hover:text-slate-900 mb-6 font-bold text-sm transition-colors"
@@ -84,6 +110,33 @@ export default function EditAccountPage() {
         </div>
 
         <form className="p-8 space-y-6" onSubmit={handleSave}>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-black uppercase text-slate-400 mb-3">Profile Photo</p>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center text-slate-400">
+                {profileFile || existingProfileImage ? (
+                  <img
+                    src={profilePreviewUrl || existingProfileImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserCircle size={40} />
+                )}
+              </div>
+              <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-semibold cursor-pointer hover:bg-slate-100">
+                <Camera size={16} />
+                Change Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setProfileFile(e.target.files?.[0] || null)}
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Full Name" value={form.full_name} onChange={(value) => setForm((prev) => ({ ...prev, full_name: value }))} />
             <Field label="Email Address" value={form.email} onChange={(value) => setForm((prev) => ({ ...prev, email: value }))} />
@@ -158,8 +211,8 @@ export default function EditAccountPage() {
           )}
 
           <div className="flex justify-end pt-4">
-            <Button className="bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white px-8 h-12 rounded-2xl font-bold shadow-lg shadow-blue-100">
-              <Save size={18} className="mr-2" /> Save Changes
+            <Button disabled={saving} className="bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white px-8 h-12 rounded-2xl font-bold shadow-lg shadow-blue-100">
+              {saving ? <Loader2 size={18} className="mr-2 animate-spin" /> : <Save size={18} className="mr-2" />} Save Changes
             </Button>
           </div>
         </form>
