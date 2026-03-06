@@ -47,15 +47,15 @@ export default function ResortResults({ resorts }) {
 
               <div className="mt-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                  Tags
+                  Facilities
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {(resort.tags || []).slice(0, 2).map((tag, index) => (
+                  {(resort.facilities || []).slice(0, 2).map((facility, index) => (
                     <span
                       key={index}
                       className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
                     >
-                      {tag}
+                      {facility?.name || "Facility"}
                     </span>
                   ))}
                 </div>

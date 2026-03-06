@@ -146,14 +146,29 @@ export function ResortDataProvider({ children }) {
     return [...allResorts]
       .filter((resort) => resort.visible !== false)
       .filter((resort) => {
-        const matchesTags =
-          selectedTags.length === 0 ||
-          selectedTags.every((tag) => resort.tags?.includes(tag));
         const totalNeeded = guests.adults + guests.children;
         const hasFittingRoom = resort.rooms?.some((room) => room.guests >= totalNeeded);
-        return matchesTags && hasFittingRoom;
+        return hasFittingRoom;
       })
       .sort((a, b) => {
+        const buildSearchableMeta = (resort) => [
+          ...((resort.tags || []).map((tag) => String(tag).toLowerCase())),
+          ...((resort.facilities || [])
+            .map((facility) => String(facility?.name || "").toLowerCase())
+            .filter(Boolean)),
+        ];
+        const hasAllTerms = (resort) => {
+          if (selectedTags.length === 0) return true;
+          const searchableMeta = buildSearchableMeta(resort);
+          return selectedTags.every((term) =>
+            searchableMeta.some((item) => item.includes(String(term || "").toLowerCase()))
+          );
+        };
+
+        const aMatchesTerms = hasAllTerms(a);
+        const bMatchesTerms = hasAllTerms(b);
+        if (aMatchesTerms !== bMatchesTerms) return aMatchesTerms ? -1 : 1;
+
         const aDist = distanceToRange(Number(a.price || 0));
         const bDist = distanceToRange(Number(b.price || 0));
         if (aDist !== bDist) return aDist - bDist;

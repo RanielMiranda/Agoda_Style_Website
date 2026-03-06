@@ -73,7 +73,7 @@ export default function FacilityGalleryModal({
           <h3 className="mt-2 text-2xl font-black text-slate-900">{facility?.name || "Unnamed Facility"}</h3>
           <p className="mt-4 text-sm text-slate-600 leading-relaxed">
             {facility?.description ||
-              "Facility details are currently not set. You can add descriptions in the resort builder for richer guest context."}
+              "No description provided."}
           </p>
           <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
             {currentIndex + 1} of {safeFacilities.length}

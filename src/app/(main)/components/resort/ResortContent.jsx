@@ -6,7 +6,7 @@ import { getSupabaseSrcSet, getTransformedSupabaseImageUrl } from "@/lib/utils";
 
 export default function ResortContent({ resort }) {
   const { safeSrc } = useResort(); // Extract safeSrc helper
-  const facilities = resort.facilities || [];
+  const tags = resort.tags || [];
 
   return (
     <CardContent className="p-4">
@@ -38,15 +38,15 @@ export default function ResortContent({ resort }) {
         </div>
       </div>
 
-      {/* Amenities Section */}
-      <h1 className="pt-2 ml-[1vh]"> Amenities</h1>
+      {/* Tags Section */}
+      <h1 className="pt-2 ml-[1vh]">Tags</h1>
       <div className="flex flex-wrap gap-2">
-        {facilities.map((facility, index) => (
+        {tags.map((tag, index) => (
           <span
             key={index}
             className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full border border-gray-200"
           >
-            {facility.name}
+            {tag}
           </span>
         ))}
       </div>
