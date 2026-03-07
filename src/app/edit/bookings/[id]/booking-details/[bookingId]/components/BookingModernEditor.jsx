@@ -45,7 +45,6 @@ export default function BookingModernEditor({
   resortRooms = [],
   allBookings = [],
   statusAudits = [],
-  resortPaymentImageUrl,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
@@ -473,7 +472,6 @@ export default function BookingModernEditor({
               draft={draft}
               resolveSignedProofUrl={resolveSignedProofUrl}
               handleVerifyProof={handleVerifyProof}
-              resortPaymentImageUrl={resortPaymentImageUrl}
             />
 
             <PaymentCardSection

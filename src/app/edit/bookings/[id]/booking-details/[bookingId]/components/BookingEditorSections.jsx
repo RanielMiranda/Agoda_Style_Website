@@ -15,7 +15,6 @@ import {
   ReceiptText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getTransformedSupabaseImageUrl } from "@/lib/utils";
 import { InfoItem, SectionLabel, StatusBadge } from "./BookingEditorAtoms";
 
 export function ClientCardSection({ resortName, isEditing, draft, setField, status }) {

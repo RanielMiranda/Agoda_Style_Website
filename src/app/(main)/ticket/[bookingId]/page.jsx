@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast";
 import { isTicketTokenValid } from "@/lib/ticketAccess";
 import { toPng } from "html-to-image";
+import { getTransformedSupabaseImageUrl } from "@/lib/utils";
 import {
   TicketHeaderSection,
   TicketStayInfoCardSection,
@@ -125,7 +126,7 @@ export default function ClientTicketPage() {
       if (bookingData?.resort_id) {
         const { data: resortData, error: resortError } = await supabase
           .from("resorts")
-          .select("id, name, location, contactEmail, contactPhone, contactMedia, rooms")
+          .select("id, name, location, contactEmail, contactPhone, contactMedia, rooms, payment_image_url")
           .eq("id", bookingData.resort_id)
           .single();
         if (resortError) throw resortError;
@@ -417,6 +418,19 @@ img{max-width:100%;height:auto;display:block}
         assignedRoomNames={stayInfoPayload?.assignedRoomNames}
         entryCode={stayInfoPayload?.entryCode}
       />
+
+      {status.includes("pending payment") && resort?.payment_image_url ? (
+        <div className="p-6 rounded-[2.5rem] border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
+          <p className="text-[10px] font-black text-emerald-700 uppercase tracking-wider mb-3">Payment reference (GCash / Bank)</p>
+          <div className="flex justify-center max-w-[320px] max-h-[320px] bg-slate-50 rounded-2xl border border-slate-100 p-4">
+            <img
+              src={getTransformedSupabaseImageUrl(resort.payment_image_url, { width: 512, quality: 90, format: "webp" })}
+              alt="Payment reference"
+              className="w-full h-full object-contain max-w-[280px] max-h-[280px]"
+            />
+          </div>
+        </div>
+      ) : null}
 
       {status.includes("pending payment") ? (
         <TicketPaymentCardSection
