@@ -1,0 +1,107 @@
+"use client";
+
+import React from "react";
+import { MessageSquare, Phone, Mail } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export function TicketSupportDeskCardSection({
+  resort,
+  loadingMessages,
+  messages,
+  isConcernOnlyMode,
+  chatMessage,
+  setChatMessage,
+  onSendMessage,
+  issueSubject,
+  setIssueSubject,
+  issueMessage,
+  setIssueMessage,
+  onSendIssue,
+}) {
+  return (
+    <Card className="p-8 border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] space-y-6">
+      <div className="flex justify-between items-start">
+        <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+          <MessageSquare size={18} className="text-blue-600" /> Support Desk
+        </h3>
+        <div className="flex gap-4">
+          <a
+            href={`tel:${resort?.contactPhone}`}
+            className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            <Phone size={16} />
+          </a>
+          <a
+            href={`mailto:${resort?.contactEmail}`}
+            className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            <Mail size={16} />
+          </a>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 max-h-56 overflow-auto space-y-2">
+          {loadingMessages ? (
+            <p className="text-xs text-slate-400">Loading conversation...</p>
+          ) : messages?.length === 0 ? (
+            <p className="text-xs text-slate-400">No messages yet.</p>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`p-2.5 rounded-xl text-xs ${
+                  msg.sender_role === "client"
+                    ? "bg-blue-50 text-blue-700 ml-8"
+                    : "bg-white text-slate-700 mr-8 border border-slate-100"
+                }`}
+              >
+                <p className="font-black uppercase tracking-wider text-[9px] mb-1">
+                  {msg.sender_role} {msg.sender_name ? `- ${msg.sender_name}` : ""}
+                </p>
+                <p>{msg.message}</p>
+              </div>
+            ))
+          )}
+        </div>
+
+        {!isConcernOnlyMode ? (
+          <div className="flex gap-2">
+            <input
+              className="flex-1 rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="Send a message to owner"
+              value={chatMessage}
+              onChange={(e) => setChatMessage(e.target.value)}
+            />
+            <Button className="rounded-2xl h-12" onClick={onSendMessage}>
+              Send
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3 border-t border-slate-100 pt-4">
+            <p className="text-xs font-black uppercase tracking-widest text-rose-600">Issue Report</p>
+            <input
+              className="w-full rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="Subject of concern"
+              value={issueSubject}
+              onChange={(e) => setIssueSubject(e.target.value)}
+            />
+            <textarea
+              className="w-full min-h-28 rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="Please describe your concern or issues with your stay..."
+              value={issueMessage}
+              onChange={(e) => setIssueMessage(e.target.value)}
+            />
+            <Button
+              className="rounded-full px-8 h-11 bg-slate-900 font-bold uppercase text-[10px] tracking-widest hover:bg-black transition-all"
+              onClick={onSendIssue}
+            >
+              Send Issue Report
+            </Button>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

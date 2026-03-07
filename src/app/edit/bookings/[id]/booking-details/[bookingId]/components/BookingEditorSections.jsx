@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   CheckCircle,
   Clock,
+  ReceiptText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InfoItem, SectionLabel, StatusBadge } from "./BookingEditorAtoms";
@@ -91,14 +92,13 @@ export function StayCardSection({
         <InfoItem label="Check-Out" value={draft.checkOutDate} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
         <InfoItem label="Check-In-Day" value={formatWeekdayLabel(draft.checkInDate)} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
         <InfoItem label="Check-Out-Day" value={formatWeekdayLabel(draft.checkOutDate)} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
-        <InfoItem label="Total Days Stay" value={totalStayDays} />
-        <InfoItem label="Approved By" value={approvedByName} />
         <InfoItem label="Pax" value={draft.guestCount} editing={isEditing} type="number" onChange={(val) => setField("guestCount", Number(val) || 0)} />
+        <InfoItem label="Sleeping" value={draft.sleepingGuests || 0} editing={isEditing} type="number" onChange={(val) => setField("sleepingGuests", Number(val) || 0)} />
         <InfoItem label="Time In" value={draft.checkInTime} editing={isEditing} type="time" onChange={(val) => setField("checkInTime", val)} />
         <InfoItem label="Time Out" value={draft.checkOutTime} editing={isEditing} type="time" onChange={(val) => setField("checkOutTime", val)} />
         <InfoItem label="Adults" value={draft.adultCount || 0} editing={isEditing} type="number" onChange={(val) => setField("adultCount", Number(val) || 0)} />
         <InfoItem label="Children" value={draft.childrenCount || 0} editing={isEditing} type="number" onChange={(val) => setField("childrenCount", Number(val) || 0)} />
-        <InfoItem label="Sleeping" value={draft.sleepingGuests || 0} editing={isEditing} type="number" onChange={(val) => setField("sleepingGuests", Number(val) || 0)} />
+        <InfoItem label="Total Days Stay" value={totalStayDays} />  
         <InfoItem
           label="Room"
           value={
@@ -110,6 +110,7 @@ export function StayCardSection({
               : draft.roomName) || "Not assigned"
           }
         />
+        <InfoItem label="Approved By" value={approvedByName} />        
       </div>
       <div className={`rounded-xl px-3 py-2 border ${conflicts.length > 0 ? "border-rose-200 bg-rose-50" : "border-emerald-200 bg-emerald-50"}`}>
         <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">Availability Check</p>
@@ -240,7 +241,7 @@ export function ProofCardSection({
 export function PaymentCardSection({ isEditing, draft, setField, balance, statusPhases, paymentChannels, status }) {
   return (
     <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-2xl space-y-6 relative overflow-hidden">
-      <div className="absolute -top-4 -right-4 p-4 opacity-5"><Briefcase size={120} /></div>
+      <div className="absolute -top-4 -right-4 p-4 opacity-5"><ReceiptText size={120} /></div>
       <div>
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Due</p>
         {isEditing ? (
