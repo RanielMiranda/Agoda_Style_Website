@@ -159,7 +159,7 @@ Quick reference for where key logic lives.
   - Uses `CRON_SECRET` (or `BOOKING_AUTOMATION_SECRET`) auth in non-dev.
 
 - `vercel.json`
-  - Cron schedule for `/api/internal/booking-status` every 30 minutes.
+  - Cron schedule for `/api/internal/booking-status` once daily (Hobby-safe).
 
 ## Rule of Thumb
 
