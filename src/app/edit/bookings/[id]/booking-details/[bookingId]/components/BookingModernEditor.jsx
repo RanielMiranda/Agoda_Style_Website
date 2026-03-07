@@ -55,6 +55,7 @@ export default function BookingModernEditor({
   allBookings = [],
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [actionBusy, setActionBusy] = useState(false);
   const [renderedAt] = useState(() => Date.now());
   const inlineDraftKey = `booking_inline_draft:${booking.id}`;
   const [draft, setDraft] = useState(() => buildDraftFromBooking(booking));
@@ -139,15 +140,35 @@ export default function BookingModernEditor({
 
   const setField = (field, value) => setDraft((prev) => ({ ...prev, [field]: value }));
 
-  const persist = (nextDraft) => {
+  const persist = async (nextDraft) => {
     const selectedRoomNames = (resortRooms || [])
       .filter((room) => (assignedRoomIds || []).includes(room.id))
       .map((room) => room.name)
       .filter(Boolean);
+    const previousStatus = booking.bookingForm?.status || booking.status || null;
+    const nextStatus = nextDraft.status || previousStatus || "Inquiry";
+    const currentAudit = Array.isArray(booking.bookingForm?.statusAudit)
+      ? booking.bookingForm.statusAudit
+      : Array.isArray(nextDraft.statusAudit)
+        ? nextDraft.statusAudit
+        : [];
+    const statusAudit =
+      previousStatus && nextStatus && previousStatus !== nextStatus
+        ? [
+            ...currentAudit,
+            {
+              from: previousStatus,
+              to: nextStatus,
+              at: new Date().toISOString(),
+              actor: "owner-ui",
+            },
+          ]
+        : currentAudit;
+
     const payload = {
       ...booking,
       roomIds: assignedRoomIds,
-      status: nextDraft.status,
+      status: nextStatus,
       startDate: nextDraft.checkInDate || booking.startDate,
       endDate: nextDraft.checkOutDate || booking.endDate,
       checkInTime: nextDraft.checkInTime || booking.checkInTime,
@@ -160,10 +181,11 @@ export default function BookingModernEditor({
         roomName: selectedRoomNames.length > 0 ? selectedRoomNames.join(", ") : nextDraft.roomName || "",
         assignedRoomIds,
         assignedRoomNames: selectedRoomNames,
+        statusAudit,
       },
     };
 
-    onSave(payload);
+    await Promise.resolve(onSave(payload));
   };
 
   const isRoomConflicting = (roomId) => {
@@ -192,20 +214,28 @@ export default function BookingModernEditor({
     );
   };
 
-  const handleSaveInline = () => {
-    persist(draft);
-    if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
-    setIsEditing(false);
+  const handleSaveInline = async () => {
+    if (actionBusy) return;
+    setActionBusy(true);
+    try {
+      await persist(draft);
+      if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
+      setIsEditing(false);
+    } finally {
+      setActionBusy(false);
+    }
   };
 
   useEffect(() => {
     const current = JSON.stringify(booking.roomIds || []);
     const next = JSON.stringify(assignedRoomIds || []);
     if (current === next) return;
-    persist({
-      ...draft,
-      roomCount: assignedRoomIds.length || draft.roomCount || 1,
-    });
+    Promise.resolve(
+      persist({
+        ...draft,
+        roomCount: assignedRoomIds.length || draft.roomCount || 1,
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignedRoomIds]);
 
@@ -217,91 +247,120 @@ export default function BookingModernEditor({
     setIsEditing(false);
   };
 
-  const handleSetStatus = (nextStatus) => {
-    const next = { ...draft, status: nextStatus };
-    if (nextStatus === "Confirmed" && !next.confirmationStub?.code) {
-      next.confirmationStub = generateConfirmationStub(booking.id, resortName, draft.guestName);
-      if (next.paymentVerified) {
-        next.paymentPendingApproval = false;
-        next.pendingDownpayment = 0;
-        next.pendingPaymentMethod = null;
+  const handleSetStatus = async (nextStatus) => {
+    if (actionBusy) return;
+    setActionBusy(true);
+    try {
+      const next = { ...draft, status: nextStatus };
+      if (nextStatus === "Confirmed" && !next.confirmationStub?.code) {
+        next.confirmationStub = generateConfirmationStub(booking.id, resortName, draft.guestName);
+        if (next.paymentVerified) {
+          next.paymentPendingApproval = false;
+          next.pendingDownpayment = 0;
+          next.pendingPaymentMethod = null;
+        }
       }
+      setDraft(next);
+      await persist(next);
+    } finally {
+      setActionBusy(false);
     }
-    setDraft(next);
-    persist(next);
   };
 
-  const handleRequestPayment = () => {
-    const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const next = {
-      ...draft,
-      status: "Pending Payment",
-      paymentDeadline: deadline,
-    };
-    setDraft(next);
-    persist(next);
+  const handleRequestPayment = async () => {
+    if (actionBusy) return;
+    setActionBusy(true);
+    try {
+      const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const next = {
+        ...draft,
+        status: "Pending Payment",
+        paymentDeadline: deadline,
+      };
+      setDraft(next);
+      await persist(next);
+    } finally {
+      setActionBusy(false);
+    }
   };
 
-  const handleApproveInquiry = () => {
-    const next = {
-      ...draft,
-      status: "Approved Inquiry",
-      ticketAccessToken: draft.ticketAccessToken || generateTicketAccessToken(),
-      ticketAccessExpiresAt: draft.ticketAccessExpiresAt || getTicketAccessExpiry(30),
-    };
-    setDraft(next);
-    persist(next);
+  const handleApproveInquiry = async () => {
+    if (actionBusy) return;
+    setActionBusy(true);
+    try {
+      const next = {
+        ...draft,
+        status: "Approved Inquiry",
+        ticketAccessToken: draft.ticketAccessToken || generateTicketAccessToken(),
+        ticketAccessExpiresAt: draft.ticketAccessExpiresAt || getTicketAccessExpiry(30),
+      };
+      setDraft(next);
+      await persist(next);
+    } finally {
+      setActionBusy(false);
+    }
   };
 
-  const handleRevertStep = () => {
+  const handleRevertStep = async () => {
+    if (actionBusy) return;
     const previous = PREVIOUS_STATUS[draft.status];
     if (!previous) return;
     const confirmed = window.confirm(`Revert status from "${draft.status}" to "${previous}"?`);
     if (!confirmed) return;
-    const next = { ...draft, status: previous };
-    setDraft(next);
-    persist(next);
+    setActionBusy(true);
+    try {
+      const next = { ...draft, status: previous };
+      setDraft(next);
+      await persist(next);
+    } finally {
+      setActionBusy(false);
+    }
   };
 
   const handleVerifyProof = async () => {
-    if (draft.paymentVerified) return;
-    const approvedAmount = Number(draft.pendingDownpayment || 0);
-    const nextDownpayment = Number(draft.downpayment || 0) + approvedAmount;
-    const nextMethod = draft.pendingPaymentMethod || draft.paymentMethod;
+    if (draft.paymentVerified || actionBusy) return;
+    setActionBusy(true);
+    try {
+      const approvedAmount = Number(draft.pendingDownpayment || 0);
+      const nextDownpayment = Number(draft.downpayment || 0) + approvedAmount;
+      const nextMethod = draft.pendingPaymentMethod || draft.paymentMethod;
 
-    const next = {
-      ...draft,
-      paymentVerified: true,
-      paymentVerifiedAt: new Date().toISOString(),
-      downpayment: nextDownpayment,
-      paymentMethod: nextMethod,
-      pendingDownpayment: 0,
-      pendingPaymentMethod: null,
-      paymentPendingApproval: false,
-    };
-    setDraft(next);
-    persist(next);
+      const next = {
+        ...draft,
+        paymentVerified: true,
+        paymentVerifiedAt: new Date().toISOString(),
+        downpayment: nextDownpayment,
+        paymentMethod: nextMethod,
+        pendingDownpayment: 0,
+        pendingPaymentMethod: null,
+        paymentPendingApproval: false,
+      };
+      setDraft(next);
+      await persist(next);
 
-    if (approvedAmount > 0) {
-      const balanceAfter = Math.max(0, Number(next.totalAmount || 0) - Number(next.downpayment || 0));
-      try {
-        await createBookingTransaction?.({
-        booking_id: booking.id,
-        method: nextMethod || "Pending",
-        amount: approvedAmount,
-        balance_after: balanceAfter,
-        note: "Downpayment approved by owner",
+      if (approvedAmount > 0) {
+        const balanceAfter = Math.max(0, Number(next.totalAmount || 0) - Number(next.downpayment || 0));
+        try {
+          await createBookingTransaction?.({
+          booking_id: booking.id,
+          method: nextMethod || "Pending",
+          amount: approvedAmount,
+          balance_after: balanceAfter,
+          note: "Downpayment approved by owner",
+          });
+        } catch (error) {
+          console.error("Failed to log booking transaction:", error.message);
+        }
+        await notifyCaretakerOnPaymentApproval({
+          bookingId: booking.id,
+          resortId: booking.resortId || booking.resort_id || null,
+          guestName: next.guestName,
+          amount: approvedAmount,
+          method: nextMethod,
         });
-      } catch (error) {
-        console.error("Failed to log booking transaction:", error.message);
       }
-      await notifyCaretakerOnPaymentApproval({
-        bookingId: booking.id,
-        resortId: booking.resortId || booking.resort_id || null,
-        guestName: next.guestName,
-        amount: approvedAmount,
-        method: nextMethod,
-      });
+    } finally {
+      setActionBusy(false);
     }
   };
 
@@ -707,6 +766,7 @@ export default function BookingModernEditor({
         onOpenEditInline={() => setIsEditing(true)}
         onSaveInline={handleSaveInline}
         onCancelInline={handleCancelInline}
+        actionBusy={actionBusy}
       />
       <Toast/>
     </div>

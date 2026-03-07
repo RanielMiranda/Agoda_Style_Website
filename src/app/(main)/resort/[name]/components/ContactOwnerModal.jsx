@@ -1,15 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { X, Calendar, User, CheckCircle2, ArrowRight, ArrowLeft, Phone, MapPin, Clock, PlusCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFilters } from "@/components/useclient/ContextFilter";
 
-export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInquiry }) {
+export default function ContactOwnerModal({
+  isOpen,
+  onClose,
+  resort,
+  unavailableRoomIds = [],
+  initialSelectedRoomIds = [],
+  onSubmitInquiry,
+}) {
   const [agreed, setAgreed] = useState(false);
   const { guests, startDate, endDate, destination, checkInTime, checkOutTime } = useFilters();
   // We can access resort data directly if not passed as prop, but prop is safer
   const [step, setStep] = useState(1);
+  const blockedIds = useMemo(
+    () => new Set((unavailableRoomIds || []).map((id) => id?.toString()).filter(Boolean)),
+    [unavailableRoomIds]
+  );
+  const availableRooms = useMemo(
+    () => (resort?.rooms || []).filter((room) => !blockedIds.has(room?.id?.toString())),
+    [blockedIds, resort?.rooms]
+  );
+  const initialSelectableRoomIds = useMemo(() => {
+    const requested = (initialSelectedRoomIds || []).map((id) => id?.toString());
+    const mapped = (availableRooms || [])
+      .filter((room) => requested.includes(room?.id?.toString()))
+      .map((room) => room.id);
+    return mapped.length > 0
+      ? mapped
+      : availableRooms?.[0]?.id
+        ? [availableRooms[0].id]
+        : [];
+  }, [availableRooms, initialSelectedRoomIds]);
+  const initialSelectableRoomNames = useMemo(
+    () => (availableRooms || []).filter((room) => initialSelectableRoomIds.includes(room.id)).map((room) => room.name),
+    [availableRooms, initialSelectableRoomIds]
+  );
 
   const formatDateForInput = (date) => {
     if (!date) return "";
@@ -34,11 +64,11 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
     pax: Number((guests?.adults || 0) + (guests?.children || 0)),
     guestCount: Number((guests?.adults || 0) + (guests?.children || 0)),
     sleepingGuests: 0,
-    roomCount: resort?.rooms?.[0]?.id ? 1 : 0,
-    roomName: resort?.rooms?.[0]?.name || "",
-    roomId: resort?.rooms?.[0]?.id || "",
-    selectedRoomIds: resort?.rooms?.[0]?.id ? [resort.rooms[0].id] : [],
-    selectedRoomNames: resort?.rooms?.[0]?.name ? [resort.rooms[0].name] : [],
+    roomCount: initialSelectableRoomIds.length,
+    roomName: initialSelectableRoomNames.join(", "),
+    roomId: initialSelectableRoomIds[0] || "",
+    selectedRoomIds: initialSelectableRoomIds,
+    selectedRoomNames: initialSelectableRoomNames,
     checkInDate: formatDateForInput(startDate),
     checkOutDate: formatDateForInput(endDate),
     checkInTime: checkInTime || "14:00",
@@ -55,7 +85,9 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
     { id: 4, title: "Review Inquiry", icon: CheckCircle2 },
   ];
 
-  if (!resort || !isOpen) return null;
+  const selectedRoomNamesDerived = (availableRooms || [])
+    .filter((room) => (formData.selectedRoomIds || []).includes(room.id))
+    .map((room) => room.name);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -90,7 +122,7 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
       const selectedRoomIds = alreadySelected
         ? prev.selectedRoomIds.filter((id) => id !== room.id)
         : [...prev.selectedRoomIds, room.id];
-      const selectedRoomNames = (resort?.rooms || [])
+      const selectedRoomNames = (availableRooms || [])
         .filter((item) => selectedRoomIds.includes(item.id))
         .map((item) => item.name);
 
@@ -114,9 +146,28 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
   };
 
   const handleSubmit = () => {
-    onSubmitInquiry(formData);
+    const selectedRoomIds = (formData.selectedRoomIds || []).filter(
+      (id) => !blockedIds.has(id?.toString())
+    );
+    const selectedRoomNames = (availableRooms || [])
+      .filter((room) => selectedRoomIds.includes(room.id))
+      .map((room) => room.name);
+    const normalized =
+      selectedRoomIds.length > 0
+        ? {
+            ...formData,
+            selectedRoomIds,
+            selectedRoomNames,
+            roomCount: selectedRoomIds.length,
+            roomId: selectedRoomIds[0] || "",
+            roomName: selectedRoomNames.join(", "),
+          }
+        : formData;
+    onSubmitInquiry(normalized);
     handleClose();
   };
+
+  if (!resort || !isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -231,14 +282,14 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
                 <div className="space-y-1">
                   <label className="text-xs font-black uppercase text-slate-400 ml-1">Selected Rooms</label>
                   <div className="w-full px-4 py-3 rounded-xl bg-slate-100 text-slate-600 text-sm min-h-[48px]">
-                    {formData.selectedRoomNames.length > 0 ? formData.selectedRoomNames.join(", ") : "No rooms selected"}
+                    {selectedRoomNamesDerived.length > 0 ? selectedRoomNamesDerived.join(", ") : "No rooms selected"}
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-400 ml-1">Choose Rooms (Multiple)</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {(resort?.rooms || []).map((room) => {
+                  {(availableRooms || []).map((room) => {
                     const isSelected = formData.selectedRoomIds.includes(room.id);
                     return (
                       <button
@@ -256,6 +307,11 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
                     );
                   })}
                 </div>
+                {(availableRooms || []).length === 0 ? (
+                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    No rooms are available for the selected date/time.
+                  </p>
+                ) : null}
               </div>
 
             </div>
@@ -314,7 +370,7 @@ export default function ContactOwnerModal({ isOpen, onClose, resort, onSubmitInq
                   <SummaryItem
                     icon={PlusCircle}
                     label="Rooms"
-                    value={formData.selectedRoomNames.length > 0 ? formData.selectedRoomNames.join(", ") : "Not set"}
+                    value={selectedRoomNamesDerived.length > 0 ? selectedRoomNamesDerived.join(", ") : "Not set"}
                   />
                   <SummaryItem icon={Phone} label="Contact" value={formData.contactNumber || "Not set"} />
                   <SummaryItem 

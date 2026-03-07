@@ -4,13 +4,20 @@ import { useResort } from "@/components/useclient/ContextEditor";
 import { useFilters } from "@/components/useclient/ContextFilter"; 
 import { getSupabaseSrcSet, getTransformedSupabaseImageUrl } from "@/lib/utils";
 
-export default function RoomsSection({ onOpenRoomGallery }) {
+export default function RoomsSection({
+  onOpenRoomGallery,
+  unavailableRoomIds = [],
+  selectedRoomIds = [],
+  onToggleRoomSelection,
+}) {
   const { resort } = useResort(); 
   const { selectedTags } = useFilters(); 
 
   if (!resort || !resort.rooms) return null;
 
   const displayedRooms = resort.rooms.filter((room) => {
+    const roomUnavailable = (unavailableRoomIds || []).includes(room?.id?.toString());
+    if (roomUnavailable) return false;
     if (selectedTags.length === 0) return true;
     return selectedTags.every(tag => room.tags?.includes(tag));
   });
@@ -32,7 +39,12 @@ export default function RoomsSection({ onOpenRoomGallery }) {
             return (
               <Card
                 key={room.id}
-                className="rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-md border-none"
+                onClick={() => onToggleRoomSelection?.(room.id)}
+                className={`rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-md border-2 cursor-pointer transition-all ${
+                  selectedRoomIds.includes(room.id)
+                    ? "border-blue-500 ring-2 ring-blue-200"
+                    : "border-transparent hover:border-slate-200"
+                }`}
               >
                 {/* IMAGE MOSAIC */}
                 <div 
@@ -48,7 +60,10 @@ export default function RoomsSection({ onOpenRoomGallery }) {
                       src={getTransformedSupabaseImageUrl(room.gallery?.[0] || resort.gallery[0], { width: 960, quality: 80, format: "webp" })}
                       srcSet={getSupabaseSrcSet(room.gallery?.[0] || resort.gallery[0])}
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      onClick={() => onOpenRoomGallery(room.gallery, 0)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenRoomGallery(room.gallery, 0);
+                      }}
                       className="object-cover w-full h-full cursor-pointer"
                     />
                   </div>
@@ -60,7 +75,10 @@ export default function RoomsSection({ onOpenRoomGallery }) {
                         src={getTransformedSupabaseImageUrl(room.gallery[1], { width: 640, quality: 80, format: "webp" })}
                         srcSet={getSupabaseSrcSet(room.gallery[1], [320, 480, 640], 80)}
                         sizes="(max-width: 768px) 50vw, 25vw"
-                        onClick={() => onOpenRoomGallery(room.gallery, 1)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenRoomGallery(room.gallery, 1);
+                        }}
                         className="object-cover w-full h-full cursor-pointer"
                       />
                     </div>
@@ -73,13 +91,19 @@ export default function RoomsSection({ onOpenRoomGallery }) {
                         src={getTransformedSupabaseImageUrl(room.gallery[2], { width: 640, quality: 80, format: "webp" })}
                         srcSet={getSupabaseSrcSet(room.gallery[2], [320, 480, 640], 80)}
                         sizes="(max-width: 768px) 50vw, 25vw"
-                        onClick={() => onOpenRoomGallery(room.gallery, 2)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenRoomGallery(room.gallery, 2);
+                        }}
                         className="object-cover w-full h-full cursor-pointer"
                       />
                       {room.gallery.length > 3 && (
                         <div
                           className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold cursor-pointer"
-                          onClick={() => onOpenRoomGallery(room.gallery, 2)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenRoomGallery(room.gallery, 2);
+                          }}
                         >
                           +{room.gallery.length - 2} more
                         </div>
@@ -91,7 +115,14 @@ export default function RoomsSection({ onOpenRoomGallery }) {
                 {/* INFO */}
                 <div className="md:w-1/2 p-6 flex flex-col justify-between bg-white">
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <h3 className="text-xl font-semibold">{room.name}</h3>
+                      {selectedRoomIds.includes(room.id) ? (
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-2 py-1">
+                          Selected
+                        </span>
+                      ) : null}
+                    </div>
                     <div className="flex gap-2 text-sm mb-4">
                       <span className="flex items-center gap-2 bg-blue-100/50 text-blue-700 px-3 py-1 rounded-2xl font-medium">
                         <Users size={16} /> {room.guests} Guests

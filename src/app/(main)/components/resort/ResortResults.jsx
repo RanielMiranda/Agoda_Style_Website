@@ -4,13 +4,22 @@ import { useRouter } from "next/navigation";
 import ResortGallery from "./ResortGallery";
 import ResortContent from "./ResortContent";
 import { Button } from "@/components/ui/button";
+import { useFilters } from "@/components/useclient/ContextFilter";
 
 export default function ResortResults({ resorts }) {
   const router = useRouter(); // Next.js hook
+  const { availabilityByResort } = useFilters();
 
   return (
     <div className="flex-1 flex flex-col gap-6 w-full">
-      {resorts.map((resort) => (
+      {resorts.map((resort) => {
+        const availability = availabilityByResort?.[resort.id];
+        const roomList =
+          availability?.availableRoomIds instanceof Set
+            ? (resort.rooms || []).filter((room) => availability.availableRoomIds.has(room?.id?.toString()))
+            : (resort.rooms || []);
+        const isViable = availability?.viable !== false;
+        return (
         <div
           key={resort.name}
           className="flex flex-col sm:flex-row bg-white shadow rounded-2xl overflow-hidden"
@@ -30,9 +39,16 @@ export default function ResortResults({ resorts }) {
 
           <div className="w-full sm:w-72 flex flex-col">
             <div className="flex-1 p-4 sm:p-6">
-              <p className="font-semibold mb-2">Available Rooms</p>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <p className="font-semibold">Available Rooms</p>
+                {!isViable ? (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                    Low Match
+                  </span>
+                ) : null}
+              </div>
               <div className="flex flex-wrap gap-2">
-                {resort.rooms.map((room) => (
+                {roomList.map((room) => (
                   <div key={room.id} className="relative group">
                     <div className="bg-blue-100 px-2 py-1 rounded-2xl text-xs">
                       {room.name}
@@ -50,7 +66,7 @@ export default function ResortResults({ resorts }) {
                   Facilities
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {(resort.facilities || []).slice(0, 2).map((facility, index) => (
+                  {(resort.facilities || []).map((facility, index) => (
                     <span
                       key={index}
                       className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
@@ -90,7 +106,8 @@ export default function ResortResults({ resorts }) {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

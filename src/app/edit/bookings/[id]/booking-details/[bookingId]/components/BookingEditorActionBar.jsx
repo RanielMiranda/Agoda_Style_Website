@@ -18,6 +18,7 @@ export default function BookingEditorActionBar({
   onOpenEditInline,
   onSaveInline,
   onCancelInline,
+  actionBusy = false,
 }) {
   return (
     <div className="fixed bottom-3 left-3 right-3 md:bottom-8 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 flex flex-col md:flex-row items-stretch md:items-center justify-center md:justify-start gap-2 bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-slate-200 shadow-2xl no-print max-h-[55vh] overflow-y-auto">
@@ -26,6 +27,7 @@ export default function BookingEditorActionBar({
           variant="ghost"
           className="rounded-full w-full md:w-auto px-6 md:px-8 h-11 md:h-12 text-slate-400 hover:text-rose-600 font-bold"
           onClick={onDecline}
+          disabled={actionBusy}
         >
           Decline
         </Button>
@@ -35,6 +37,7 @@ export default function BookingEditorActionBar({
           variant="outline"
           className="rounded-full w-full md:w-auto px-6 md:px-8 h-11 md:h-12 font-bold text-xs border-slate-300 text-slate-600 hover:bg-slate-50"
           onClick={onBackOneStep}
+          disabled={actionBusy}
         >
           Back One Step
         </Button>
@@ -44,6 +47,7 @@ export default function BookingEditorActionBar({
           <Button
             className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-blue-600 hover:bg-blue-700 text-white"
             onClick={onApproveInquiry}
+            disabled={actionBusy}
           >
             <CheckCircle size={18} />
             Approve Inquiry
@@ -52,6 +56,7 @@ export default function BookingEditorActionBar({
           <Button
             className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-amber-600 hover:bg-amber-700 text-white"
             onClick={onRequestPayment}
+            disabled={actionBusy}
           >
             <Clock size={18} />
             Request Payment
@@ -60,6 +65,7 @@ export default function BookingEditorActionBar({
           <Button
             className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
             onClick={onConfirmStay}
+            disabled={actionBusy}
           >
             <CheckCircle size={18} />
             {status === "Pending Payment" ? "Confirm Stay" : "Approve"}
@@ -69,6 +75,7 @@ export default function BookingEditorActionBar({
       {!isEditing ? (
         <Button
           onClick={onOpenEditInline}
+          disabled={actionBusy}
           className="items-center justify-center w-full md:w-auto bg-slate-900 hover:bg-black text-white rounded-full px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg flex gap-2"
         >
           <Edit3 size={18} /> Edit Inline
@@ -77,6 +84,7 @@ export default function BookingEditorActionBar({
         <>
           <Button
             onClick={onSaveInline}
+            disabled={actionBusy}
             className="w-full md:w-auto bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white rounded-full px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg"
           >
             Save Changes
@@ -84,6 +92,7 @@ export default function BookingEditorActionBar({
           <Button
             variant="outline"
             onClick={onCancelInline}
+            disabled={actionBusy}
             className="w-full md:w-auto rounded-full px-6 md:px-8 h-11 md:h-12 text-slate-600 border-slate-300"
           >
             Cancel

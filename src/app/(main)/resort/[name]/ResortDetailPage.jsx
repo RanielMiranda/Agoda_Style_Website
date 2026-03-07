@@ -15,6 +15,8 @@ import FacilityGalleryModal from "./components/FacilityGalleryModal";
 
 import ContactOwnerModal from "./components/ContactOwnerModal";
 import RoomFilterPanel from "./rooms/filters/RoomFilterPanel";
+import { useFilters } from "@/components/useclient/ContextFilter";
+import { buildRequestedRange, getUnavailableRoomIds } from "@/lib/availability";
 
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast"
@@ -34,6 +36,9 @@ export default function ResortDetailPage({ name }) {
   const [roomImages, setRoomImages] = useState([]);
   const [contactOpen, setContactOpen] = useState(false);
   const [price, setPrice] = useState(5000);
+  const [unavailableRoomIds, setUnavailableRoomIds] = useState([]);
+  const [selectedRoomIds, setSelectedRoomIds] = useState([]);
+  const { startDate, endDate, checkInTime, checkOutTime } = useFilters();
 
   const { toast, persistentToast } = useToast();
   useEffect(() => {
@@ -43,6 +48,42 @@ export default function ResortDetailPage({ name }) {
       loadResort(decodedName, false);
     }
   }, [name, loadResort, resort]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadRoomAvailability = async () => {
+      if (!resort?.id) {
+        setUnavailableRoomIds([]);
+        return;
+      }
+      const requestedRange = buildRequestedRange({ startDate, endDate, checkInTime, checkOutTime });
+      if (!requestedRange) {
+        setUnavailableRoomIds([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("room_ids, start_date, end_date, check_in_time, check_out_time, status, booking_form")
+        .eq("resort_id", Number(resort.id));
+      if (error) {
+        console.error("Failed to load room availability:", error.message);
+        if (!cancelled) setUnavailableRoomIds([]);
+        return;
+      }
+      const blockedSet = getUnavailableRoomIds(data || [], requestedRange);
+      if (!cancelled) setUnavailableRoomIds(Array.from(blockedSet));
+    };
+    loadRoomAvailability();
+    return () => {
+      cancelled = true;
+    };
+  }, [resort?.id, startDate, endDate, checkInTime, checkOutTime]);
+
+  useEffect(() => {
+    setSelectedRoomIds((prev) =>
+      prev.filter((id) => !(unavailableRoomIds || []).includes(id?.toString()))
+    );
+  }, [unavailableRoomIds]);
 
   if (loading && !resort) {
     return (
@@ -181,9 +222,13 @@ const handleSubmitInquiry = async (submittedData) => {
 
       <ServicesSection services={resort.extraServices} />      
 
-      <div className="max-w-6xl mx-auto px-4 mb-6 flex flex-col md:flex-row items-center justify-between">
-        <h2 className="text-2xl font-semibold mb-4 md:mb-0">Available Rooms</h2>
-      </div>
+      <div className="flex flex-col max-w-6xl mx-auto px-4 mb-6">
+        <h2 className="text-2xl font-bold text-slate-800">Available Rooms</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Click on a room card to select it for your inquiry.
+        </p>
+      </div>  
+
       <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-0 max-w-6xl mx-auto pb-10">
         <div className="lg:w-80 w-full lg:sticky lg:top-24">
           <RoomFilterPanel price={price} setPrice={setPrice} />
@@ -192,6 +237,13 @@ const handleSubmitInquiry = async (submittedData) => {
         <div className="flex-1 w-full">
           <RoomsSection
             price={price}
+            unavailableRoomIds={unavailableRoomIds}
+            selectedRoomIds={selectedRoomIds}
+            onToggleRoomSelection={(roomId) =>
+              setSelectedRoomIds((prev) =>
+                prev.includes(roomId) ? prev.filter((id) => id !== roomId) : [...prev, roomId]
+              )
+            }
             onOpenRoomGallery={(images, index = 0) => {
               setRoomImages(images);
               setRoomActiveIndex(index);
@@ -233,6 +285,8 @@ const handleSubmitInquiry = async (submittedData) => {
           isOpen={contactOpen}
           onClose={() => setContactOpen(false)}
           resort={resort}
+          unavailableRoomIds={unavailableRoomIds}
+          initialSelectedRoomIds={selectedRoomIds}
           onSubmitInquiry={handleSubmitInquiry}
         />
       )}

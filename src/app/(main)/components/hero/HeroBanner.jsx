@@ -50,36 +50,37 @@ export default function HeroBanner() {
   const nextIndex = (heroIndex + 1) % heroImages.length;
 
   return (
-    <div className="relative h-[80vh] overflow-hidden group">
+    <div className="relative h-[80vh] group">
+      <div className="absolute inset-0 overflow-hidden">
+        {/* BACKGROUND (next image always loaded underneath) */}
+        <img
+          src={getTransformedSupabaseImageUrl(safeSrc(heroImages[nextIndex]), { width: 1600, quality: 80, format: "webp" })}
+          srcSet={getSupabaseSrcSet(safeSrc(heroImages[nextIndex]))}
+          sizes="100vw"
+          className="
+            absolute w-full h-full object-cover
+            transition-transform duration-[6000ms] ease-out
+            group-hover:scale-105
+          "
+          alt=""
+        />
 
-      {/* BACKGROUND (next image always loaded underneath) */}
-      <img
-        src={getTransformedSupabaseImageUrl(safeSrc(heroImages[nextIndex]), { width: 1600, quality: 80, format: "webp" })}
-        srcSet={getSupabaseSrcSet(safeSrc(heroImages[nextIndex]))}
-        sizes="100vw"
-        className="
-          absolute w-full h-full object-cover
-          transition-transform duration-[6000ms] ease-out
-          group-hover:scale-105
-        "
-        alt=""
-      />
-
-      {/* FOREGROUND (current image fades out) */}
-      <motion.img
-        key={heroIndex}
-        src={getTransformedSupabaseImageUrl(
-          safeSrc(heroImages[heroIndex]),
-          { width: 1600, quality: 80, format: "webp" }
-        )}
-        srcSet={getSupabaseSrcSet(safeSrc(heroImages[heroIndex]))}
-        sizes="100vw"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        transition={{ duration: 2, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute w-full h-full object-cover transition-transform duration-[6000ms] ease-out group-hover:scale-105"
-        alt=""
-      />
+        {/* FOREGROUND (current image fades out) */}
+        <motion.img
+          key={heroIndex}
+          src={getTransformedSupabaseImageUrl(
+            safeSrc(heroImages[heroIndex]),
+            { width: 1600, quality: 80, format: "webp" }
+          )}
+          srcSet={getSupabaseSrcSet(safeSrc(heroImages[heroIndex]))}
+          sizes="100vw"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 2, ease: [0.4, 0, 0.2, 1] }}
+          className="absolute w-full h-full object-cover transition-transform duration-[6000ms] ease-out group-hover:scale-105"
+          alt=""
+        />
+      </div>
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" />
@@ -92,7 +93,7 @@ export default function HeroBanner() {
       </div>
 
       {/* Search */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4">
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-[200]">
         <SearchBar />
       </div>
 

@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { buildRequestedRange, getUnavailableRoomIds } from "@/lib/availability";
 
 const ResortDataContext = createContext(null);
 const RESORT_CACHE_KEY = "resorts_cache_v1";
@@ -54,6 +55,7 @@ export function ResortDataProvider({ children }) {
   const [endDate, setEndDate] = useState(null);
   const [checkInTime, setCheckInTime] = useState("14:00");
   const [checkOutTime, setCheckOutTime] = useState("12:00");
+  const [availabilityByResort, setAvailabilityByResort] = useState({});
 
   const fetchResorts = useCallback(async () => {
     setLoading(true);
@@ -131,6 +133,80 @@ export function ResortDataProvider({ children }) {
     fetchResorts();
   }, [fetchResorts, hydrateCachedResorts]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadAvailability = async () => {
+      if (!allResorts?.length) {
+        setAvailabilityByResort({});
+        return;
+      }
+
+      const requestedRange = buildRequestedRange({ startDate, endDate, checkInTime, checkOutTime });
+      if (!requestedRange) {
+        const fallback = {};
+        allResorts.forEach((resort) => {
+          const rooms = resort.rooms || [];
+          const totalAvailablePax = rooms.reduce((sum, room) => sum + Number(room?.guests || 0), 0);
+          fallback[resort.id] = {
+            unavailableRoomIds: new Set(),
+            availableRoomIds: new Set((rooms || []).map((room) => room?.id?.toString()).filter(Boolean)),
+            availableRoomCount: rooms.length,
+            totalAvailablePax,
+            hasEnoughRooms: rooms.length >= Number(guests.rooms || 1),
+            hasEnoughPax: totalAvailablePax >= Number(guests.adults || 0) + Number(guests.children || 0),
+            viable: rooms.length >= Number(guests.rooms || 1) && totalAvailablePax >= Number(guests.adults || 0) + Number(guests.children || 0),
+          };
+        });
+        if (!cancelled) setAvailabilityByResort(fallback);
+        return;
+      }
+
+      const resortIds = allResorts.map((resort) => Number(resort.id)).filter((id) => Number.isFinite(id));
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("resort_id, room_ids, start_date, end_date, check_in_time, check_out_time, status, booking_form")
+        .in("resort_id", resortIds);
+      if (error) {
+        console.error("Availability fetch error:", error.message);
+        if (!cancelled) setAvailabilityByResort({});
+        return;
+      }
+
+      const byResortBookings = {};
+      (data || []).forEach((row) => {
+        const key = Number(row.resort_id);
+        if (!byResortBookings[key]) byResortBookings[key] = [];
+        byResortBookings[key].push(row);
+      });
+
+      const next = {};
+      allResorts.forEach((resort) => {
+        const rooms = resort.rooms || [];
+        const blockedSet = getUnavailableRoomIds(byResortBookings[Number(resort.id)] || [], requestedRange);
+        const availableRooms = rooms.filter((room) => !blockedSet.has(room?.id?.toString()));
+        const totalAvailablePax = availableRooms.reduce((sum, room) => sum + Number(room?.guests || 0), 0);
+        const requestedRooms = Number(guests.rooms || 1);
+        const requestedPax = Number(guests.adults || 0) + Number(guests.children || 0);
+        const hasEnoughRooms = availableRooms.length >= requestedRooms;
+        const hasEnoughPax = totalAvailablePax >= requestedPax;
+        next[resort.id] = {
+          unavailableRoomIds: blockedSet,
+          availableRoomIds: new Set(availableRooms.map((room) => room?.id?.toString()).filter(Boolean)),
+          availableRoomCount: availableRooms.length,
+          totalAvailablePax,
+          hasEnoughRooms,
+          hasEnoughPax,
+          viable: hasEnoughRooms && hasEnoughPax,
+        };
+      });
+      if (!cancelled) setAvailabilityByResort(next);
+    };
+    loadAvailability();
+    return () => {
+      cancelled = true;
+    };
+  }, [allResorts, checkInTime, checkOutTime, endDate, guests.adults, guests.children, guests.rooms, startDate]);
+
   const filteredResorts = useMemo(() => {
     const { min, max } = priceRange;
     const safeMin = Math.min(min, max);
@@ -145,11 +221,6 @@ export function ResortDataProvider({ children }) {
 
     return [...allResorts]
       .filter((resort) => resort.visible !== false)
-      .filter((resort) => {
-        const totalNeeded = guests.adults + guests.children;
-        const hasFittingRoom = resort.rooms?.some((room) => room.guests >= totalNeeded);
-        return hasFittingRoom;
-      })
       .sort((a, b) => {
         const buildSearchableMeta = (resort) => [
           ...((resort.tags || []).map((tag) => String(tag).toLowerCase())),
@@ -165,6 +236,12 @@ export function ResortDataProvider({ children }) {
           );
         };
 
+        const aAvailability = availabilityByResort[a.id];
+        const bAvailability = availabilityByResort[b.id];
+        const aViable = aAvailability?.viable !== false;
+        const bViable = bAvailability?.viable !== false;
+        if (aViable !== bViable) return aViable ? -1 : 1;
+
         const aMatchesTerms = hasAllTerms(a);
         const bMatchesTerms = hasAllTerms(b);
         if (aMatchesTerms !== bMatchesTerms) return aMatchesTerms ? -1 : 1;
@@ -177,7 +254,7 @@ export function ResortDataProvider({ children }) {
         const bMid = Math.abs(Number(b.price || 0) - midpoint);
         return aMid - bMid;
       });
-  }, [allResorts, guests.adults, guests.children, priceRange, selectedTags]);
+  }, [allResorts, availabilityByResort, priceRange, selectedTags]);
 
   return (
     <ResortDataContext.Provider
@@ -206,6 +283,7 @@ export function ResortDataProvider({ children }) {
         setCheckInTime,
         checkOutTime,
         setCheckOutTime,
+        availabilityByResort,
       }}
     >
       {children}
