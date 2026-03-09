@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Database, HardDrive, AlertTriangle, RefreshCw, ExternalLink } from "lucide-react";
+import { Database, HardDrive, AlertTriangle, RefreshCw, ExternalLink, Mail } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { BUCKET_NAME } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ const TABLES = [
   { name: "ticket_issues", label: "Ticket Issues" },
   { name: "owner_admin_messages", label: "Owner/Admin Messages" },
   { name: "booking_transactions", label: "Transactions" },
+  { name: "email_delivery_logs", label: "Email Logs" },
 ];
 
 const ESTIMATED_DB_RECORD_LIMIT = 50000;
@@ -41,6 +42,13 @@ export default function AdminAnalyticsPage() {
   const [tableCounts, setTableCounts] = useState([]);
   const [bucketBytes, setBucketBytes] = useState(0);
   const [lastCheckedAt, setLastCheckedAt] = useState(null);
+  const [emailStats, setEmailStats] = useState({
+    todaySent: 0,
+    todayFailed: 0,
+    sevenDaySent: 0,
+    daily: [],
+    trackingInstalled: true,
+  });
 
   const computeBucketUsage = useCallback(async () => {
     let totalBytes = 0;
@@ -98,6 +106,69 @@ export default function AdminAnalyticsPage() {
       } catch (err) {
         toast({
           message: `Storage usage check failed: ${err.message}`,
+          color: "amber",
+        });
+      }
+
+      try {
+        const since = new Date();
+        since.setDate(since.getDate() - 6);
+        since.setHours(0, 0, 0, 0);
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const { data, error } = await supabase
+          .from("email_delivery_logs")
+          .select("created_at, status")
+          .gte("created_at", since.toISOString())
+          .order("created_at", { ascending: true });
+
+        if (error) {
+          const tableMissing =
+            error.message?.includes("email_delivery_logs") &&
+            (error.message?.includes("does not exist") || error.message?.includes("schema cache"));
+          if (tableMissing) {
+            setEmailStats({
+              todaySent: 0,
+              todayFailed: 0,
+              sevenDaySent: 0,
+              daily: [],
+              trackingInstalled: false,
+            });
+          } else {
+            throw error;
+          }
+        } else {
+          const byDay = new Map();
+          for (let offset = 0; offset < 7; offset += 1) {
+            const date = new Date();
+            date.setDate(date.getDate() - (6 - offset));
+            const key = date.toISOString().slice(0, 10);
+            byDay.set(key, { date: key, sent: 0, failed: 0 });
+          }
+
+          (data || []).forEach((row) => {
+            const key = String(row.created_at || "").slice(0, 10);
+            if (!byDay.has(key)) return;
+            const entry = byDay.get(key);
+            const status = String(row.status || "").toLowerCase();
+            if (status === "failed") {
+              entry.failed += 1;
+            } else if (status === "sent") {
+              entry.sent += 1;
+            }
+          });
+
+          const daily = Array.from(byDay.values());
+          setEmailStats({
+            todaySent: daily.find((entry) => entry.date === todayKey)?.sent || 0,
+            todayFailed: daily.find((entry) => entry.date === todayKey)?.failed || 0,
+            sevenDaySent: daily.reduce((sum, entry) => sum + entry.sent, 0),
+            daily,
+            trackingInstalled: true,
+          });
+        }
+      } catch (err) {
+        toast({
+          message: `Email tracking check failed: ${err.message}`,
           color: "amber",
         });
       }
@@ -184,6 +255,82 @@ export default function AdminAnalyticsPage() {
                 ? "Image file storage almost full. Paid tier might be needed soon."
                 : "Image storage has enough room."}
             </p>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
+          <Card className="p-6 rounded-2xl border bg-white border-slate-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                <Mail size={20} />
+              </div>
+              <h2 className="font-bold text-slate-900">Email Delivery</h2>
+            </div>
+            <p className="text-3xl font-black text-slate-900">{emailStats.todaySent.toLocaleString()}</p>
+            <p className="text-xs uppercase tracking-wider text-slate-500 mt-1">Emails sent today</p>
+            <div className="mt-5 space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Last 7 days</span>
+                <span className="font-bold text-slate-900">{emailStats.sevenDaySent.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Failed today</span>
+                <span className={`font-bold ${emailStats.todayFailed > 0 ? "text-rose-600" : "text-slate-900"}`}>
+                  {emailStats.todayFailed.toLocaleString()}
+                </span>
+              </div>
+            </div>
+            <p className="mt-4 text-sm font-semibold text-slate-600">
+              {emailStats.trackingInstalled
+                ? "Counts come from real email delivery log entries."
+                : "Email tracking table is not installed yet."}
+            </p>
+          </Card>
+
+          <Card className="p-6 rounded-2xl border bg-white border-slate-100">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 className="font-bold text-slate-900">Daily Email Counter</h2>
+                <p className="text-sm text-slate-500">Sent and failed emails over the last 7 days.</p>
+              </div>
+            </div>
+            {!emailStats.trackingInstalled ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+                Install `supabase/phase9_email_tracking.sql` to enable this panel.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {emailStats.daily.map((entry) => {
+                  const total = entry.sent + entry.failed;
+                  const sentWidth = total > 0 ? Math.max(8, Math.round((entry.sent / total) * 100)) : 0;
+                  const failedWidth = total > 0 ? Math.max(0, 100 - sentWidth) : 0;
+                  return (
+                    <div key={entry.date} className="grid grid-cols-[92px_1fr_auto] items-center gap-3">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        {new Date(`${entry.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                      <div className="h-3 rounded-full bg-slate-100 overflow-hidden flex">
+                        <div
+                          className="h-full bg-emerald-500"
+                          style={{ width: `${sentWidth}%` }}
+                          title={`Sent: ${entry.sent}`}
+                        />
+                        <div
+                          className="h-full bg-rose-400"
+                          style={{ width: `${failedWidth}%` }}
+                          title={`Failed: ${entry.failed}`}
+                        />
+                      </div>
+                      <span className="text-sm font-bold text-slate-900">
+                        {entry.sent}
+                        <span className="text-slate-400"> / </span>
+                        <span className={entry.failed > 0 ? "text-rose-600" : "text-slate-400"}>{entry.failed}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
         </div>
 

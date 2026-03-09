@@ -72,6 +72,7 @@ Quick reference for where key logic lives.
 
 - `caretakerNotifications.js`
   - Notification write helper used after payment approval.
+  - Current hook point for future caretaker email/SMS delivery.
 
 - `server/bookingStatusAutomation.js`
   - Server-only status automation runner.
@@ -79,6 +80,9 @@ Quick reference for where key logic lives.
 
 - `idempotency.js`
   - Simple idempotency key generator for write actions/messages.
+
+- `emailTracking.js`
+  - Shared helper for writing real email delivery events into analytics log table.
 
 ## Main Public Pages
 
@@ -151,6 +155,9 @@ Quick reference for where key logic lives.
   - Status transition enforcement trigger.
   - Booking status/payment audit table + trigger.
   - Ticket message idempotency column/index + safe insert RPC.
+
+- `supabase/phase9_email_tracking.sql`
+  - Adds `email_delivery_logs` for send/failed email tracking and analytics.
 
 ## Server Automation
 
