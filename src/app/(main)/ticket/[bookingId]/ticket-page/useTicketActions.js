@@ -84,6 +84,21 @@ export function useTicketActions({
 
       if (error) throw error;
 
+      const amount = Number(downpayment || 0);
+      if (amount > 0) {
+        const totalAmount = Number(form.totalAmount || 0);
+        const existingPaid = Number(form.downpayment || 0);
+        const balanceAfter = Math.max(0, totalAmount - existingPaid - amount);
+        const { error: txError } = await supabase.from("booking_transactions").insert({
+          booking_id: booking.id,
+          method: paymentMethod || "Pending",
+          amount,
+          balance_after: balanceAfter,
+          note: "Payment proof submitted by client (pending approval)",
+        });
+        if (txError) console.error("Failed to record booking_transactions:", txError);
+      }
+
       setBooking((prev) => ({ ...prev, booking_form: bookingForm, status: nextStatus }));
       await fetchTicket();
       toast({
@@ -124,7 +139,7 @@ export function useTicketActions({
       toast({ message: "Issue sent to owner support.", color: "green" });
     } catch (err) {
       if (isMissingSupportTableError(err)) {
-        toast({ message: "Issue table missing. Ask admin to run phase3 SQL.", color: "amber" });
+        toast({ message: "Issue table missing. Ask admin to run supabase/schema.sql.", color: "amber" });
         return;
       }
       toast({ message: `Issue send failed: ${err.message}`, color: "red" });
@@ -148,7 +163,7 @@ export function useTicketActions({
       toast({ message: "Message sent to owner.", color: "green" });
     } catch (err) {
       if (isMissingSupportTableError(err)) {
-        toast({ message: "Messaging table missing. Ask admin to run phase4 SQL.", color: "amber" });
+        toast({ message: "Messaging table missing. Ask admin to run supabase/schema.sql.", color: "amber" });
         return;
       }
       toast({ message: `Message send failed: ${err.message}`, color: "red" });
