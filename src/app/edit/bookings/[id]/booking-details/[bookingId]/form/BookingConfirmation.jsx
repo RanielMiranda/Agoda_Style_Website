@@ -41,8 +41,6 @@ const STATUS_PHASES = [
   "Ongoing",
   "Pending Checkout",
   "Checked Out",
-  "Cancelled",
-  "Declined",
 ];
 
 export default function BookingConfirmation({

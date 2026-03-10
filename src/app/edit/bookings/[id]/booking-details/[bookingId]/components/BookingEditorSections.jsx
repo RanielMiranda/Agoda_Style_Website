@@ -3,6 +3,7 @@
 import React from "react";
 import {
   User,
+  MapPin,
   Mail,
   Phone,
   Calendar,
@@ -61,6 +62,13 @@ export function ClientCardSection({ resortName, isEditing, draft, setField, stat
                   onChange={(e) => setField("phoneNumber", e.target.value)}
                   placeholder="Phone"
                 />
+                <input
+                  type="text"
+                  className="text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                  value={draft.address || ""}
+                  onChange={(e) => setField("address", e.target.value)}
+                  placeholder="Address"
+                />
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -71,6 +79,10 @@ export function ClientCardSection({ resortName, isEditing, draft, setField, stat
                 <span className="inline-flex items-center gap-1">
                   <Phone size={12} />
                   {draft.phoneNumber || "No phone"}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={12} />
+                  {draft.address || "No address"}
                 </span>
               </div>
             )}
@@ -136,7 +148,7 @@ export function StayCardSection({
             <Button
               type="button"
               variant="outline"
-              className="h-7 px-2 text-[10px] font-bold border-rose-200 text-rose-700 hover:bg-rose-50"
+              className="flex items-center justify-center h-7 px-2 text-[10px] font-bold border-rose-200 text-rose-700 hover:bg-rose-50"
               onClick={onOpenConflict}
             >
               Open Conflict
@@ -146,7 +158,7 @@ export function StayCardSection({
             <Button
               type="button"
               variant="outline"
-              className="h-7 px-2 text-[10px] font-bold"
+              className="flex items-center justify-center h-7 px-2 text-[10px] font-bold"
               onClick={onOpenCalendar}
             >
               View Availability Calendar
@@ -426,7 +438,7 @@ export function AssignRoomsCardSection({
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
       <SectionLabel icon={<Briefcase size={14} />} label="Assign Rooms" />
-      <p className="text-xs text-slate-500">Select available rooms for this stay. Conflicting rooms are marked.</p>
+      <p className="text-xs text-slate-500">Assign rooms based on the discussions.</p>
       <div className="space-y-2 max-h-64 overflow-auto pr-1">
         {(resortRooms || []).map((room) => {
           const roomId = room.id;
@@ -478,6 +490,10 @@ export function MessagesInboxCardSection({
   setOwnerReply,
   onSendReply,
 }) {
+  const earliestClientMessageId = (messages || [])
+    .filter((msg) => msg?.sender_role === "client" && msg?.id)
+    .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+    .map((msg) => `msg:${msg.id}`)[0];
   const conversationItems = buildSupportConversationItems({
     messages,
     issues: (issues || []).map((issue) => ({
@@ -510,6 +526,10 @@ export function MessagesInboxCardSection({
             const isOwner = item.senderRole === "owner";
             const isIssue = item.kind === "issue";
             const resolved = isResolvedConversationItem(item);
+            const isInitialInquiryNote =
+              item.kind === "message" &&
+              item.senderRole === "client" &&
+              item.id === earliestClientMessageId;
             return (
               <div
                 key={item.id}
@@ -524,12 +544,14 @@ export function MessagesInboxCardSection({
                 }`}
               >
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="font-black uppercase text-[9px]">{getSupportConversationLabel(item)}</p>
+                  <p className="font-black uppercase text-[9px]">
+                    {isInitialInquiryNote ? "Initial Inquiry Note" : getSupportConversationLabel(item)}
+                  </p>
                   {isIssue && !resolved ? (
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-6 px-2 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                      className="flex items-center justify-center  h-6 px-2 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                       onClick={() => onResolveIssue?.(item.issueId)}
                     >
                       Resolve

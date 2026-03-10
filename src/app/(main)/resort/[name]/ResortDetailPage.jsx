@@ -156,7 +156,7 @@ const handleSubmitInquiry = async (submittedData) => {
         guestName: submittedData.guestName || "",
         email: submittedData.email || "",
         phoneNumber: submittedData.contactNumber || "",
-        address: submittedData.area || "",
+        address: submittedData.address || submittedData.area || "",
         adultCount,
         childrenCount,
         pax,
@@ -199,6 +199,19 @@ const handleSubmitInquiry = async (submittedData) => {
       });
 
       if (error) throw error;
+      if (submittedData.message) {
+        try {
+          await supabase.from("ticket_messages").insert({
+            booking_id: bookingId,
+            resort_id: Number(resort.id),
+            sender_role: "client",
+            sender_name: submittedData.guestName || "Client",
+            message: submittedData.message,
+          });
+        } catch (messageError) {
+          console.error("Failed to save inquiry message:", messageError?.message || messageError);
+        }
+      }
       if (typeof window !== "undefined") {
         const ticketUrl = `${window.location.origin}/ticket/${bookingId}?token=${ticketAccessToken}`;
         console.info("Client ticket link (for testing until email is enabled):", ticketUrl);
@@ -245,7 +258,7 @@ const handleSubmitInquiry = async (submittedData) => {
 
             <section className="px-0">
               <div className="border-b border-slate-200 pb-5 mb-6">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400 mb-2">
+                <p className="mt-10 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400 mb-2">
                   Available Accommodations
                 </p>
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-900">

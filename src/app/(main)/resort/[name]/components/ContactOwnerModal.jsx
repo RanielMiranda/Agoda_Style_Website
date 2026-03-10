@@ -61,6 +61,7 @@ export default function ContactOwnerModal({
     email: "",
     contactNumber: "",
     area: destination || "",
+    address: "",
     adultCount: Number(guests?.adults || 0),
     childrenCount: Number(guests?.children || 0),
     pax: Number((guests?.adults || 0) + (guests?.children || 0)),
@@ -100,6 +101,7 @@ export default function ContactOwnerModal({
         email: saved.email || "",
         contactNumber: saved.contactNumber || "",
         area: saved.area || base.area,
+        address: saved.address || "",
         message: saved.message || "",
         sleepingGuests: Number(saved.sleepingGuests || 0),
       });
@@ -119,13 +121,14 @@ export default function ContactOwnerModal({
           email: formData.email || "",
           contactNumber: formData.contactNumber || "",
           area: formData.area || "",
+          address: formData.address || "",
           message: formData.message || "",
           sleepingGuests: Number(formData.sleepingGuests || 0),
         })
       );
     }, 150);
     return () => clearTimeout(timer);
-  }, [formData.guestName, formData.email, formData.contactNumber, formData.area, formData.message, formData.sleepingGuests, isOpen, resort?.id]);
+  }, [formData.guestName, formData.email, formData.contactNumber, formData.area, formData.address, formData.message, formData.sleepingGuests, isOpen, resort?.id]);
 
   // Steps Configuration (Increased to 4)
   const steps = [
@@ -267,6 +270,10 @@ export default function ContactOwnerModal({
                   <label className="text-xs font-black uppercase text-slate-400 ml-1">Contact Number</label>
                   <input name="contactNumber" value={formData.contactNumber ?? ""} onChange={handleChange} type="tel" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="+(63) 917 180 2394" />
                 </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-black uppercase text-slate-400 ml-1">Your Address</label>
+                <input name="address" value={formData.address ?? ""} onChange={handleChange} type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="Street, city, province" />
               </div>
             </div>
           )}
@@ -423,6 +430,7 @@ export default function ContactOwnerModal({
                     value={selectedRoomNamesDerived.length > 0 ? selectedRoomNamesDerived.join(", ") : "Not set"}
                   />
                   <SummaryItem icon={Phone} label="Contact" value={formData.contactNumber || "Not set"} />
+                  <SummaryItem icon={MapPin} label="Address" value={formData.address || "Not set"} />
                   <SummaryItem 
                     icon={PlusCircle} 
                     label="Add-ons" 

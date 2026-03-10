@@ -29,6 +29,7 @@ export function buildDraftFromBooking(booking) {
     guestName: form.guestName || "Guest",
     email: form.email || "",
     phoneNumber: form.phoneNumber || "",
+    address: form.address || "",
     adultCount: adults,
     childrenCount: children,
     guestCount: derivedPax,
