@@ -15,12 +15,7 @@ export function normalizeRoomIds(roomIds) {
 
 export function isBlockingStatus(status) {
   const normalized = String(status || "").toLowerCase();
-  return !(
-    normalized.includes("pending checkout") ||
-    normalized.includes("cancel") ||
-    normalized.includes("declined") ||
-    normalized.includes("checked out")
-  );
+  return normalized.includes("confirm") || normalized.includes("ongoing");
 }
 
 export function buildRequestedRange({ startDate, endDate, checkInTime, checkOutTime }) {

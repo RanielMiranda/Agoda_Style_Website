@@ -35,6 +35,8 @@ export default function BookingModernEditor({
   onDelete,
   onOpenForm,
   onOpenTicket,
+  onOpenBooking,
+  onOpenCalendar,
   messages,
   issues,
   ownerReply,
@@ -61,6 +63,7 @@ export default function BookingModernEditor({
   const [proofPreviewUrls, setProofPreviewUrls] = useState(() => buildDraftFromBooking(booking).paymentProofUrls || []);
   const [assignedRoomIds, setAssignedRoomIds] = useState(() => booking.roomIds || []);
   const [actorMeta, setActorMeta] = useState({ name: "Owner", role: "owner", id: "" });
+  const hasConflicts = conflicts.length > 0;
 
   useEffect(() => {
     setAssignedRoomIds(booking.roomIds || []);
@@ -208,6 +211,13 @@ export default function BookingModernEditor({
   };
 
   const handleApproveInquiry = async () => {
+    if (hasConflicts) {
+      toast({
+        message: "Approval blocked: this booking conflicts with existing reservations.",
+        color: "amber",
+      });
+      return;
+    }
     await handleApproveInquiryAction({
       actionBusy,
       setActionBusy,
@@ -310,6 +320,12 @@ export default function BookingModernEditor({
                 resortRooms={resortRooms}
                 conflicts={conflicts}
                 formatWeekdayLabel={formatWeekdayLabel}
+                onOpenConflict={() => {
+                  const conflictBooking = conflicts[0];
+                  if (!conflictBooking?.id) return;
+                  onOpenBooking?.(conflictBooking.id);
+                }}
+                onOpenCalendar={onOpenCalendar}
               />
             </div>
 

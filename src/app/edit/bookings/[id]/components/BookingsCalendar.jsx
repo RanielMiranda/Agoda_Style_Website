@@ -11,6 +11,7 @@ import {
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const GROUP_COLORS = ["bg-blue-600", "bg-orange-500", "bg-emerald-600", "bg-amber-500"];
 const GROUP_COLOR_HEX = ["#2563eb", "#f97316", "#059669", "#f59e0b"];
@@ -19,9 +20,29 @@ function getNormalizedStatus(booking) {
   return String(booking?.status || booking?.bookingForm?.status || "").toLowerCase();
 }
 
+function getStatusLabel(booking) {
+  const normalized = getNormalizedStatus(booking);
+  if (normalized.includes("ongoing")) return "Ongoing";
+  if (normalized.includes("confirm")) return "Confirmed";
+  if (normalized.includes("pending payment")) return "Pending Payment";
+  if (normalized.includes("approved inquiry")) return "Approved Inquiry";
+  if (normalized.includes("inquiry")) return "Inquiry";
+  return booking?.status || booking?.bookingForm?.status || "Unknown";
+}
+
 function shouldShowOnCalendar(booking) {
   const normalizedStatus = getNormalizedStatus(booking);
   return !["pending checkout", "checked out", "cancelled", "declined"].includes(normalizedStatus);
+}
+
+function isConfirmedStatus(booking) {
+  const normalized = getNormalizedStatus(booking);
+  return normalized.includes("confirm") || normalized.includes("ongoing");
+}
+
+function isInquiryStatus(booking) {
+  const normalized = getNormalizedStatus(booking);
+  return normalized.includes("inquiry") || normalized.includes("pending payment");
 }
 
 function getBookingStartDate(booking) {
@@ -39,6 +60,8 @@ export default function BookingCalendar() {
   const params = useParams();
 
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarMode, setCalendarMode] = useState("all"); // all | confirmed
+  const [showInquiryOverlay, setShowInquiryOverlay] = useState(false);
 
   const bookingList = useMemo(() => bookings || resort?.bookings || [], [bookings, resort?.bookings]);
   const getBookingColor = (booking) => {
@@ -55,6 +78,7 @@ export default function BookingCalendar() {
   const getDateBookings = (dateString) =>
     bookingList.filter((booking) => {
       if (!shouldShowOnCalendar(booking)) return false;
+      if (calendarMode === "confirmed" && !isConfirmedStatus(booking)) return false;
       const startDate = getBookingStartDate(booking);
       const endDate = getBookingEndDate(booking);
       if (!startDate) return false;
@@ -87,6 +111,20 @@ export default function BookingCalendar() {
     router.push(`/edit/bookings/${resortId}/booking-details/${bookingId}`);
   };
 
+  const getInquiryOverlayBookings = (dateString) =>
+    bookingList.filter((booking) => {
+      if (!isInquiryStatus(booking)) return false;
+      const startDate = getBookingStartDate(booking);
+      const endDate = getBookingEndDate(booking);
+      if (!startDate) return false;
+      if (!endDate) return startDate === dateString;
+      return (
+        startDate === dateString ||
+        endDate === dateString ||
+        (dateString > startDate && dateString < endDate)
+      );
+    });
+
   const renderMonth = (monthOffset) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset, 1);
     const month = date.getMonth();
@@ -108,6 +146,7 @@ export default function BookingCalendar() {
             const day = index + 1;
             const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const dateBookings = getDateBookings(dateString);
+            const inquiryBookings = showInquiryOverlay ? getInquiryOverlayBookings(dateString) : [];
             const orderedBookings = [...dateBookings].sort((a, b) => {
               const startA = getBookingStartDate(a) || "";
               const startB = getBookingStartDate(b) || "";
@@ -123,6 +162,7 @@ export default function BookingCalendar() {
                   backgroundImage: `linear-gradient(90deg, ${getBookingColorHex(booking)} 0%, ${getBookingColorHex(booking)} 50%, ${getBookingColorHex(secondaryBooking)} 50%, ${getBookingColorHex(secondaryBooking)} 100%)`,
                 }
               : undefined;
+            const hasInquiryOverlay = inquiryBookings.length > 0;
 
             const className = `h-9 w-full rounded-lg text-sm transition-all relative 
               ${booking ? "text-white cursor-pointer" : "hover:bg-slate-100 text-slate-600"} 
@@ -144,6 +184,9 @@ export default function BookingCalendar() {
                       className={`absolute inset-0 rounded-[inherit] ${primaryColor} ${getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "opacity-90" : ""}`}
                     />
                   )
+                ) : null}
+                {hasInquiryOverlay ? (
+                  <span className="absolute inset-0 rounded-[inherit] bg-amber-400/30 ring-1 ring-amber-400/40" />
                 ) : null}
                 <span className="relative z-10">{day}</span>
               </>
@@ -193,6 +236,24 @@ export default function BookingCalendar() {
             </h2>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Read-only whole-resort availability overview</p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant={calendarMode === "confirmed" ? "default" : "outline"}
+              className="h-9 px-3 text-[11px] font-bold"
+              onClick={() => setCalendarMode((prev) => (prev === "confirmed" ? "all" : "confirmed"))}
+            >
+              {calendarMode === "confirmed" ? "Confirmed Only" : "All Bookings"}
+            </Button>
+            <Button
+              type="button"
+              variant={showInquiryOverlay ? "default" : "outline"}
+              className="h-9 px-3 text-[11px] font-bold"
+              onClick={() => setShowInquiryOverlay((prev) => !prev)}
+            >
+              {showInquiryOverlay ? "Inquiries Overlay On" : "Show Inquiries Overlay"}
+            </Button>
+          </div>
         
         </div>
 
@@ -218,11 +279,12 @@ export default function BookingCalendar() {
           <div className="flex flex-wrap gap-3">
             {bookingList
               .filter((booking) => shouldShowOnCalendar(booking))
+              .filter((booking) => (calendarMode === "confirmed" ? isConfirmedStatus(booking) : true))
               .map((booking) => {
                 const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
                 const checkOut = booking?.checkOutTime || booking?.bookingForm?.checkOutTime || "--:--";
                 const guestName = booking?.bookingForm?.guestName || "Guest";
-                const roomLabel = "Whole resort";
+                const roomLabel = getStatusLabel(booking);
 
                 return (
                   <div

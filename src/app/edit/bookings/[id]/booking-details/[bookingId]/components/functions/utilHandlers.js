@@ -2,7 +2,7 @@ import { overlapsByDateTime } from "../bookingEditorUtils";
 
 function isBlockingStatus(status) {
   const normalized = String(status || "").toLowerCase();
-  return !["pending checkout", "checked out", "cancelled", "declined"].includes(normalized);
+  return normalized.includes("confirm");
 }
 
 export function resolveApprovedByName({ bookingFormAudits = [], dbAudits = [] }) {

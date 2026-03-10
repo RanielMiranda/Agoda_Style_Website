@@ -92,7 +92,10 @@ export function StayCardSection({
   resortRooms,
   conflicts,
   formatWeekdayLabel,
+  onOpenConflict,
+  onOpenCalendar,
 }) {
+  const hasConflicts = conflicts.length > 0;
   return (
     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
       <SectionLabel icon={<Calendar size={14} />} label="Stay" />
@@ -128,6 +131,28 @@ export function StayCardSection({
             ? `${conflicts.length} conflicting booking(s) on shared room/date range.`
             : "No detected schedule conflict for this range."}
         </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {hasConflicts && onOpenConflict ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-7 px-2 text-[10px] font-bold border-rose-200 text-rose-700 hover:bg-rose-50"
+              onClick={onOpenConflict}
+            >
+              Open Conflict
+            </Button>
+          ) : null}
+          {onOpenCalendar ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-7 px-2 text-[10px] font-bold"
+              onClick={onOpenCalendar}
+            >
+              View Availability Calendar
+            </Button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { useSupport } from "@/components/useclient/SupportClient";
@@ -27,6 +27,7 @@ import BookingSummaryCards from "./components/BookingSummaryCards";
 export default function BookingManagementPage() {
   const { id } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { resort, loadResort, setResort, loading } = useResort();
   const { bookings, refreshBookings, updateBookingById, deleteBookingById } = useBookings();
   const { listResortConcerns, updateConcernStatus } = useSupport();

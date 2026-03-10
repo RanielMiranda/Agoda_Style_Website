@@ -84,9 +84,7 @@ export default function ResortDetailPage({ name }) {
   }, [resort?.id, startDate, endDate, checkInTime, checkOutTime]);
 
   useEffect(() => {
-    setSelectedRoomIds((prev) =>
-      prev.filter((id) => !(unavailableRoomIds || []).includes(id?.toString()))
-    );
+    setSelectedRoomIds((prev) => prev);
   }, [unavailableRoomIds]);
 
   useEffect(() => {
@@ -124,6 +122,7 @@ export default function ResortDetailPage({ name }) {
   const selectedRoomSummary = selectedRooms.length > 0
     ? selectedRooms.map((room) => room.name).filter(Boolean).join(", ")
     : "";
+  const hasAvailabilityConflict = unavailableRoomIds.length > 0;
 
 const handleSubmitInquiry = async (submittedData) => {
     try {
@@ -280,9 +279,22 @@ const handleSubmitInquiry = async (submittedData) => {
               </div>
 
               <div className="border-t border-slate-100 px-6 py-5 space-y-4 bg-slate-50/80 rounded-b-[2rem]">
+                {hasAvailabilityConflict ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">
+                    Resort is unavailable for the selected dates.
+                  </div>
+                ) : null}
                 <button
                   className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
-                  onClick={() => setContactOpen(true)}
+                  onClick={() => {
+                    if (hasAvailabilityConflict) {
+                      toast({
+                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
+                        color: "amber",
+                      });
+                    }
+                    setContactOpen(true);
+                  }}
                 >
                   Contact Owner
                 </button>
@@ -371,6 +383,12 @@ const handleSubmitInquiry = async (submittedData) => {
                   className="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white"
                   onClick={() => {
                     setMobileFiltersOpen(false);
+                    if (hasAvailabilityConflict) {
+                      toast({
+                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
+                        color: "amber",
+                      });
+                    }
                     setContactOpen(true);
                   }}
                 >

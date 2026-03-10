@@ -52,7 +52,7 @@ export default function BookingDetailsPage() {
   const bookingConflicts = (bookings || []).filter((entry) => {
     if (!booking || entry.id?.toString() === booking.id?.toString()) return false;
     const normalizedStatus = String(entry.status || entry.bookingForm?.status || "").toLowerCase();
-    if (["pending checkout", "checked out", "cancelled", "declined"].includes(normalizedStatus)) return false;
+    if (!normalizedStatus.includes("confirm")) return false;
     return overlapsByDateTime(booking, entry);
   });
 
@@ -172,6 +172,8 @@ export default function BookingDetailsPage() {
       }}
       onOpenForm={() => router.push(`/edit/bookings/${id}/booking-details/${booking.id}/form`)}
       onOpenTicket={() => router.push(`/ticket/${booking.id}`)}
+      onOpenBooking={(targetId) => router.push(`/edit/bookings/${id}/booking-details/${targetId}`)}
+      onOpenCalendar={() => router.push(`/edit/bookings/${id}?tab=calendar`)}
       messages={messages}
       issues={issues}
       ownerReply={ownerReply}
