@@ -187,9 +187,21 @@ export default function BookingManagementPage() {
   }, [bookings]);
 
   const handleResolveConcern = async (issueId) => {
+    const confirmed = window.confirm("Resolve and permanently delete this concern?");
+    if (!confirmed) return;
     try {
-      await updateConcernStatus(issueId, "resolved");
-      setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "resolved" } : entry)));
+      const isArchivedId = typeof issueId === "string" && issueId.startsWith("arch:");
+      const archiveId = isArchivedId ? issueId.slice(5) : null;
+
+      if (isArchivedId) {
+        const { error } = await supabase.from("ticket_issues_archive").delete().eq("id", archiveId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("ticket_issues").delete().eq("id", issueId);
+        if (error) throw error;
+      }
+
+      setConcerns((prev) => prev.filter((entry) => entry.id !== issueId));
     } catch (error) {
       console.error("Resolve concern error:", error.message);
     }

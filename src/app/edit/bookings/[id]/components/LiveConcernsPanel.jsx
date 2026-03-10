@@ -21,7 +21,7 @@ export default function LiveConcernsPanel({
             Live Concerns Feed
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Resolved concerns older than 10 days are auto-deleted.
+            Resolved concerns are deleted immediately.
           </p>
         </div>
         <Button
@@ -95,7 +95,7 @@ export default function LiveConcernsPanel({
                       className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-700"
                       onClick={() => onResolve?.(issue.id)}
                     >
-                      Mark Resolved
+                      Resolve & Delete
                     </Button>
                   )}
                 </div>

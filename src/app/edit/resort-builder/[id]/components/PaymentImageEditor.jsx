@@ -30,7 +30,7 @@ export default function PaymentImageEditor() {
         <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Payment reference image</h2>
       </div>
       <p className="text-xs text-slate-500 mb-4">
-        Optional. Upload a GCash QR or payment reference image. It will appear in the booking editor so guests know where to send payment. Stored as WebP under <code className="bg-slate-100 px-1 rounded">[resortname]/payment</code>.
+        Optional. Upload a GCash QR or payment reference image for clients to know where to send their payment.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 items-start">
         <input
