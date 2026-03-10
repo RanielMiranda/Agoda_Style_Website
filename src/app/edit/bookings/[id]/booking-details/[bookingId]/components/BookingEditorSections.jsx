@@ -181,6 +181,7 @@ export function AddOnsCardSection({
   const toggleService = (service) => {
     if (!setField) return;
     const exists = services.some((entry) => entry?.name === service?.name);
+    const serviceCost = Number(service?.cost || 0);
     const nextServices = exists
       ? services.filter((entry) => entry?.name !== service?.name)
       : [
@@ -191,7 +192,14 @@ export function AddOnsCardSection({
             cost: Number(service?.cost || 0),
           },
         ];
+    const currentTotal = Number(draft.totalAmount || 0);
+    const nextTotal = exists
+      ? Math.max(0, currentTotal - serviceCost)
+      : currentTotal + serviceCost;
     setField("resortServices", nextServices);
+    if (serviceCost > 0) {
+      setField("totalAmount", nextTotal);
+    }
   };
 
   return (

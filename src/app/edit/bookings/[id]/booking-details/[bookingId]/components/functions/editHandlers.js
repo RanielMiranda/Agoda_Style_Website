@@ -27,6 +27,7 @@ export function loadDraftFromStorage({ booking, inlineDraftKey, isEditing }) {
       pendingDownpayment: base.pendingDownpayment,
       pendingPaymentMethod: base.pendingPaymentMethod,
       paymentPendingApproval: base.paymentPendingApproval,
+      paymentDeadline: base.paymentDeadline,
       paymentProofUrl: base.paymentProofUrl,
       paymentProofUrls: base.paymentProofUrls,
       paymentSubmittedAt: base.paymentSubmittedAt,

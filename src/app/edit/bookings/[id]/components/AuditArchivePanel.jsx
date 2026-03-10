@@ -24,6 +24,8 @@ export default function AuditArchivePanel({
   onReopenDeclined,
   onDeleteDeclined,
   onResolveCheckedOut,
+  hasUnresolvedConcerns = false,
+  unresolvedConcernCount = 0,
 }) {
   const visibleAudits = audits || [];
 
@@ -48,6 +50,12 @@ export default function AuditArchivePanel({
           {loading ? "Refreshing..." : "Refresh Archive"}
         </Button>
       </div>
+      {hasUnresolvedConcerns ? (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-700 font-semibold">
+          Resolve actions are disabled until all live concerns are cleared.
+          {unresolvedConcernCount > 0 ? ` (${unresolvedConcernCount} open)` : ""}
+        </div>
+      ) : null}
 
       {visibleAudits.length === 0 && declinedBookings.length === 0 && checkedOutBookings.length === 0 ? (
         <div className="p-10 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
@@ -90,8 +98,11 @@ export default function AuditArchivePanel({
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-8 px-3 text-xs font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    className={`h-8 px-3 text-xs font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50 ${
+                      hasUnresolvedConcerns ? "opacity-60 cursor-not-allowed" : ""
+                    }`}
                     onClick={() => onResolveCheckedOut?.(item.id)}
+                    disabled={hasUnresolvedConcerns}
                   >
                     Resolve
                   </Button>

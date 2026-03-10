@@ -251,6 +251,10 @@ export default function BookingManagementPage() {
   };
 
   const handleResolveCheckedOut = async (bookingId) => {
+    if (openConcernCount > 0) {
+      window.alert("Resolve blocked: please clear all live concerns first.");
+      return;
+    }
     const confirmed = window.confirm("Resolve and permanently delete this checked-out booking?");
     if (!confirmed) return;
     try {
@@ -377,6 +381,8 @@ export default function BookingManagementPage() {
                 onReopenDeclined={handleReopenDeclined}
                 onDeleteDeclined={handleDeleteDeclined}
                 onResolveCheckedOut={handleResolveCheckedOut}
+                hasUnresolvedConcerns={openConcernCount > 0}
+                unresolvedConcernCount={openConcernCount}
               />
             </div>
           )}
