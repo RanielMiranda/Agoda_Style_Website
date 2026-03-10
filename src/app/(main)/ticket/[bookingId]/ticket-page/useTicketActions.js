@@ -82,8 +82,18 @@ export function useTicketActions({
         paymentSubmittedAt: new Date().toISOString(),
       };
 
+      const normalizedStatus = String(booking.status || "").toLowerCase();
+      const isPendingCheckout = normalizedStatus === "pending checkout";
+      if (isPendingCheckout && !bookingForm.checkoutPaymentRequestedAt) {
+        toast({
+          message: "Payment upload is locked until the owner requests payment for checkout.",
+          color: "amber",
+        });
+        return;
+      }
+
       const nextStatus =
-        (booking.status || "").toLowerCase().includes("inquiry") || (booking.status || "").toLowerCase().includes("pending")
+        normalizedStatus.includes("inquiry") || normalizedStatus === "approved inquiry"
           ? "Pending Payment"
           : booking.status;
       const adults = Number(bookingForm.adultCount || form.adultCount || 0);

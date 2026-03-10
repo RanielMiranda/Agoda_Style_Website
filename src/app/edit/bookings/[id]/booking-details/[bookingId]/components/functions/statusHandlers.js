@@ -68,11 +68,20 @@ export async function handleRequestPaymentAction({
   setActionBusy(true);
   try {
     const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const next = {
-      ...draft,
-      status: "Pending Payment",
-      paymentDeadline: deadline,
-    };
+    const normalizedStatus = String(draft.status || "").toLowerCase();
+
+    const next =
+      normalizedStatus === "pending checkout"
+        ? {
+            ...draft,
+            checkoutPaymentRequestedAt: draft.checkoutPaymentRequestedAt || new Date().toISOString(),
+            checkoutPaymentDeadline: deadline,
+          }
+        : {
+            ...draft,
+            status: "Pending Payment",
+            paymentDeadline: deadline,
+          };
     setDraft(next);
     await persist(next);
   } finally {
@@ -164,7 +173,6 @@ export async function handleVerifyProofAction({
   setDraft,
   persist,
   createBookingTransaction,
-  notifyCaretakerOnPaymentApproval,
   booking,
 }) {
   if (draft.paymentVerified || actionBusy) return;
@@ -181,6 +189,10 @@ export async function handleVerifyProofAction({
       ...draft,
       paymentVerified: true,
       paymentVerifiedAt: new Date().toISOString(),
+      checkoutPaymentApprovedAt:
+        String(draft.status || "").toLowerCase() === "pending checkout"
+          ? new Date().toISOString()
+          : draft.checkoutPaymentApprovedAt || null,
       downpayment: nextDownpayment,
       paymentMethod: nextMethod,
       pendingDownpayment: 0,
@@ -193,16 +205,6 @@ export async function handleVerifyProofAction({
     };
     setDraft(next);
     await persist(next);
-
-    if (approvedAmount > 0) {
-      await notifyCaretakerOnPaymentApproval({
-        bookingId: booking.id,
-        resortId: booking.resortId || booking.resort_id || null,
-        guestName: next.guestName,
-        amount: approvedAmount,
-        method: nextMethod,
-      });
-    }
   } finally {
     setActionBusy(false);
   }

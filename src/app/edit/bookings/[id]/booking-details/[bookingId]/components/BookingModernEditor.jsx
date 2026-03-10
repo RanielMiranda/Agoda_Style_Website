@@ -5,7 +5,6 @@ import { ChevronLeft, FileText, AlertCircle, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Toast from "@/components/ui/toast/Toast";
 import { useToast } from "@/components/ui/toast/ToastProvider";
-import { notifyCaretakerOnPaymentApproval } from "@/lib/caretakerNotifications";
 import {
   buildDraftFromBooking,
   formatWeekdayLabel,
@@ -27,6 +26,7 @@ import { buildPersistPayload } from "./functions/payloadHandlers";
 import { handleCancelInlineAction, handleSaveInlineAction, loadDraftFromStorage, persistDraftToStorage, syncPaxFromCounts } from "./functions/editHandlers";
 import { handleApproveInquiryAction, handleDeclineAction, handleDeclineProofAction, handleRequestPaymentAction, handleRevertStepAction, handleSetStatusAction, handleVerifyProofAction } from "./functions/statusHandlers";
 import { isRoomConflictingForBooking, resolveApprovedByName } from "./functions/utilHandlers";
+import { isCheckoutAmountSettled } from "@/lib/bookingPayments";
 export default function BookingModernEditor({
   booking,
   resortName,
@@ -231,7 +231,6 @@ export default function BookingModernEditor({
       setDraft,
       persist,
       createBookingTransaction,
-      notifyCaretakerOnPaymentApproval,
       booking,
     });
   };
@@ -369,16 +368,23 @@ export default function BookingModernEditor({
       <BookingEditorActionBar
         showDecisionActions={showDecisionActions}
         showPaymentReviewActions={draft.paymentPendingApproval}
+        checkoutPaymentRequested={!!draft.checkoutPaymentRequestedAt}
+        checkoutPaymentApproved={
+          normalizedStatus === "pending checkout"
+            ? isCheckoutAmountSettled({ totalAmount: draft.totalAmount, paidAmount: draft.downpayment }) &&
+              !draft.paymentPendingApproval
+            : false
+        }
         status={status}
         draftStatus={draft.status}
         isEditing={isEditing}
         onDecline={handleDecline}
         onAcceptPayment={handleVerifyProof}
-        onDeclinePayment={handleDeclineProof}
-        onBackOneStep={handleRevertStep}
-        onApproveInquiry={handleApproveInquiry}
-        onRequestPayment={handleRequestPayment}
-        onConfirmStay={() => handleSetStatus(status === "Pending Checkout" ? "Checked Out" : "Confirmed")}
+    onDeclinePayment={handleDeclineProof}
+    onBackOneStep={handleRevertStep}
+    onApproveInquiry={handleApproveInquiry}
+    onRequestPayment={handleRequestPayment}
+    onConfirmStay={() => handleSetStatus(status === "Pending Checkout" ? "Checked Out" : "Confirmed")}
         onDeleteTicket={() => {
           const confirmed = window.confirm("Delete this declined ticket and related data?");
           if (!confirmed) return;

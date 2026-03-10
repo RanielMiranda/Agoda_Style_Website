@@ -125,7 +125,8 @@ export default function ClientTicketPage() {
         onSubmitDownpayment={handleSubmitDownpayment}
         resortPaymentImageUrl={resort?.payment_image_url}
         canSubmitPayment={
-          (status.includes("pending payment") || status.includes("pending checkout")) &&
+          (status.includes("pending payment") ||
+            (status.includes("pending checkout") && !!form.checkoutPaymentRequestedAt)) &&
           !form.paymentPendingApproval
         }
       />

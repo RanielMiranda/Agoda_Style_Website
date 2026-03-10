@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
   Clock3,
@@ -34,6 +35,8 @@ function getBookingEndDate(booking) {
 export default function BookingCalendar() {
   const { resort } = useResort();
   const { bookings } = useBookings();
+  const router = useRouter();
+  const params = useParams();
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -77,6 +80,13 @@ export default function BookingCalendar() {
       .join(" | ");
   };
 
+  const openBookingDetails = (bookingId) => {
+    if (!bookingId) return;
+    const resortId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+    if (!resortId) return;
+    router.push(`/edit/bookings/${resortId}/booking-details/${bookingId}`);
+  };
+
   const renderMonth = (monthOffset) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset, 1);
     const month = date.getMonth();
@@ -114,17 +124,15 @@ export default function BookingCalendar() {
                 }
               : undefined;
 
-            return (
-              <div
-                key={day}
-                title={getDateTooltip(dateBookings)}
-                className={`h-9 w-full rounded-lg text-sm transition-all relative 
-                  ${booking ? "text-white" : "hover:bg-slate-100 text-slate-600"} 
-                  ${getBookingStartDate(booking) === dateString ? "rounded-r-none" : ""} 
-                  ${getBookingEndDate(booking) === dateString ? "rounded-l-none" : ""} 
-                  ${booking && getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "rounded-none opacity-80" : ""}
-                `}
-              >
+            const className = `h-9 w-full rounded-lg text-sm transition-all relative 
+              ${booking ? "text-white cursor-pointer" : "hover:bg-slate-100 text-slate-600"} 
+              ${getBookingStartDate(booking) === dateString ? "rounded-r-none" : ""} 
+              ${getBookingEndDate(booking) === dateString ? "rounded-l-none" : ""} 
+              ${booking && getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "rounded-none opacity-80" : ""}
+            `;
+
+            const content = (
+              <>
                 {booking ? (
                   hasSplit ? (
                     <span
@@ -138,6 +146,26 @@ export default function BookingCalendar() {
                   )
                 ) : null}
                 <span className="relative z-10">{day}</span>
+              </>
+            );
+
+            return booking ? (
+              <button
+                key={day}
+                type="button"
+                onClick={() => openBookingDetails(booking.id)}
+                title={getDateTooltip(dateBookings)}
+                className={className}
+              >
+                {content}
+              </button>
+            ) : (
+              <div
+                key={day}
+                title={getDateTooltip(dateBookings)}
+                className={className}
+              >
+                {content}
               </div>
             );
           })}
@@ -200,7 +228,8 @@ export default function BookingCalendar() {
                   <div
                     key={booking.id}
                     title={getBookingTooltip(booking)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl border border-transparent bg-slate-50 opacity-70 transition-all hover:bg-white hover:opacity-100 hover:shadow-sm"
+                    onClick={() => openBookingDetails(booking.id)}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border border-transparent bg-slate-50 opacity-70 transition-all hover:bg-white hover:opacity-100 hover:shadow-sm"
                   >
                     <div className={`w-3 h-3 rounded-full ${getBookingColor(booking)}`} />
                     <div className="flex flex-col">
