@@ -5,11 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
   Clock3,
-  Trash2,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Edit2,
 } from "lucide-react";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
@@ -19,17 +16,53 @@ import { Button } from "@/components/ui/button";
 const GROUP_COLORS = ["bg-blue-600", "bg-orange-500", "bg-emerald-600", "bg-amber-500"];
 const GROUP_COLOR_HEX = ["#2563eb", "#f97316", "#059669", "#f59e0b"];
 
+function getNormalizedStatus(booking) {
+  return String(booking?.status || booking?.bookingForm?.status || "").toLowerCase();
+}
+
+function getStatusLabel(booking) {
+  const normalized = getNormalizedStatus(booking);
+  if (normalized.includes("ongoing")) return "Ongoing";
+  if (normalized.includes("confirm")) return "Confirmed";
+  if (normalized.includes("pending payment")) return "Pending Payment";
+  if (normalized.includes("approved inquiry")) return "Approved Inquiry";
+  if (normalized.includes("inquiry")) return "Inquiry";
+  return booking?.status || booking?.bookingForm?.status || "Unknown";
+}
+
+function shouldShowOnCalendar(booking) {
+  const normalizedStatus = getNormalizedStatus(booking);
+  return !["pending checkout", "checked out", "cancelled", "declined"].includes(normalizedStatus);
+}
+
+function isConfirmedStatus(booking) {
+  const normalized = getNormalizedStatus(booking);
+  return normalized.includes("confirm") || normalized.includes("ongoing");
+}
+
+function isInquiryStatus(booking) {
+  const normalized = getNormalizedStatus(booking);
+  return normalized.includes("inquiry") || normalized.includes("pending payment");
+}
+
+function getBookingStartDate(booking) {
+  return booking?.startDate || booking?.bookingForm?.checkInDate || null;
+}
+
+function getBookingEndDate(booking) {
+  return booking?.endDate || booking?.bookingForm?.checkOutDate || getBookingStartDate(booking);
+}
+
 export default function BookingCalendar() {
   const { resort } = useResort();
-  const { bookings, createBooking, updateBookingById, deleteBookingById } = useBookings();
+  const { bookings } = useBookings();
   const router = useRouter();
   const params = useParams();
 
-  const [selectedRoomIds, setSelectedRoomIds] = useState([]);
-  const [activeRangeId, setActiveRangeId] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarMode, setCalendarMode] = useState("all"); // all | confirmed
+  const [showInquiryOverlay, setShowInquiryOverlay] = useState(false);
 
-  const rooms = resort?.rooms || [];
   const bookingList = useMemo(() => bookings || resort?.bookings || [], [bookings, resort?.bookings]);
   const getBookingColor = (booking) => {
     const index = bookingList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
@@ -41,90 +74,21 @@ export default function BookingCalendar() {
     if (index < 0) return GROUP_COLOR_HEX[0];
     return GROUP_COLOR_HEX[index % GROUP_COLOR_HEX.length];
   };
-  const selectedRooms = selectedRoomIds.length > 0 ? selectedRoomIds : rooms[0]?.id ? [rooms[0].id] : [];
-
-  const toggleRoomSelection = (id) => {
-    setSelectedRoomIds((prev) => (prev.includes(id) ? prev.filter((rid) => rid !== id) : [...prev, id]));
-    setActiveRangeId(null);
-  };
 
   const getDateBookings = (dateString) =>
     bookingList.filter((booking) => {
-      const roomMatch = booking.roomIds?.some((rid) => selectedRooms.includes(rid));
-      if (!roomMatch || !booking.startDate) return false;
-      if (!booking.endDate) return booking.startDate === dateString;
+      if (!shouldShowOnCalendar(booking)) return false;
+      if (calendarMode === "confirmed" && !isConfirmedStatus(booking)) return false;
+      const startDate = getBookingStartDate(booking);
+      const endDate = getBookingEndDate(booking);
+      if (!startDate) return false;
+      if (!endDate) return startDate === dateString;
       return (
-        booking.startDate === dateString ||
-        booking.endDate === dateString ||
-        (dateString > booking.startDate && dateString < booking.endDate)
+        startDate === dateString ||
+        endDate === dateString ||
+        (dateString > startDate && dateString < endDate)
       );
     });
-
-
-  const navigateToForm = (bookingId) => router.push(`/edit/bookings/${params.id}/booking-details/${bookingId}`);
-
-  const handleDateClick = (dateString) => {
-    const clickedBookings = getDateBookings(dateString);
-    const clickedBooking = clickedBookings[0] || null;
-
-    if (!activeRangeId) {
-      if (clickedBooking) {
-        setActiveRangeId(clickedBooking.id.toString());
-        return;
-      }
-      const newId = addBookingGroup();
-      if (!newId) return;
-      updateBookingById(newId, {
-        id: newId,
-        roomIds: [...selectedRooms],
-        startDate: dateString,
-        endDate: null,
-        checkInTime: "14:00",
-        checkOutTime: "11:00",
-        bookingForm: {
-          status: "Inquiry",
-          roomCount: selectedRooms.length,
-          checkInDate: dateString,
-          checkOutDate: "",
-          checkInTime: "14:00",
-          checkOutTime: "11:00",
-        },
-      });
-      return;
-    }
-
-    const current = bookingList.find((entry) => entry.id.toString() === activeRangeId.toString());
-    if (!current) return;
-
-    if (!current.startDate || (current.startDate && current.endDate)) {
-      updateBookingById(activeRangeId, {
-        ...current,
-        startDate: dateString,
-        endDate: null,
-        roomIds: [...selectedRooms],
-        bookingForm: {
-          ...(current.bookingForm || {}),
-          checkInDate: dateString,
-          checkOutDate: "",
-        },
-      });
-      return;
-    }
-
-    const nextStart = dateString < current.startDate ? dateString : current.startDate;
-    const nextEnd = dateString < current.startDate ? current.startDate : dateString;
-
-    updateBookingById(activeRangeId, {
-      ...current,
-      startDate: nextStart,
-      endDate: nextEnd,
-      bookingForm: {
-        ...(current.bookingForm || {}),
-        checkInDate: nextStart,
-        checkOutDate: nextEnd,
-      },
-    });
-  };
 
   const getBookingTooltip = (booking) => {
     const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
@@ -136,9 +100,30 @@ export default function BookingCalendar() {
     if (!dateBookings?.length) return "";
     return dateBookings
       .slice(0, 2)
-      .map((booking, index) => `${getBookingTooltip(booking)}`)
+      .map((booking) => `${getBookingTooltip(booking)}`)
       .join(" | ");
   };
+
+  const openBookingDetails = (bookingId) => {
+    if (!bookingId) return;
+    const resortId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+    if (!resortId) return;
+    router.push(`/edit/bookings/${resortId}/booking-details/${bookingId}`);
+  };
+
+  const getInquiryOverlayBookings = (dateString) =>
+    bookingList.filter((booking) => {
+      if (!isInquiryStatus(booking)) return false;
+      const startDate = getBookingStartDate(booking);
+      const endDate = getBookingEndDate(booking);
+      if (!startDate) return false;
+      if (!endDate) return startDate === dateString;
+      return (
+        startDate === dateString ||
+        endDate === dateString ||
+        (dateString > startDate && dateString < endDate)
+      );
+    });
 
   const renderMonth = (monthOffset) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset, 1);
@@ -161,52 +146,70 @@ export default function BookingCalendar() {
             const day = index + 1;
             const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const dateBookings = getDateBookings(dateString);
+            const inquiryBookings = showInquiryOverlay ? getInquiryOverlayBookings(dateString) : [];
             const orderedBookings = [...dateBookings].sort((a, b) => {
-              const startA = a.startDate || "";
-              const startB = b.startDate || "";
+              const startA = getBookingStartDate(a) || "";
+              const startB = getBookingStartDate(b) || "";
               if (startA !== startB) return startA.localeCompare(startB);
               return String(a.id || "").localeCompare(String(b.id || ""));
             });
             const booking = orderedBookings[0] || null;
             const secondaryBooking = orderedBookings[1] || null;
             const hasSplit = !!booking && !!secondaryBooking;
-            const isActive =
-              !!activeRangeId &&
-              dateBookings.some((entry) => entry.id?.toString() === activeRangeId?.toString());
             const primaryColor = booking ? getBookingColor(booking) : "";
             const splitGradientStyle = hasSplit
               ? {
                   backgroundImage: `linear-gradient(90deg, ${getBookingColorHex(booking)} 0%, ${getBookingColorHex(booking)} 50%, ${getBookingColorHex(secondaryBooking)} 50%, ${getBookingColorHex(secondaryBooking)} 100%)`,
                 }
               : undefined;
+            const hasInquiryOverlay = inquiryBookings.length > 0;
 
-            return (
-              <button
-                key={day}
-                onClick={() => handleDateClick(dateString)}
-                title={getDateTooltip(dateBookings)}
-                className={`h-9 w-full rounded-lg text-sm transition-all relative 
-                  ${booking ? "text-white" : "hover:bg-slate-100 text-slate-600"} 
-                  ${isActive ? "ring-2 ring-offset-2 ring-slate-400 scale-90 z-10" : ""} 
-                  ${booking?.startDate === dateString ? "rounded-r-none" : ""} 
-                  ${booking?.endDate === dateString ? "rounded-l-none" : ""} 
-                  ${booking && booking.startDate !== dateString && booking.endDate !== dateString ? "rounded-none opacity-80" : ""}
-                `}
-              >
+            const className = `h-9 w-full rounded-lg text-sm transition-all relative 
+              ${booking ? "text-white cursor-pointer" : "hover:bg-slate-100 text-slate-600"} 
+              ${getBookingStartDate(booking) === dateString ? "rounded-r-none" : ""} 
+              ${getBookingEndDate(booking) === dateString ? "rounded-l-none" : ""} 
+              ${booking && getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "rounded-none opacity-80" : ""}
+            `;
+
+            const content = (
+              <>
                 {booking ? (
                   hasSplit ? (
                     <span
                       style={splitGradientStyle}
-                      className={`absolute inset-0 rounded-[inherit] ${booking?.startDate !== dateString && booking?.endDate !== dateString ? "opacity-90" : ""}`}
+                      className={`absolute inset-0 rounded-[inherit] ${getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "opacity-90" : ""}`}
                     />
                   ) : (
                     <span
-                      className={`absolute inset-0 rounded-[inherit] ${primaryColor} ${booking?.startDate !== dateString && booking?.endDate !== dateString ? "opacity-90" : ""}`}
+                      className={`absolute inset-0 rounded-[inherit] ${primaryColor} ${getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "opacity-90" : ""}`}
                     />
                   )
                 ) : null}
+                {hasInquiryOverlay ? (
+                  <span className="absolute inset-0 rounded-[inherit] bg-amber-400/30 ring-1 ring-amber-400/40" />
+                ) : null}
                 <span className="relative z-10">{day}</span>
+              </>
+            );
+
+            return booking ? (
+              <button
+                key={day}
+                type="button"
+                onClick={() => openBookingDetails(booking.id)}
+                title={getDateTooltip(dateBookings)}
+                className={className}
+              >
+                {content}
               </button>
+            ) : (
+              <div
+                key={day}
+                title={getDateTooltip(dateBookings)}
+                className={className}
+              >
+                {content}
+              </div>
             );
           })}
         </div>
@@ -222,7 +225,7 @@ export default function BookingCalendar() {
     );
   }
 
-return (
+  return (
     <Card className="w-full p-4 sm:p-8 bg-white shadow-2xl rounded-3xl sm:rounded-[2.5rem] border-none">
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
@@ -231,26 +234,27 @@ return (
               <CalendarIcon size={28} className="text-blue-600" /> 
               Resort Schedule
             </h2>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Select dates to manage room availability</p>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Read-only whole-resort availability overview</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant={calendarMode === "confirmed" ? "default" : "outline"}
+              className="h-9 px-3 text-[11px] font-bold"
+              onClick={() => setCalendarMode((prev) => (prev === "confirmed" ? "all" : "confirmed"))}
+            >
+              {calendarMode === "confirmed" ? "Confirmed Only" : "All Bookings"}
+            </Button>
+            <Button
+              type="button"
+              variant={showInquiryOverlay ? "default" : "outline"}
+              className="h-9 px-3 text-[11px] font-bold"
+              onClick={() => setShowInquiryOverlay((prev) => !prev)}
+            >
+              {showInquiryOverlay ? "Inquiries Overlay On" : "Show Inquiries Overlay"}
+            </Button>
           </div>
         
-        </div>
-
-        {/* Room Filter Bar */}
-        <div className="p-2 bg-slate-50 rounded-2xl border border-slate-100 flex flex-wrap gap-2">
-            {rooms.map((room) => (
-               <button
-                  key={room.id}
-                  onClick={() => toggleRoomSelection(room.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                    selectedRooms.includes(room.id)
-                      ? "bg-white text-blue-600 shadow-md ring-1 ring-blue-100"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-               >
-                 {room.name}
-               </button>
-            ))}
         </div>
 
         {/* THE CALENDAR GRID - Now much larger */}
@@ -271,42 +275,31 @@ return (
         {/* ... (keep your existing active ranges list) */}
       </div>
               <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Ranges for these rooms</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Resort Booking Ranges</p>
           <div className="flex flex-wrap gap-3">
             {bookingList
-              .filter((booking) => booking.roomIds?.some((rid) => selectedRooms.includes(rid)))
+              .filter((booking) => shouldShowOnCalendar(booking))
+              .filter((booking) => (calendarMode === "confirmed" ? isConfirmedStatus(booking) : true))
               .map((booking) => {
                 const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
                 const checkOut = booking?.checkOutTime || booking?.bookingForm?.checkOutTime || "--:--";
                 const guestName = booking?.bookingForm?.guestName || "Guest";
-                const roomNames = (booking.roomIds || [])
-                  .map((rid) => rooms.find((room) => room.id === rid)?.name)
-                  .filter(Boolean);
-                const roomLabel = roomNames.length > 0 ? roomNames.join(", ") : `${booking.roomIds?.length || 0} Rooms`;
+                const roomLabel = getStatusLabel(booking);
 
                 return (
                   <div
                     key={booking.id}
                     title={getBookingTooltip(booking)}
-                    onClick={() => setActiveRangeId(booking.id.toString())}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border transition-all ${
-                      activeRangeId?.toString() === booking.id?.toString() ? "border-slate-400 bg-white shadow-sm" : "border-transparent bg-slate-50 opacity-70"
-                    }`}
+                    onClick={() => openBookingDetails(booking.id)}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border border-transparent bg-slate-50 opacity-70 transition-all hover:bg-white hover:opacity-100 hover:shadow-sm"
                   >
                     <div className={`w-3 h-3 rounded-full ${getBookingColor(booking)}`} />
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-400 uppercase">{roomLabel}</span>
                       <span className="text-xs font-black text-slate-800">{guestName}</span>
-                      <span className="text-xs font-bold text-slate-700">{booking.startDate || "..."} - {booking.endDate || "..."}</span>
+                      <span className="text-xs font-bold text-slate-700">{getBookingStartDate(booking) || "..."} - {getBookingEndDate(booking) || "..."}</span>
                       <span className="text-[10px] text-slate-500 flex items-center gap-1"><Clock3 size={10} /> {checkIn} to {checkOut}</span>
                     </div>
-                    <button onClick={(event) => { event.stopPropagation(); navigateToForm(booking.id); }} className="ml-1 text-slate-400 hover:text-blue-600" title="Edit booking form"><Edit2 size={14} /></button>
-                    <button onClick={(event) => {
-                      event.stopPropagation();
-                      const confirmed = window.confirm("Delete this booking range?");
-                      if (!confirmed) return;
-                      deleteBookingById(booking.id);
-                    }} className="text-slate-400 hover:text-red-500" title="Delete booking range"><Trash2 size={14} /></button>
                   </div>
                 );
               })}

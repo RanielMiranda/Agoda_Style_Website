@@ -1,3 +1,13 @@
+function normalizeProofUrls(form) {
+  if (Array.isArray(form.paymentProofUrls) && form.paymentProofUrls.length > 0) {
+    return form.paymentProofUrls.filter(Boolean);
+  }
+  if (form.paymentProofUrl) {
+    return [form.paymentProofUrl];
+  }
+  return [];
+}
+
 export function buildDraftFromBooking(booking) {
   const form = booking.bookingForm || {};
   const adults = Number(form.adultCount || 0);
@@ -7,17 +17,26 @@ export function buildDraftFromBooking(booking) {
   const paymentPendingApproval = !!form.paymentPendingApproval && !paymentVerified;
   const pendingDownpayment = paymentPendingApproval ? Number(form.pendingDownpayment || 0) : 0;
   const pendingPaymentMethod = paymentPendingApproval ? form.pendingPaymentMethod || null : null;
+  const paymentProofUrls = normalizeProofUrls(form);
   const roomNameFromAssigned =
     (form.assignedRoomNames || []).length > 0
       ? form.assignedRoomNames.join(", ")
       : (form.roomName || "");
 
+  const baseStatus = form.status || booking.status || "Inquiry";
+  const paymentDeadline =
+    form.paymentDeadline ||
+    (String(baseStatus).toLowerCase() === "pending checkout" ? form.checkoutPaymentDeadline : null) ||
+    booking.paymentDeadline ||
+    null;
+
   return {
     ...form,
-    status: form.status || booking.status || "Inquiry",
+    status: baseStatus,
     guestName: form.guestName || "Guest",
     email: form.email || "",
     phoneNumber: form.phoneNumber || "",
+    address: form.address || "",
     adultCount: adults,
     childrenCount: children,
     guestCount: derivedPax,
@@ -34,13 +53,14 @@ export function buildDraftFromBooking(booking) {
     pendingPaymentMethod,
     paymentPendingApproval,
     totalAmount: Number(form.totalAmount || 0),
-    paymentDeadline: form.paymentDeadline || booking.paymentDeadline || null,
-    paymentProofUrl: form.paymentProofUrl || null,
+    paymentDeadline,
+    paymentProofUrl: paymentProofUrls[0] || null,
+    paymentProofUrls,
     paymentSubmittedAt: form.paymentSubmittedAt || null,
     paymentVerified,
     paymentVerifiedAt: form.paymentVerifiedAt || null,
     confirmationStub: form.confirmationStub || null,
-    resortServices: form.resortServices || [],
+    resortServices: Array.isArray(form.resortServices) ? form.resortServices : [],
   };
 }
 

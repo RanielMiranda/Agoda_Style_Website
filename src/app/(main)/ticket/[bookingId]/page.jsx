@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 import Toast from "@/components/ui/toast/Toast";
 import {
   TicketHeaderSection,
+  TicketAddOnsCardSection,
   TicketStayInfoCardSection,
   TicketPaymentCardSection,
   TicketSupportDeskCardSection,
@@ -29,7 +30,7 @@ export default function ClientTicketPage() {
   const [chatMessage, setChatMessage] = useState("");
 
   const [paymentDraft, setPaymentDraft] = useState({ method: null, downpayment: null });
-  const [proofFile, setProofFile] = useState(null);
+  const [proofFiles, setProofFiles] = useState([]);
 
   const { loading, booking, setBooking, resort, messages, issues, loadingMessages, fetchTicket, fetchMessages } = useTicketData({
     normalizedBookingId,
@@ -43,17 +44,18 @@ export default function ClientTicketPage() {
   const setPaymentMethod = (method) => setPaymentDraft((prev) => ({ ...prev, method }));
   const setDownpayment = (value) => setPaymentDraft((prev) => ({ ...prev, downpayment: value }));
 
-  const { isSubmitting, handleSubmitDownpayment, handleSendIssue, handleSendMessage } = useTicketActions({
+  const { isSubmitting, isSavingAddOns, handleSubmitDownpayment, handleSubmitAddOns, handleSendIssue, handleSendMessage } = useTicketActions({
     booking,
     resort,
     form,
     normalizedBookingId,
     paymentMethod,
     downpayment,
-    proofFile,
+    proofFiles,
     fetchTicket,
     fetchMessages,
     setBooking,
+    setProofFiles,
     issueSubject,
     setIssueSubject,
     issueMessage,
@@ -120,8 +122,8 @@ export default function ClientTicketPage() {
         setPaymentMethod={setPaymentMethod}
         downpayment={downpayment}
         setDownpayment={setDownpayment}
-        proofFile={proofFile}
-        setProofFile={setProofFile}
+        proofFiles={proofFiles}
+        setProofFiles={setProofFiles}
         isSubmitting={isSubmitting}
         onSubmitDownpayment={handleSubmitDownpayment}
         resortPaymentImageUrl={resort?.payment_image_url}

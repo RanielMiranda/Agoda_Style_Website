@@ -70,7 +70,11 @@ export default function ResortDetailPage({ name }) {
         if (!cancelled) setUnavailableRoomIds([]);
         return;
       }
-      const blockedSet = getUnavailableRoomIds(data || [], requestedRange);
+      const blockedSet = getUnavailableRoomIds(
+        data || [],
+        requestedRange,
+        (resort?.rooms || []).map((room) => room?.id)
+      );
       if (!cancelled) setUnavailableRoomIds(Array.from(blockedSet));
     };
     loadRoomAvailability();
@@ -80,9 +84,7 @@ export default function ResortDetailPage({ name }) {
   }, [resort?.id, startDate, endDate, checkInTime, checkOutTime]);
 
   useEffect(() => {
-    setSelectedRoomIds((prev) =>
-      prev.filter((id) => !(unavailableRoomIds || []).includes(id?.toString()))
-    );
+    setSelectedRoomIds((prev) => prev);
   }, [unavailableRoomIds]);
 
   useEffect(() => {
@@ -120,6 +122,7 @@ export default function ResortDetailPage({ name }) {
   const selectedRoomSummary = selectedRooms.length > 0
     ? selectedRooms.map((room) => room.name).filter(Boolean).join(", ")
     : "";
+  const hasAvailabilityConflict = unavailableRoomIds.length > 0;
 
 const handleSubmitInquiry = async (submittedData) => {
     try {
@@ -153,7 +156,7 @@ const handleSubmitInquiry = async (submittedData) => {
         guestName: submittedData.guestName || "",
         email: submittedData.email || "",
         phoneNumber: submittedData.contactNumber || "",
-        address: submittedData.area || "",
+        address: submittedData.address || submittedData.area || "",
         adultCount,
         childrenCount,
         pax,
@@ -196,6 +199,19 @@ const handleSubmitInquiry = async (submittedData) => {
       });
 
       if (error) throw error;
+      if (submittedData.message) {
+        try {
+          await supabase.from("ticket_messages").insert({
+            booking_id: bookingId,
+            resort_id: Number(resort.id),
+            sender_role: "client",
+            sender_name: submittedData.guestName || "Client",
+            message: submittedData.message,
+          });
+        } catch (messageError) {
+          console.error("Failed to save inquiry message:", messageError?.message || messageError);
+        }
+      }
       if (typeof window !== "undefined") {
         const ticketUrl = `${window.location.origin}/ticket/${bookingId}?token=${ticketAccessToken}`;
         console.info("Client ticket link (for testing until email is enabled):", ticketUrl);
@@ -242,7 +258,7 @@ const handleSubmitInquiry = async (submittedData) => {
 
             <section className="px-0">
               <div className="border-b border-slate-200 pb-5 mb-6">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400 mb-2">
+                <p className="mt-10 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400 mb-2">
                   Available Accommodations
                 </p>
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
@@ -276,9 +292,22 @@ const handleSubmitInquiry = async (submittedData) => {
               </div>
 
               <div className="border-t border-slate-100 px-6 py-5 space-y-4 bg-slate-50/80 rounded-b-[2rem]">
+                {hasAvailabilityConflict ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">
+                    Resort is unavailable for the selected dates.
+                  </div>
+                ) : null}
                 <button
                   className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
-                  onClick={() => setContactOpen(true)}
+                  onClick={() => {
+                    if (hasAvailabilityConflict) {
+                      toast({
+                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
+                        color: "amber",
+                      });
+                    }
+                    setContactOpen(true);
+                  }}
                 >
                   Contact Owner
                 </button>
@@ -367,6 +396,12 @@ const handleSubmitInquiry = async (submittedData) => {
                   className="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white"
                   onClick={() => {
                     setMobileFiltersOpen(false);
+                    if (hasAvailabilityConflict) {
+                      toast({
+                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
+                        color: "amber",
+                      });
+                    }
                     setContactOpen(true);
                   }}
                 >

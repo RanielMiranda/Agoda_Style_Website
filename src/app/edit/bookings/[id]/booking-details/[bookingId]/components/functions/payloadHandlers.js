@@ -15,6 +15,16 @@ export function buildStatusAudit({
     return currentAudit;
   }
 
+  const lastAudit = currentAudit[currentAudit.length - 1];
+  if (
+    lastAudit?.from === previousStatus &&
+    lastAudit?.to === nextStatus &&
+    lastAudit?.actorId === (actorMeta.id || "") &&
+    lastAudit?.actorRole === (actorMeta.role || "owner")
+  ) {
+    return currentAudit;
+  }
+
   return [
     ...currentAudit,
     {

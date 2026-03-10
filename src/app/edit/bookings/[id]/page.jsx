@@ -6,7 +6,6 @@ import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { useSupport } from "@/components/useclient/SupportClient";
 import {
-  Plus, 
   Calendar as CalendarIcon, 
   ClipboardList, 
   LayoutDashboard,
@@ -14,7 +13,6 @@ import {
   MessageCircleWarning,
   Archive,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 
 // Components
@@ -81,7 +79,15 @@ export default function BookingManagementPage() {
       }),
     [bookings]
   );
-  const auditArchiveCount = audits.length + declinedBookings.length;
+  const checkedOutBookings = useMemo(
+    () =>
+      (bookings || []).filter((entry) => {
+        const status = (entry.status || entry.bookingForm?.status || "").toLowerCase();
+        return status.includes("checked out");
+      }),
+    [bookings]
+  );
+  const auditArchiveCount = audits.length + declinedBookings.length + checkedOutBookings.length;
   const openConcernCount = concerns.filter((item) => item.status !== "resolved").length;
 
   const TabBadge = ({ count, tone = "blue" }) =>
@@ -218,9 +224,21 @@ export default function BookingManagementPage() {
   }, [activeTab]);
 
   const handleResolveConcern = async (issueId) => {
+    const confirmed = window.confirm("Resolve and permanently delete this concern?");
+    if (!confirmed) return;
     try {
-      await updateConcernStatus(issueId, "resolved");
-      setConcerns((prev) => prev.map((entry) => (entry.id === issueId ? { ...entry, status: "resolved" } : entry)));
+      const isArchivedId = typeof issueId === "string" && issueId.startsWith("arch:");
+      const archiveId = isArchivedId ? issueId.slice(5) : null;
+
+      if (isArchivedId) {
+        const { error } = await supabase.from("ticket_issues_archive").delete().eq("id", archiveId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("ticket_issues").delete().eq("id", issueId);
+        if (error) throw error;
+      }
+
+      setConcerns((prev) => prev.filter((entry) => entry.id !== issueId));
     } catch (error) {
       console.error("Resolve concern error:", error.message);
     }
@@ -263,15 +281,19 @@ export default function BookingManagementPage() {
     }
   };
 
-  const openForm = (guestData = {}, targetBookingId = null) => {
-    if (targetBookingId) {
-      router.push(`/edit/bookings/${id}/booking-details/${targetBookingId}/form`);
+  const handleResolveCheckedOut = async (bookingId) => {
+    if (openConcernCount > 0) {
+      window.alert("Resolve blocked: please clear all live concerns first.");
       return;
     }
-    const payload = { ...guestData, resortName: currentResort?.name };
-    const draftKey = `booking-form:${Date.now()}`;
-    sessionStorage.setItem(draftKey, JSON.stringify(payload));
-    router.push(`/edit/bookings/${id}/booking-details/new/form?draft=${encodeURIComponent(draftKey)}`);
+    const confirmed = window.confirm("Resolve and permanently delete this checked-out booking?");
+    if (!confirmed) return;
+    try {
+      await deleteBookingById(bookingId);
+      await loadAudits();
+    } catch (error) {
+      console.error("Delete checked-out booking error:", error.message);
+    }
   };
 
   const openDetails = (targetBookingId) => {
@@ -298,15 +320,6 @@ export default function BookingManagementPage() {
                 Booking Console
               </h1>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Button 
-              onClick={() => openForm({ status: "Inquiry" })}
-              className="w-full md:w-auto bg-blue-600 items-center justify-center hover:bg-blue-700 text-white rounded-2xl px-6 md:px-8 h-12 md:h-14 font-black shadow-lg shadow-blue-100 transition-all hover:scale-[1.02] md:hover:scale-105 flex gap-3"
-            >
-              <Plus size={20} /> Create New Entry
-            </Button>
           </div>
         </header>
 
@@ -392,6 +405,7 @@ export default function BookingManagementPage() {
               <AuditArchivePanel
                 audits={audits}
                 declinedBookings={declinedBookings}
+                checkedOutBookings={checkedOutBookings}
                 loading={loadingAudits}
                 onRefresh={loadAudits}
                 onOpenBooking={(bookingTargetId) => openDetails(bookingTargetId)}

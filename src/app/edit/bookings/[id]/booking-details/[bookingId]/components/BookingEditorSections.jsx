@@ -3,6 +3,7 @@
 import React from "react";
 import {
   User,
+  MapPin,
   Mail,
   Phone,
   Calendar,
@@ -17,12 +18,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildSupportConversationItems, getSupportConversationLabel, isResolvedConversationItem } from "@/lib/supportConversation";
+import { getTransformedSupabaseImageUrl } from "@/lib/utils";
 import { InfoItem, SectionLabel, StatusBadge } from "./BookingEditorAtoms";
 
 function getAuditActorLabel(entry) {
   if (entry?.actor_name) return entry.actor_name;
-  if (entry?.actorRole) return entry.actorRole;
-  return entry?.actor || "system";
+  if (entry?.actorName) return entry.actorName;
+  return "Unknown";
 }
 
 export function ClientCardSection({ resortName, isEditing, draft, setField, status }) {
@@ -60,6 +62,13 @@ export function ClientCardSection({ resortName, isEditing, draft, setField, stat
                   onChange={(e) => setField("phoneNumber", e.target.value)}
                   placeholder="Phone"
                 />
+                <input
+                  type="text"
+                  className="text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100 md:col-span-2"
+                  value={draft.address || ""}
+                  onChange={(e) => setField("address", e.target.value)}
+                  placeholder="Address"
+                />
               </div>
             ) : (
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -70,6 +79,10 @@ export function ClientCardSection({ resortName, isEditing, draft, setField, stat
                 <span className="inline-flex items-center gap-1">
                   <Phone size={12} />
                   {draft.phoneNumber || "No phone"}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={12} />
+                  {draft.address || "No address"}
                 </span>
               </div>
             )}
@@ -91,7 +104,10 @@ export function StayCardSection({
   resortRooms,
   conflicts,
   formatWeekdayLabel,
+  onOpenConflict,
+  onOpenCalendar,
 }) {
+  const hasConflicts = conflicts.length > 0;
   return (
     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
       <SectionLabel icon={<Calendar size={14} />} label="Stay" />
@@ -127,27 +143,119 @@ export function StayCardSection({
             ? `${conflicts.length} conflicting booking(s) on shared room/date range.`
             : "No detected schedule conflict for this range."}
         </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {hasConflicts && onOpenConflict ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center justify-center h-7 px-2 text-[10px] font-bold border-rose-200 text-rose-700 hover:bg-rose-50"
+              onClick={onOpenConflict}
+            >
+              Open Conflict
+            </Button>
+          ) : null}
+          {onOpenCalendar ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center justify-center h-7 px-2 text-[10px] font-bold"
+              onClick={onOpenCalendar}
+            >
+              View Availability Calendar
+            </Button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
 }
 
-export function AddOnsCardSection({ draft }) {
+export function AddOnsCardSection({
+  draft,
+  isEditing = false,
+  setField,
+  availableServices = [],
+}) {
+  const services = Array.isArray(draft.resortServices) ? draft.resortServices : [];
+
+  const toggleService = (service) => {
+    if (!setField) return;
+    const exists = services.some((entry) => entry?.name === service?.name);
+    const serviceCost = Number(service?.cost || 0);
+    const nextServices = exists
+      ? services.filter((entry) => entry?.name !== service?.name)
+      : [
+          ...services,
+          {
+            name: service?.name || "",
+            description: service?.description || "",
+            cost: Number(service?.cost || 0),
+          },
+        ];
+    const currentTotal = Number(draft.totalAmount || 0);
+    const nextTotal = exists
+      ? Math.max(0, currentTotal - serviceCost)
+      : currentTotal + serviceCost;
+    setField("resortServices", nextServices);
+    if (serviceCost > 0) {
+      setField("totalAmount", nextTotal);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <SectionLabel icon={<Briefcase size={14} />} label="Add-ons" />
-      <div className="flex flex-wrap gap-3">
-        {(draft.resortServices || []).length > 0 ? (
-          draft.resortServices.map((service, index) => (
+      {isEditing ? (
+        <div className="space-y-3">
+          {availableServices.length > 0 ? (
+            availableServices.map((service, index) => {
+              const selected = services.some((entry) => entry?.name === service?.name);
+              return (
+                <button
+                  key={`${service?.name || "service"}-${index}`}
+                  type="button"
+                  onClick={() => toggleService(service)}
+                  className={`w-full text-left rounded-xl border px-4 py-4 transition-all ${
+                    selected
+                      ? "border-blue-300 bg-blue-50 ring-1 ring-blue-100"
+                      : "border-slate-100 bg-white hover:border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-slate-800">{service?.name || "Service"}</p>
+                      {service?.description ? (
+                        <p className="mt-1 text-xs text-slate-500">{service.description}</p>
+                      ) : null}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-blue-600">PHP {Number(service?.cost || 0).toLocaleString()}</p>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        {selected ? "Selected" : "Tap to add"}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          ) : (
+            <div className="text-xs text-slate-400">This resort has no configured extra services yet.</div>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3">
+          {services.length > 0 ? (
+            services.map((service, index) => (
             <div key={index} className="bg-white px-4 py-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
               <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md"><CheckCircle size={14} /></div>
               <span className="text-xs font-bold text-slate-700">{service.name} (PHP {service.cost})</span>
             </div>
-          ))
-        ) : (
-          <div className="text-xs text-slate-400">No add-ons selected.</div>
-        )}
-      </div>
+            ))
+          ) : (
+            <div className="text-xs text-slate-400">No add-ons selected.</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -190,13 +298,16 @@ export function StatusAuditCardSection({ dbAudits, bookingFormAudits }) {
 
 export function ProofCardSection({
   hasProof,
-  proofPreviewUrl,
+  proofPreviewUrls,
   draft,
   resolveSignedProofUrl,
-  handleVerifyProof,
-  resortPaymentImageUrl,
 }) {
-  const hasResortPaymentImage = !!resortPaymentImageUrl && typeof resortPaymentImageUrl === "string";
+  const proofUrls =
+    Array.isArray(proofPreviewUrls) && proofPreviewUrls.length > 0
+      ? proofPreviewUrls
+      : Array.isArray(draft.paymentProofUrls)
+        ? draft.paymentProofUrls
+        : [];
   return (
     <div className={`p-6 rounded-[2rem] border-2 transition-all shadow-xl ${
       hasProof ? "bg-white border-emerald-100 shadow-emerald-50" : "bg-slate-50 border-dashed border-slate-200 shadow-none"
@@ -210,53 +321,41 @@ export function ProofCardSection({
         )}
       </div>
 
-      {hasResortPaymentImage && (
-        <div className="mb-6 p-3 rounded-xl border border-blue-100 bg-blue-50/50">
-          <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider mb-2">Payment reference (GCash / Bank)</p>
-          <a
-            href={resortPaymentImageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block relative group overflow-hidden rounded-xl border border-slate-100 max-w-[200px]"
-          >
-            <img
-              src={getTransformedSupabaseImageUrl(resortPaymentImageUrl, { width: 400, quality: 85, format: "webp" })}
-              alt="Payment reference"
-              className="w-full h-28 object-cover group-hover:scale-105 transition-transform"
-            />
-            <span className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-              <ExternalLink size={16} className="text-white" />
-            </span>
-          </a>
-        </div>
-      )}
-
       {hasProof ? (
         <div className="space-y-4">
-          <div className="relative group cursor-pointer overflow-hidden rounded-2xl border border-slate-100">
-            <img
-              src={proofPreviewUrl || draft.paymentProofUrl}
-              alt="Payment Receipt"
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
-              onError={resolveSignedProofUrl}
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Button variant="secondary" size="sm" className="rounded-full text-xs" onClick={() => window.open(proofPreviewUrl || draft.paymentProofUrl)}>
-                View Fullscreen <ExternalLink size={12} className="ml-2" />
-              </Button>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {proofUrls.map((proofUrl, index) => (
+              <div key={`${proofUrl}-${index}`} className="relative group cursor-pointer overflow-hidden rounded-2xl border border-slate-100">
+                <img
+                  src={proofUrl}
+                  alt={`Payment receipt ${index + 1}`}
+                  className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
+                  onError={resolveSignedProofUrl}
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button variant="secondary" size="sm" className="rounded-full text-xs" onClick={() => window.open(proofUrl)}>
+                    View Fullscreen <ExternalLink size={12} className="ml-2" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
           <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
             <p className="text-[10px] text-emerald-700 font-bold mb-1">Owner Verification</p>
+            <p className="text-[10px] text-emerald-700/80 mb-2">
+              {proofUrls.length} proof image{proofUrls.length === 1 ? "" : "s"} uploaded by client.
+            </p>
             {draft.paymentPendingApproval && Number(draft.pendingDownpayment || 0) > 0 ? (
               <p className="text-[10px] text-emerald-700/80 mb-2">
                 Pending approval: PHP {Number(draft.pendingDownpayment || 0).toLocaleString()} ({draft.pendingPaymentMethod || "Pending"})
               </p>
             ) : null}
-            <button onClick={handleVerifyProof} className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-tighter">
-              {draft.paymentVerified ? <CheckCircle size={14} /> : <ShieldCheck size={14} />}
-              {draft.paymentVerified ? "Transaction Verified" : "Mark as Verified"}
-            </button>
+            {!draft.paymentPendingApproval ? (
+              <div className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-tighter">
+                <CheckCircle size={14} />
+                Payment Accepted
+              </div>
+            ) : null}
           </div>
         </div>
       ) : (
@@ -283,7 +382,7 @@ export function PaymentCardSection({ isEditing, draft, setField, balance, status
       </div>
       <div className="space-y-3 pt-4 border-t border-white/10 text-sm">
         <div className="flex justify-between items-center gap-2">
-          <span className="text-slate-400">Downpayment</span>
+          <span className="text-slate-400">Total Paid Balance</span>
           {isEditing ? (
             <input type="number" min="0" className="bg-transparent border-b border-white/20 outline-none text-right font-bold" value={draft.downpayment || 0} onChange={(e) => setField("downpayment", Number(e.target.value) || 0)} />
           ) : (
@@ -342,11 +441,12 @@ export function AssignRoomsCardSection({
   assignedRoomIds,
   toggleAssignedRoom,
   isRoomConflicting,
+  isEditing = false,
 }) {
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
       <SectionLabel icon={<Briefcase size={14} />} label="Assign Rooms" />
-      <p className="text-xs text-slate-500">Select available rooms for this stay. Conflicting rooms are marked.</p>
+      <p className="text-xs text-slate-500">Assign rooms based on the discussions.</p>
       <div className="space-y-2 max-h-64 overflow-auto pr-1">
         {(resortRooms || []).map((room) => {
           const roomId = room.id;
@@ -360,7 +460,7 @@ export function AssignRoomsCardSection({
               }`}
             >
               <div className="flex items-center gap-2">
-                <input type="checkbox" checked={selected} onChange={() => toggleAssignedRoom(roomId)} />
+                <input type="checkbox" checked={selected} onChange={() => toggleAssignedRoom(roomId)} disabled={!isEditing} />
                 <div>
                   <p className="text-sm font-bold text-slate-800">{room.name || `Room ${roomId}`}</p>
                   <p className="text-[11px] text-slate-500">Sleeps {Number(room.guests || 0)} pax</p>
@@ -382,6 +482,7 @@ export function AssignRoomsCardSection({
             ? (resortRooms || []).filter((room) => assignedRoomIds.includes(room.id)).map((room) => room.name).join(", ")
             : "No room assigned yet."}
         </p>
+        {!isEditing ? <p className="mt-2 text-[11px] text-slate-500">Click Edit, then Save Changes to update assigned rooms.</p> : null}
       </div>
     </div>
   );
@@ -397,6 +498,10 @@ export function MessagesInboxCardSection({
   setOwnerReply,
   onSendReply,
 }) {
+  const earliestClientMessageId = (messages || [])
+    .filter((msg) => msg?.sender_role === "client" && msg?.id)
+    .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+    .map((msg) => `msg:${msg.id}`)[0];
   const conversationItems = buildSupportConversationItems({
     messages,
     issues: (issues || []).map((issue) => ({
@@ -429,6 +534,10 @@ export function MessagesInboxCardSection({
             const isOwner = item.senderRole === "owner";
             const isIssue = item.kind === "issue";
             const resolved = isResolvedConversationItem(item);
+            const isInitialInquiryNote =
+              item.kind === "message" &&
+              item.senderRole === "client" &&
+              item.id === earliestClientMessageId;
             return (
               <div
                 key={item.id}
@@ -443,12 +552,14 @@ export function MessagesInboxCardSection({
                 }`}
               >
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="font-black uppercase text-[9px]">{getSupportConversationLabel(item)}</p>
+                  <p className="font-black uppercase text-[9px]">
+                    {isInitialInquiryNote ? "Initial Inquiry Note" : getSupportConversationLabel(item)}
+                  </p>
                   {isIssue && !resolved ? (
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-6 px-2 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                      className="flex items-center justify-center  h-6 px-2 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                       onClick={() => onResolveIssue?.(item.issueId)}
                     >
                       Resolve

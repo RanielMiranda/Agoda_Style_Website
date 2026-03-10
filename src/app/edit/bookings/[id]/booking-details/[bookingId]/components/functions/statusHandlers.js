@@ -1,5 +1,6 @@
 import { generateConfirmationStub } from "@/lib/bookingFlow";
 import { generateTicketAccessToken, getTicketAccessExpiry } from "@/lib/ticketAccess";
+import { getCheckoutMismatchMessage, isCheckoutAmountSettled } from "@/lib/bookingPayments";
 import { PREVIOUS_STATUS } from "../bookingEditorConfig";
 
 export async function handleSetStatusAction({
@@ -13,6 +14,23 @@ export async function handleSetStatusAction({
   persist,
 }) {
   if (actionBusy) return;
+  if (nextStatus === "Checked Out") {
+    const isSettled = isCheckoutAmountSettled({
+      totalAmount: draft.totalAmount,
+      paidAmount: draft.downpayment,
+    });
+    if (!isSettled) {
+      window.alert(
+        getCheckoutMismatchMessage({
+          totalAmount: draft.totalAmount,
+          paidAmount: draft.downpayment,
+        })
+      );
+      return;
+    }
+    const confirmed = window.confirm("Confirm checkout for this booking?");
+    if (!confirmed) return;
+  }
   setActionBusy(true);
   try {
     const next = { ...draft, status: nextStatus };
@@ -36,8 +54,6 @@ export async function handleSetStatusAction({
 }
 
 export async function handleDeclineAction({ handleSetStatus }) {
-  const confirmed = window.confirm("Decline this inquiry?");
-  if (!confirmed) return;
   await handleSetStatus("Declined");
 }
 
@@ -52,11 +68,21 @@ export async function handleRequestPaymentAction({
   setActionBusy(true);
   try {
     const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const next = {
-      ...draft,
-      status: "Pending Payment",
-      paymentDeadline: deadline,
-    };
+    const normalizedStatus = String(draft.status || "").toLowerCase();
+
+    const next =
+      normalizedStatus === "pending checkout"
+        ? {
+            ...draft,
+            checkoutPaymentRequestedAt: draft.checkoutPaymentRequestedAt || new Date().toISOString(),
+            checkoutPaymentDeadline: deadline,
+            paymentDeadline: deadline,
+          }
+        : {
+            ...draft,
+            status: "Pending Payment",
+            paymentDeadline: deadline,
+          };
     setDraft(next);
     await persist(next);
   } finally {
@@ -131,8 +157,6 @@ export async function handleRevertStepAction({
   if (actionBusy) return;
   const previous = PREVIOUS_STATUS[draft.status];
   if (!previous) return;
-  const confirmed = window.confirm(`Revert status from "${draft.status}" to "${previous}"?`);
-  if (!confirmed) return;
   setActionBusy(true);
   try {
     const next = { ...draft, status: previous };
@@ -150,7 +174,6 @@ export async function handleVerifyProofAction({
   setDraft,
   persist,
   createBookingTransaction,
-  notifyCaretakerOnPaymentApproval,
   booking,
 }) {
   if (draft.paymentVerified || actionBusy) return;
@@ -159,41 +182,61 @@ export async function handleVerifyProofAction({
     const approvedAmount = Number(draft.pendingDownpayment || 0);
     const nextDownpayment = Number(draft.downpayment || 0) + approvedAmount;
     const nextMethod = draft.pendingPaymentMethod || draft.paymentMethod;
+    const isFullyPaid = Number(draft.totalAmount || 0) > 0
+      ? nextDownpayment >= Number(draft.totalAmount || 0)
+      : false;
 
     const next = {
       ...draft,
       paymentVerified: true,
       paymentVerifiedAt: new Date().toISOString(),
+      checkoutPaymentApprovedAt:
+        String(draft.status || "").toLowerCase() === "pending checkout"
+          ? new Date().toISOString()
+          : draft.checkoutPaymentApprovedAt || null,
       downpayment: nextDownpayment,
       paymentMethod: nextMethod,
       pendingDownpayment: 0,
       pendingPaymentMethod: null,
       paymentPendingApproval: false,
+      status:
+        draft.status === "Pending Payment" && isFullyPaid
+          ? "Confirmed"
+          : draft.status,
     };
     setDraft(next);
     await persist(next);
+  } finally {
+    setActionBusy(false);
+  }
+}
 
-    if (approvedAmount > 0) {
-      const balanceAfter = Math.max(0, Number(next.totalAmount || 0) - Number(next.downpayment || 0));
-      try {
-        await createBookingTransaction?.({
-          booking_id: booking.id,
-          method: nextMethod || "Pending",
-          amount: approvedAmount,
-          balance_after: balanceAfter,
-          note: "Downpayment approved by owner",
-        });
-      } catch (error) {
-        console.error("Failed to log booking transaction:", error.message);
-      }
-      await notifyCaretakerOnPaymentApproval({
-        bookingId: booking.id,
-        resortId: booking.resortId || booking.resort_id || null,
-        guestName: next.guestName,
-        amount: approvedAmount,
-        method: nextMethod,
-      });
-    }
+export async function handleDeclineProofAction({
+  draft,
+  actionBusy,
+  setActionBusy,
+  setDraft,
+  persist,
+}) {
+  if (!draft.paymentPendingApproval || actionBusy) return;
+  const confirmed = window.confirm("Decline this submitted payment and allow the client to upload again?");
+  if (!confirmed) return;
+
+  setActionBusy(true);
+  try {
+    const next = {
+      ...draft,
+      paymentPendingApproval: false,
+      pendingDownpayment: 0,
+      pendingPaymentMethod: null,
+      paymentSubmittedAt: null,
+      paymentVerified: false,
+      paymentVerifiedAt: null,
+      paymentProofUrl: null,
+      paymentProofUrls: [],
+    };
+    setDraft(next);
+    await persist(next);
   } finally {
     setActionBusy(false);
   }

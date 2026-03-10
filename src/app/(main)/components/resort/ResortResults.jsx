@@ -9,10 +9,18 @@ import { useFilters } from "@/components/useclient/ContextFilter";
 export default function ResortResults({ resorts }) {
   const router = useRouter(); // Next.js hook
   const { availabilityByResort } = useFilters();
+  const sortedResorts = [...(resorts || [])].sort((a, b) => {
+    const aAvailability = availabilityByResort?.[a.id];
+    const bAvailability = availabilityByResort?.[b.id];
+    const aViable = aAvailability?.viable !== false;
+    const bViable = bAvailability?.viable !== false;
+    if (aViable === bViable) return 0;
+    return aViable ? -1 : 1;
+  });
 
   return (
     <div className="flex-1 flex flex-col gap-6 w-full">
-      {resorts.map((resort) => {
+      {sortedResorts.map((resort) => {
         const availability = availabilityByResort?.[resort.id];
         const roomList =
           availability?.availableRoomIds instanceof Set
@@ -22,7 +30,7 @@ export default function ResortResults({ resorts }) {
         return (
         <div
           key={resort.name}
-          className="flex flex-col sm:flex-row bg-white shadow rounded-2xl overflow-hidden"
+          className={`flex flex-col sm:flex-row bg-white shadow rounded-2xl overflow-hidden ${!isViable ? "opacity-90" : ""}`}
         >
           <div className="flex-1 max-w-full">
             <div
@@ -42,8 +50,8 @@ export default function ResortResults({ resorts }) {
               <div className="flex items-center justify-between gap-2 mb-2">
                 <p className="font-semibold">Available Rooms</p>
                 {!isViable ? (
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                    Low Match
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-200 rounded-full px-2 py-0.5">
+                    Unavailable
                   </span>
                 ) : null}
               </div>

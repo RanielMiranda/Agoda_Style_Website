@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getCheckoutMismatchMessage, isCheckoutAmountSettled } from "@/lib/bookingPayments";
 
 const DEFAULT_FORM = {
   status: "Inquiry",
@@ -28,6 +29,7 @@ const DEFAULT_FORM = {
   confirmationStub: null,
   downpayment: 0,
   totalAmount: 0,
+  resortServices: [],
   notes: "",
 };
 
@@ -39,14 +41,13 @@ const STATUS_PHASES = [
   "Ongoing",
   "Pending Checkout",
   "Checked Out",
-  "Cancelled",
-  "Declined",
 ];
 
 export default function BookingConfirmation({
   data,
   resortName,
   roomOptions = [],
+  availableServices = [],
   readOnly = false,
   title = "Booking Form",
   onSave,
@@ -101,6 +102,23 @@ export default function BookingConfirmation({
       alert("For same-day bookings, check-out time must be later than check-in time.");
       return;
     }
+    if (formData.status === "Checked Out") {
+      const isSettled = isCheckoutAmountSettled({
+        totalAmount: formData.totalAmount,
+        paidAmount: formData.downpayment,
+      });
+      if (!isSettled) {
+        alert(
+          getCheckoutMismatchMessage({
+            totalAmount: formData.totalAmount,
+            paidAmount: formData.downpayment,
+          })
+        );
+        return;
+      }
+      const confirmed = window.confirm("Confirm checkout for this booking?");
+      if (!confirmed) return;
+    }
 
     if (storageKey && typeof window !== "undefined") {
       localStorage.removeItem(storageKey);
@@ -118,6 +136,26 @@ export default function BookingConfirmation({
 
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-500";
+
+  const toggleAddon = (service) => {
+    setFormData((prev) => {
+      const selected = Array.isArray(prev.resortServices) ? prev.resortServices : [];
+      const exists = selected.some((entry) => entry?.name === service?.name);
+      return {
+        ...prev,
+        resortServices: exists
+          ? selected.filter((entry) => entry?.name !== service?.name)
+          : [
+              ...selected,
+              {
+                name: service?.name || "",
+                description: service?.description || "",
+                cost: Number(service?.cost || 0),
+              },
+            ],
+      };
+    });
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 mt-[8vh]">
@@ -247,6 +285,47 @@ export default function BookingConfirmation({
               onChange={(e) => handleChange("notes", e.target.value)}
               placeholder="Special requests, payment remarks, or internal notes"
             />
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Add-ons</h2>
+            <div className="space-y-3">
+              {availableServices.length > 0 ? (
+                availableServices.map((service, index) => {
+                  const selected = (formData.resortServices || []).some((entry) => entry?.name === service?.name);
+                  return (
+                    <button
+                      key={`${service?.name || "service"}-${index}`}
+                      type="button"
+                      disabled={readOnly}
+                      onClick={() => toggleAddon(service)}
+                      className={`w-full text-left rounded-xl border px-4 py-4 transition-all disabled:opacity-60 ${
+                        selected
+                          ? "border-blue-300 bg-blue-50 ring-1 ring-blue-100"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-black text-slate-800">{service?.name || "Service"}</p>
+                          {service?.description ? (
+                            <p className="mt-1 text-xs text-slate-500">{service.description}</p>
+                          ) : null}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-blue-600">PHP {Number(service?.cost || 0).toLocaleString()}</p>
+                          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                            {selected ? "Selected" : "Tap to add"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-slate-400">This resort has no configured extra services yet.</p>
+              )}
+            </div>
           </section>
         </Card>
       </form>

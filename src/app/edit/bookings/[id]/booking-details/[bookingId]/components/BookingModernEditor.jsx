@@ -5,13 +5,12 @@ import { ChevronLeft, FileText, AlertCircle, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Toast from "@/components/ui/toast/Toast";
 import { useToast } from "@/components/ui/toast/ToastProvider";
-import { notifyCaretakerOnPaymentApproval } from "@/lib/caretakerNotifications";
 import {
   buildDraftFromBooking,
   formatWeekdayLabel,
   formatTotalStayDays,
 } from "./bookingEditorUtils";
-import { PAYMENT_CHANNELS, PREVIOUS_STATUS, STATUS_PHASES } from "./bookingEditorConfig";
+import { PAYMENT_CHANNELS, STATUS_PHASES } from "./bookingEditorConfig";
 import BookingEditorActionBar from "./BookingEditorActionBar";
 import {
   AddOnsCardSection,
@@ -25,8 +24,9 @@ import {
 } from "./BookingEditorSections";
 import { buildPersistPayload } from "./functions/payloadHandlers";
 import { handleCancelInlineAction, handleSaveInlineAction, loadDraftFromStorage, persistDraftToStorage, syncPaxFromCounts } from "./functions/editHandlers";
-import { handleApproveInquiryAction, handleDeclineAction, handleRequestPaymentAction, handleRevertStepAction, handleSetStatusAction, handleVerifyProofAction } from "./functions/statusHandlers";
+import { handleApproveInquiryAction, handleDeclineAction, handleDeclineProofAction, handleRequestPaymentAction, handleRevertStepAction, handleSetStatusAction, handleVerifyProofAction } from "./functions/statusHandlers";
 import { isRoomConflictingForBooking, resolveApprovedByName } from "./functions/utilHandlers";
+import { isCheckoutAmountSettled } from "@/lib/bookingPayments";
 export default function BookingModernEditor({
   booking,
   resortName,
@@ -35,6 +35,8 @@ export default function BookingModernEditor({
   onDelete,
   onOpenForm,
   onOpenTicket,
+  onOpenBooking,
+  onOpenCalendar,
   messages,
   issues,
   ownerReply,
@@ -47,8 +49,10 @@ export default function BookingModernEditor({
   createSignedProofUrl,
   createBookingTransaction,
   resortRooms = [],
+  resortExtraServices = [],
   allBookings = [],
   statusAudits = [],
+  resortPaymentImageUrl,
 }) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -56,9 +60,10 @@ export default function BookingModernEditor({
   const [renderedAt] = useState(() => Date.now());
   const inlineDraftKey = `booking_inline_draft:${booking.id}`;
   const [draft, setDraft] = useState(() => buildDraftFromBooking(booking));
-  const [proofPreviewUrl, setProofPreviewUrl] = useState(() => buildDraftFromBooking(booking).paymentProofUrl || null);
+  const [proofPreviewUrls, setProofPreviewUrls] = useState(() => buildDraftFromBooking(booking).paymentProofUrls || []);
   const [assignedRoomIds, setAssignedRoomIds] = useState(() => booking.roomIds || []);
   const [actorMeta, setActorMeta] = useState({ name: "Owner", role: "owner", id: "" });
+  const hasConflicts = conflicts.length > 0;
 
   useEffect(() => {
     setAssignedRoomIds(booking.roomIds || []);
@@ -95,14 +100,16 @@ export default function BookingModernEditor({
   }, [booking, inlineDraftKey, isEditing]);
 
   useEffect(() => {
-    setProofPreviewUrl(draft.paymentProofUrl || null);
-  }, [draft.paymentProofUrl]);
+    setProofPreviewUrls(Array.isArray(draft.paymentProofUrls) ? draft.paymentProofUrls : []);
+  }, [draft.paymentProofUrls]);
 
-  const resolveSignedProofUrl = async () => {
-    if (!draft.paymentProofUrl) return;
+  const resolveSignedProofUrls = async () => {
+    if (!Array.isArray(draft.paymentProofUrls) || draft.paymentProofUrls.length === 0) return;
     try {
-      const signed = await createSignedProofUrl?.(draft.paymentProofUrl, 60 * 60);
-      if (signed) setProofPreviewUrl(signed);
+      const signedUrls = await Promise.all(
+        draft.paymentProofUrls.map(async (proofUrl) => (await createSignedProofUrl?.(proofUrl, 60 * 60)) || proofUrl)
+      );
+      setProofPreviewUrls(signedUrls.filter(Boolean));
     } catch {
       // Keep original URL when signing fails.
     }
@@ -119,7 +126,7 @@ export default function BookingModernEditor({
   const status = draft.status || "Inquiry";
   const totalStayDays = formatTotalStayDays(draft.checkInDate, draft.checkOutDate);
   const normalizedStatus = status.toLowerCase();
-  const hasProof = !!draft.paymentProofUrl;
+  const hasProof = Array.isArray(draft.paymentProofUrls) && draft.paymentProofUrls.length > 0;
   const effectivePaid = Number(draft.downpayment || 0) + (status === "Confirmed" ? Number(draft.pendingDownpayment || 0) : 0);
   const balance = Math.max(0, Number(draft.totalAmount || 0) - effectivePaid);
   const paymentDeadlineDate = draft.paymentDeadline ? new Date(draft.paymentDeadline) : null;
@@ -151,7 +158,15 @@ export default function BookingModernEditor({
   };
 
   const handleSaveInline = async () => {
-    await handleSaveInlineAction({ actionBusy, setActionBusy, persist, draft, inlineDraftKey, setIsEditing });
+    await handleSaveInlineAction({
+      actionBusy,
+      setActionBusy,
+      persist,
+      draft,
+      inlineDraftKey,
+      setIsEditing,
+      booking,
+    });
   };
 
   useEffect(() => {
@@ -168,7 +183,13 @@ export default function BookingModernEditor({
   }, [assignedRoomIds]);
 
   const handleCancelInline = () => {
-    handleCancelInlineAction({ booking, setDraft, setProofPreviewUrl, inlineDraftKey, setIsEditing });
+    handleCancelInlineAction({
+      booking,
+      setDraft,
+      setProofPreviewUrl: (value) => setProofPreviewUrls(value ? [value] : []),
+      inlineDraftKey,
+      setIsEditing,
+    });
   };
 
   const handleSetStatus = async (nextStatus) => {
@@ -193,6 +214,13 @@ export default function BookingModernEditor({
   };
 
   const handleApproveInquiry = async () => {
+    if (hasConflicts) {
+      toast({
+        message: "Approval blocked: this booking conflicts with existing reservations.",
+        color: "amber",
+      });
+      return;
+    }
     await handleApproveInquiryAction({
       actionBusy,
       setActionBusy,
@@ -216,8 +244,17 @@ export default function BookingModernEditor({
       setDraft,
       persist,
       createBookingTransaction,
-      notifyCaretakerOnPaymentApproval,
       booking,
+    });
+  };
+
+  const handleDeclineProof = async () => {
+    await handleDeclineProofAction({
+      draft,
+      actionBusy,
+      setActionBusy,
+      setDraft,
+      persist,
     });
   };
 
@@ -286,10 +323,21 @@ export default function BookingModernEditor({
                 resortRooms={resortRooms}
                 conflicts={conflicts}
                 formatWeekdayLabel={formatWeekdayLabel}
+                onOpenConflict={() => {
+                  const conflictBooking = conflicts[0];
+                  if (!conflictBooking?.id) return;
+                  onOpenBooking?.(conflictBooking.id);
+                }}
+                onOpenCalendar={onOpenCalendar}
               />
             </div>
 
-            <AddOnsCardSection draft={draft} />
+            <AddOnsCardSection
+              draft={draft}
+              isEditing={isEditing}
+              setField={setField}
+              availableServices={resortExtraServices}
+            />
 
             <StatusAuditCardSection dbAudits={dbAudits} bookingFormAudits={bookingFormAudits} />
           </div>
@@ -297,10 +345,9 @@ export default function BookingModernEditor({
           <div className="space-y-6">
             <ProofCardSection
               hasProof={hasProof}
-              proofPreviewUrl={proofPreviewUrl}
+              proofPreviewUrls={proofPreviewUrls}
               draft={draft}
-              resolveSignedProofUrl={resolveSignedProofUrl}
-              handleVerifyProof={handleVerifyProof}
+              resolveSignedProofUrl={resolveSignedProofUrls}
             />
 
             <PaymentCardSection
@@ -321,6 +368,7 @@ export default function BookingModernEditor({
             assignedRoomIds={assignedRoomIds}
             toggleAssignedRoom={toggleAssignedRoom}
             isRoomConflicting={isRoomConflicting}
+            isEditing={isEditing}
           />
 
           <MessagesInboxCardSection
@@ -338,6 +386,14 @@ export default function BookingModernEditor({
 
       <BookingEditorActionBar
         showDecisionActions={showDecisionActions}
+        showPaymentReviewActions={draft.paymentPendingApproval}
+        checkoutPaymentRequested={!!draft.checkoutPaymentRequestedAt}
+        checkoutPaymentApproved={
+          normalizedStatus === "pending checkout"
+            ? isCheckoutAmountSettled({ totalAmount: draft.totalAmount, paidAmount: draft.downpayment }) &&
+              !draft.paymentPendingApproval
+            : false
+        }
         status={status}
         draftStatus={draft.status}
         isEditing={isEditing}
