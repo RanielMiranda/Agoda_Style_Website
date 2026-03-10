@@ -134,32 +134,15 @@ export default function SideRangeCalendar({
       <div className="fixed inset-0 z-[999] bg-black/20 backdrop-blur-[1px]" onClick={onClose} />
 
       <div
-        className={`z-[1000] flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl ${
+        className={`relative z-[1000] flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl ${
           mobileCentered
             ? "fixed left-1/2 top-1/2 w-[min(92vw,360px)] -translate-x-1/2 -translate-y-1/2"
-            : "absolute left-0 top-full mt-2 w-[min(92vw,460px)]"
+            : "absolute top-0 w-[min(92vw,460px)]"
         }`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setBaseMonth((prev) => addMonths(prev, -1))}
-              className="rounded-full border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50"
-              aria-label="Previous month"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setBaseMonth((prev) => addMonths(prev, 1))}
-              className="rounded-full border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50"
-              aria-label="Next month"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <div className="w-10" />
           <h3 className="font-bold text-gray-800">
             {activeDropdown === "start" ? "Check-in" : "Check-out"}
           </h3>
@@ -168,7 +151,24 @@ export default function SideRangeCalendar({
           </button>
         </div>
 
-        <div className={`flex ${monthCount > 1 ? "gap-6" : "justify-center"}`}>
+        <button
+          type="button"
+          onClick={() => setBaseMonth((prev) => addMonths(prev, -1))}
+          className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-2 text-slate-500 shadow-sm hover:bg-slate-50"
+          aria-label="Previous month"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setBaseMonth((prev) => addMonths(prev, 1))}
+          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-2 text-slate-500 shadow-sm hover:bg-slate-50"
+          aria-label="Next month"
+        >
+          <ChevronRight size={18} />
+        </button>
+
+        <div className={`flex ${monthCount > 1 ? "gap-6 px-10" : "justify-center px-10"}`}>
           {Array.from({ length: monthCount }).map((_, index) => (
             <React.Fragment key={index}>
               {renderMonth(addMonths(baseMonth, index))}

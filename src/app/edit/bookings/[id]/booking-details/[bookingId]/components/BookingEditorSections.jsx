@@ -137,7 +137,6 @@ export function AddOnsCardSection({
   draft,
   isEditing = false,
   setField,
-  onStartEditing,
   availableServices = [],
 }) {
   const services = Array.isArray(draft.resortServices) ? draft.resortServices : [];
@@ -161,13 +160,6 @@ export function AddOnsCardSection({
   return (
     <div className="space-y-4">
       <SectionLabel icon={<Briefcase size={14} />} label="Add-ons" />
-      {!isEditing && onStartEditing ? (
-        <div className="flex justify-end">
-          <Button type="button" variant="outline" className="rounded-full" onClick={onStartEditing}>
-            Edit Add-ons
-          </Button>
-        </div>
-      ) : null}
       {isEditing ? (
         <div className="space-y-3">
           {availableServices.length > 0 ? (
@@ -264,8 +256,6 @@ export function ProofCardSection({
   proofPreviewUrls,
   draft,
   resolveSignedProofUrl,
-  handleVerifyProof,
-  handleDeclineProof,
 }) {
   const proofUrls =
     Array.isArray(proofPreviewUrls) && proofPreviewUrls.length > 0
@@ -315,22 +305,12 @@ export function ProofCardSection({
                 Pending approval: PHP {Number(draft.pendingDownpayment || 0).toLocaleString()} ({draft.pendingPaymentMethod || "Pending"})
               </p>
             ) : null}
-            {draft.paymentPendingApproval ? (
-              <div className="flex flex-wrap gap-2">
-                <button onClick={handleVerifyProof} className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-tighter">
-                  <ShieldCheck size={14} />
-                  Accept Payment
-                </button>
-                <button onClick={handleDeclineProof} className="flex items-center gap-2 text-xs font-black text-rose-600 uppercase tracking-tighter">
-                  Decline Payment
-                </button>
-              </div>
-            ) : (
+            {!draft.paymentPendingApproval ? (
               <div className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-tighter">
                 <CheckCircle size={14} />
                 Payment Accepted
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       ) : (

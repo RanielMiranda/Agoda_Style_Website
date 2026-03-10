@@ -318,7 +318,6 @@ export default function BookingModernEditor({
               draft={draft}
               isEditing={isEditing}
               setField={setField}
-              onStartEditing={() => setIsEditing(true)}
               availableServices={resortExtraServices}
             />
 
@@ -331,9 +330,6 @@ export default function BookingModernEditor({
               proofPreviewUrls={proofPreviewUrls}
               draft={draft}
               resolveSignedProofUrl={resolveSignedProofUrls}
-              handleVerifyProof={handleVerifyProof}
-              handleDeclineProof={handleDeclineProof}
-              resortPaymentImageUrl={resortPaymentImageUrl}
             />
 
             <PaymentCardSection
@@ -372,10 +368,13 @@ export default function BookingModernEditor({
 
       <BookingEditorActionBar
         showDecisionActions={showDecisionActions}
+        showPaymentReviewActions={draft.paymentPendingApproval}
         status={status}
         draftStatus={draft.status}
         isEditing={isEditing}
         onDecline={handleDecline}
+        onAcceptPayment={handleVerifyProof}
+        onDeclinePayment={handleDeclineProof}
         onBackOneStep={handleRevertStep}
         onApproveInquiry={handleApproveInquiry}
         onRequestPayment={handleRequestPayment}

@@ -1,20 +1,15 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
   Clock3,
-  Trash2,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Edit2,
 } from "lucide-react";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 const GROUP_COLORS = ["bg-blue-600", "bg-orange-500", "bg-emerald-600", "bg-amber-500"];
 const GROUP_COLOR_HEX = ["#2563eb", "#f97316", "#059669", "#f59e0b"];
@@ -28,12 +23,6 @@ function shouldShowOnCalendar(booking) {
   return !["pending checkout", "checked out", "cancelled", "declined"].includes(normalizedStatus);
 }
 
-function getBookingRoomIds(booking) {
-  if (Array.isArray(booking?.roomIds) && booking.roomIds.length > 0) return booking.roomIds;
-  if (Array.isArray(booking?.bookingForm?.assignedRoomIds)) return booking.bookingForm.assignedRoomIds;
-  return [];
-}
-
 function getBookingStartDate(booking) {
   return booking?.startDate || booking?.bookingForm?.checkInDate || null;
 }
@@ -44,15 +33,10 @@ function getBookingEndDate(booking) {
 
 export default function BookingCalendar() {
   const { resort } = useResort();
-  const { bookings, createBooking, updateBookingById, deleteBookingById } = useBookings();
-  const router = useRouter();
-  const params = useParams();
+  const { bookings } = useBookings();
 
-  const [selectedRoomIds, setSelectedRoomIds] = useState([]);
-  const [activeRangeId, setActiveRangeId] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const rooms = resort?.rooms || [];
   const bookingList = useMemo(() => bookings || resort?.bookings || [], [bookings, resort?.bookings]);
   const getBookingColor = (booking) => {
     const index = bookingList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
@@ -64,21 +48,13 @@ export default function BookingCalendar() {
     if (index < 0) return GROUP_COLOR_HEX[0];
     return GROUP_COLOR_HEX[index % GROUP_COLOR_HEX.length];
   };
-  const selectedRooms = selectedRoomIds.length > 0 ? selectedRoomIds : rooms[0]?.id ? [rooms[0].id] : [];
-
-  const toggleRoomSelection = (id) => {
-    setSelectedRoomIds((prev) => (prev.includes(id) ? prev.filter((rid) => rid !== id) : [...prev, id]));
-    setActiveRangeId(null);
-  };
 
   const getDateBookings = (dateString) =>
     bookingList.filter((booking) => {
       if (!shouldShowOnCalendar(booking)) return false;
-      const bookingRoomIds = getBookingRoomIds(booking);
       const startDate = getBookingStartDate(booking);
       const endDate = getBookingEndDate(booking);
-      const roomMatch = bookingRoomIds.some((rid) => selectedRooms.includes(rid));
-      if (!roomMatch || !startDate) return false;
+      if (!startDate) return false;
       if (!endDate) return startDate === dateString;
       return (
         startDate === dateString ||
@@ -86,72 +62,6 @@ export default function BookingCalendar() {
         (dateString > startDate && dateString < endDate)
       );
     });
-
-
-  const navigateToForm = (bookingId) => router.push(`/edit/bookings/${params.id}/booking-details/${bookingId}`);
-
-  const handleDateClick = (dateString) => {
-    const clickedBookings = getDateBookings(dateString);
-    const clickedBooking = clickedBookings[0] || null;
-
-    if (!activeRangeId) {
-      if (clickedBooking) {
-        setActiveRangeId(clickedBooking.id.toString());
-        return;
-      }
-      const newId = addBookingGroup();
-      if (!newId) return;
-      updateBookingById(newId, {
-        id: newId,
-        roomIds: [...selectedRooms],
-        startDate: dateString,
-        endDate: null,
-        checkInTime: "14:00",
-        checkOutTime: "11:00",
-        bookingForm: {
-          status: "Inquiry",
-          roomCount: selectedRooms.length,
-          checkInDate: dateString,
-          checkOutDate: "",
-          checkInTime: "14:00",
-          checkOutTime: "11:00",
-        },
-      });
-      return;
-    }
-
-    const current = bookingList.find((entry) => entry.id.toString() === activeRangeId.toString());
-    if (!current) return;
-
-    if (!current.startDate || (current.startDate && current.endDate)) {
-      updateBookingById(activeRangeId, {
-        ...current,
-        startDate: dateString,
-        endDate: null,
-        roomIds: [...selectedRooms],
-        bookingForm: {
-          ...(current.bookingForm || {}),
-          checkInDate: dateString,
-          checkOutDate: "",
-        },
-      });
-      return;
-    }
-
-    const nextStart = dateString < current.startDate ? dateString : current.startDate;
-    const nextEnd = dateString < current.startDate ? current.startDate : dateString;
-
-    updateBookingById(activeRangeId, {
-      ...current,
-      startDate: nextStart,
-      endDate: nextEnd,
-      bookingForm: {
-        ...(current.bookingForm || {}),
-        checkInDate: nextStart,
-        checkOutDate: nextEnd,
-      },
-    });
-  };
 
   const getBookingTooltip = (booking) => {
     const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
@@ -163,7 +73,7 @@ export default function BookingCalendar() {
     if (!dateBookings?.length) return "";
     return dateBookings
       .slice(0, 2)
-      .map((booking, index) => `${getBookingTooltip(booking)}`)
+      .map((booking) => `${getBookingTooltip(booking)}`)
       .join(" | ");
   };
 
@@ -197,9 +107,6 @@ export default function BookingCalendar() {
             const booking = orderedBookings[0] || null;
             const secondaryBooking = orderedBookings[1] || null;
             const hasSplit = !!booking && !!secondaryBooking;
-            const isActive =
-              !!activeRangeId &&
-              dateBookings.some((entry) => entry.id?.toString() === activeRangeId?.toString());
             const primaryColor = booking ? getBookingColor(booking) : "";
             const splitGradientStyle = hasSplit
               ? {
@@ -208,13 +115,11 @@ export default function BookingCalendar() {
               : undefined;
 
             return (
-              <button
+              <div
                 key={day}
-                onClick={() => handleDateClick(dateString)}
                 title={getDateTooltip(dateBookings)}
                 className={`h-9 w-full rounded-lg text-sm transition-all relative 
                   ${booking ? "text-white" : "hover:bg-slate-100 text-slate-600"} 
-                  ${isActive ? "ring-2 ring-offset-2 ring-slate-400 scale-90 z-10" : ""} 
                   ${getBookingStartDate(booking) === dateString ? "rounded-r-none" : ""} 
                   ${getBookingEndDate(booking) === dateString ? "rounded-l-none" : ""} 
                   ${booking && getBookingStartDate(booking) !== dateString && getBookingEndDate(booking) !== dateString ? "rounded-none opacity-80" : ""}
@@ -233,7 +138,7 @@ export default function BookingCalendar() {
                   )
                 ) : null}
                 <span className="relative z-10">{day}</span>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -249,7 +154,7 @@ export default function BookingCalendar() {
     );
   }
 
-return (
+  return (
     <Card className="w-full p-4 sm:p-8 bg-white shadow-2xl rounded-3xl sm:rounded-[2.5rem] border-none">
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
@@ -258,26 +163,9 @@ return (
               <CalendarIcon size={28} className="text-blue-600" /> 
               Resort Schedule
             </h2>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Select dates to manage room availability</p>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Read-only whole-resort availability overview</p>
           </div>
         
-        </div>
-
-        {/* Room Filter Bar */}
-        <div className="p-2 bg-slate-50 rounded-2xl border border-slate-100 flex flex-wrap gap-2">
-            {rooms.map((room) => (
-               <button
-                  key={room.id}
-                  onClick={() => toggleRoomSelection(room.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                    selectedRooms.includes(room.id)
-                      ? "bg-white text-blue-600 shadow-md ring-1 ring-blue-100"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-               >
-                 {room.name}
-               </button>
-            ))}
         </div>
 
         {/* THE CALENDAR GRID - Now much larger */}
@@ -298,28 +186,21 @@ return (
         {/* ... (keep your existing active ranges list) */}
       </div>
               <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Ranges for these rooms</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Resort Booking Ranges</p>
           <div className="flex flex-wrap gap-3">
             {bookingList
-              .filter((booking) => shouldShowOnCalendar(booking) && getBookingRoomIds(booking).some((rid) => selectedRooms.includes(rid)))
+              .filter((booking) => shouldShowOnCalendar(booking))
               .map((booking) => {
                 const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
                 const checkOut = booking?.checkOutTime || booking?.bookingForm?.checkOutTime || "--:--";
                 const guestName = booking?.bookingForm?.guestName || "Guest";
-                const bookingRoomIds = getBookingRoomIds(booking);
-                const roomNames = bookingRoomIds
-                  .map((rid) => rooms.find((room) => room.id === rid)?.name)
-                  .filter(Boolean);
-                const roomLabel = roomNames.length > 0 ? roomNames.join(", ") : `${bookingRoomIds.length || 0} Rooms`;
+                const roomLabel = "Whole resort";
 
                 return (
                   <div
                     key={booking.id}
                     title={getBookingTooltip(booking)}
-                    onClick={() => setActiveRangeId(booking.id.toString())}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer border transition-all ${
-                      activeRangeId?.toString() === booking.id?.toString() ? "border-slate-400 bg-white shadow-sm" : "border-transparent bg-slate-50 opacity-70"
-                    }`}
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl border border-transparent bg-slate-50 opacity-70 transition-all hover:bg-white hover:opacity-100 hover:shadow-sm"
                   >
                     <div className={`w-3 h-3 rounded-full ${getBookingColor(booking)}`} />
                     <div className="flex flex-col">
@@ -328,13 +209,6 @@ return (
                       <span className="text-xs font-bold text-slate-700">{getBookingStartDate(booking) || "..."} - {getBookingEndDate(booking) || "..."}</span>
                       <span className="text-[10px] text-slate-500 flex items-center gap-1"><Clock3 size={10} /> {checkIn} to {checkOut}</span>
                     </div>
-                    <button onClick={(event) => { event.stopPropagation(); navigateToForm(booking.id); }} className="ml-1 text-slate-400 hover:text-blue-600" title="Edit booking form"><Edit2 size={14} /></button>
-                    <button onClick={(event) => {
-                      event.stopPropagation();
-                      const confirmed = window.confirm("Delete this booking range?");
-                      if (!confirmed) return;
-                      deleteBookingById(booking.id);
-                    }} className="text-slate-400 hover:text-red-500" title="Delete booking range"><Trash2 size={14} /></button>
                   </div>
                 );
               })}

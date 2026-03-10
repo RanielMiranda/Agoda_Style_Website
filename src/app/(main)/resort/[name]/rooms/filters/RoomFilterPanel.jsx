@@ -177,7 +177,7 @@ function DateRangeField({
       </button>
 
       {(activeDropdown === "start" || activeDropdown === "end") && (
-        <div className={mobileSheet ? "" : "absolute top-full left-0 mt-2 z-[1000]"}>
+        <div className={mobileSheet ? "" : "absolute right-full top-0 mr-4 z-[1000]"}>
           <SideRangeCalendar
             startDate={startDate}
             endDate={endDate}

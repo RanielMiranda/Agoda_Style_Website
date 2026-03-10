@@ -54,8 +54,6 @@ export async function handleSetStatusAction({
 }
 
 export async function handleDeclineAction({ handleSetStatus }) {
-  const confirmed = window.confirm("Decline this inquiry?");
-  if (!confirmed) return;
   await handleSetStatus("Declined");
 }
 
@@ -149,8 +147,6 @@ export async function handleRevertStepAction({
   if (actionBusy) return;
   const previous = PREVIOUS_STATUS[draft.status];
   if (!previous) return;
-  const confirmed = window.confirm(`Revert status from "${draft.status}" to "${previous}"?`);
-  if (!confirmed) return;
   setActionBusy(true);
   try {
     const next = { ...draft, status: previous };
@@ -199,18 +195,6 @@ export async function handleVerifyProofAction({
     await persist(next);
 
     if (approvedAmount > 0) {
-      const balanceAfter = Math.max(0, Number(next.totalAmount || 0) - Number(next.downpayment || 0));
-      try {
-        await createBookingTransaction?.({
-          booking_id: booking.id,
-          method: nextMethod || "Pending",
-          amount: approvedAmount,
-          balance_after: balanceAfter,
-          note: "Downpayment approved by owner",
-        });
-      } catch (error) {
-        console.error("Failed to log booking transaction:", error.message);
-      }
       await notifyCaretakerOnPaymentApproval({
         bookingId: booking.id,
         resortId: booking.resortId || booking.resort_id || null,
