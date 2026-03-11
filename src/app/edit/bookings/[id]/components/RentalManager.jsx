@@ -87,11 +87,11 @@
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-md text-slate-500 uppercase tracking-tight">{item.room}</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 uppercase tracking-tight">
                         {item.status}
-                      </span>
+                      </span>                      
+                      <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-md text-slate-500 uppercase tracking-tight">{item.room}</span>
                       <span className="text-[11px] font-bold text-slate-500 uppercase flex items-center gap-1">
                         {item.checkInDate} <ChevronRight size={10}/> {item.checkOutDate}
                       </span>

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { NextResponse } from "next/server";
 import { runBookingStatusAutomation } from "@/lib/server/bookingStatusAutomation";
 
 export const runtime = "nodejs";
