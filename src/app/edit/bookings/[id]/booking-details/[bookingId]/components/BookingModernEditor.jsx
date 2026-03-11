@@ -5,6 +5,7 @@ import { ChevronLeft, FileText, AlertCircle, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Toast from "@/components/ui/toast/Toast";
 import { useToast } from "@/components/ui/toast/ToastProvider";
+import { useAccounts } from "@/components/useclient/AccountsClient";
 import {
   buildDraftFromBooking,
   formatWeekdayLabel,
@@ -55,6 +56,7 @@ export default function BookingModernEditor({
   resortPaymentImageUrl,
 }) {
   const { toast, persistentToast } = useToast();
+  const { activeAccount } = useAccounts();
   const [isEditing, setIsEditing] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
   const [renderedAt] = useState(() => Date.now());
@@ -70,20 +72,16 @@ export default function BookingModernEditor({
   }, [booking.id, booking.roomIds]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = sessionStorage.getItem("active_account_v1");
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      setActorMeta({
-        name: parsed?.full_name || parsed?.email || "Owner",
-        role: parsed?.role || "owner",
-        id: parsed?.id ? String(parsed.id) : "",
-      });
-    } catch {
-      // keep default actor
+    if (!activeAccount) {
+      setActorMeta({ name: "Owner", role: "owner", id: "" });
+      return;
     }
-  }, []);
+    setActorMeta({
+      name: activeAccount?.full_name || activeAccount?.email || "Owner",
+      role: activeAccount?.role || "owner",
+      id: activeAccount?.id ? String(activeAccount.id) : "",
+    });
+  }, [activeAccount]);
 
   useEffect(() => {
     syncPaxFromCounts({

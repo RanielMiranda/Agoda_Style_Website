@@ -23,7 +23,7 @@ export default function HeroBanner() {
       }
 
       const images = (data || [])
-        .flatMap((resort) => (resort.gallery || []).filter(Boolean).slice(0, 1))
+        .flatMap((resort) => (resort.gallery || []).filter(Boolean).slice(0, 2))
         .filter(Boolean)
         .slice(0, 6);
 
