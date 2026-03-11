@@ -62,7 +62,7 @@ export default function BookingManagementPage() {
     const source = bookings || [];
     const inquiry = source.filter((entry) => {
       const status = (entry.status || entry.bookingForm?.status || "").toLowerCase();
-      return (status.includes("inquiry") || status.includes("pending payment")) && !status.includes("declined");
+      return (status.includes("inquiry") || status.includes("pending payment") || status.includes("pending checkout")) && !status.includes("declined");
     }).length;
     const checkout = source.filter((entry) => {
       const status = (entry.status || entry.bookingForm?.status || "").toLowerCase();

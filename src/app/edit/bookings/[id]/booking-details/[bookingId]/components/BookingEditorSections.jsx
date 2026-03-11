@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { buildSupportConversationItems, getSupportConversationLabel, isResolvedConversationItem } from "@/lib/supportConversation";
 import { getTransformedSupabaseImageUrl } from "@/lib/utils";
 import { InfoItem, SectionLabel, StatusBadge } from "./BookingEditorAtoms";
+import RangeCalendar from "@/app/(main)/components/search/calendar/RangeCalendar";
 
 function getAuditActorLabel(entry) {
   if (entry?.actor_name) return entry.actor_name;
@@ -106,17 +107,41 @@ export function StayCardSection({
   formatWeekdayLabel,
   onOpenConflict,
   onOpenCalendar,
+  isStayRangeInvalid = false,
 }) {
   const hasConflicts = conflicts.length > 0;
+  const parseUtcDate = (value) => (value ? new Date(`${value}T00:00:00Z`) : null);
+  const rangeStart = parseUtcDate(draft.checkInDate);
+  const rangeEnd = parseUtcDate(draft.checkOutDate);
+
+  const handleRangeChange = (start, end) => {
+    const startValue = start ? start.toISOString().slice(0, 10) : "";
+    const endValue = end ? end.toISOString().slice(0, 10) : "";
+    setField("checkInDate", startValue);
+    setField("checkOutDate", endValue);
+  };
+
   return (
     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
       <SectionLabel icon={<Calendar size={14} />} label="Stay" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <InfoItem label="Check-In" value={draft.checkInDate} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
-        <InfoItem label="Check-Out" value={draft.checkOutDate} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
-        <InfoItem label="Check-In-Day" value={formatWeekdayLabel(draft.checkInDate)} editing={isEditing} type="date" onChange={(val) => setField("checkInDate", val)} />
-        <InfoItem label="Check-Out-Day" value={formatWeekdayLabel(draft.checkOutDate)} editing={isEditing} type="date" onChange={(val) => setField("checkOutDate", val)} />
-        <InfoItem label="Total Days Stay" value={totalStayDays} />  
+        <InfoItem
+          label="Check-In Date"
+          value={draft.checkInDate}
+          editing={isEditing}
+          type="date"
+          onChange={(val) => setField("checkInDate", val)}
+        />
+        <InfoItem
+          label="Check-Out Date"
+          value={draft.checkOutDate}
+          editing={isEditing}
+          type="date"
+          onChange={(val) => setField("checkOutDate", val)}
+        />
+        <InfoItem label="Check-In Day" value={formatWeekdayLabel(draft.checkInDate)} />
+        <InfoItem label="Check-Out Day" value={formatWeekdayLabel(draft.checkOutDate)} />
+        <InfoItem label="Total Days Stay" value={totalStayDays} />
         <InfoItem
           label="Room"
           value={
@@ -136,6 +161,21 @@ export function StayCardSection({
         <InfoItem label="Children" value={draft.childrenCount || 0} editing={isEditing} type="number" onChange={(val) => setField("childrenCount", Number(val) || 0)} />
         <InfoItem label="Approved By" value={approvedByName} />        
       </div>
+      {isEditing ? (
+        <div className="mt-3">
+          <RangeCalendar
+            startDate={rangeStart}
+            endDate={rangeEnd}
+            onChange={handleRangeChange}
+            activeDropdown={rangeEnd ? "end" : "start"}
+          />
+        </div>
+      ) : null}
+      {isStayRangeInvalid ? (
+        <p className="text-[11px] font-bold text-rose-600">
+          Check-out must be the same day or after check-in.
+        </p>
+      ) : null}
       <div className={`rounded-xl px-3 py-2 border ${conflicts.length > 0 ? "border-rose-200 bg-rose-50" : "border-emerald-200 bg-emerald-50"}`}>
         <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">Availability Check</p>
         <p className={`text-xs font-bold ${conflicts.length > 0 ? "text-rose-700" : "text-emerald-700"}`}>

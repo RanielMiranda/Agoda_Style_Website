@@ -61,9 +61,17 @@
               >
                 <tab.icon size={16} className={isActive ? tab.color : ""} />
                 {tab.label}
-                <span className={`px-2 py-0.5 rounded-full text-[10px] ${isActive ? `${tab.bg} ${tab.color}` : "bg-slate-200 text-slate-500"}`}>
-                  {count}
-                </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] ${
+                      isActive
+                        ? `${tab.bg} ${tab.color}`
+                        : tab.id === "confirmed"
+                        ? "bg-slate-200 text-slate-500"
+                        : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {count}
+                  </span>
               </button>
             );
           })}

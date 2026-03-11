@@ -11,6 +11,7 @@ import {
   formatWeekdayLabel,
   formatTotalStayDays,
 } from "./bookingEditorUtils";
+import { overlapsByDateTime } from "./bookingEditorUtils";
 import { PAYMENT_CHANNELS, STATUS_PHASES } from "./bookingEditorConfig";
 import BookingEditorActionBar from "./BookingEditorActionBar";
 import {
@@ -46,7 +47,6 @@ export default function BookingModernEditor({
   onRefreshMessages,
   refreshingMessages = false,
   onResolveIssue,
-  conflicts = [],
   createSignedProofUrl,
   createBookingTransaction,
   resortRooms = [],
@@ -66,7 +66,28 @@ export default function BookingModernEditor({
   const [proofPreviewUrls, setProofPreviewUrls] = useState(() => buildDraftFromBooking(booking).paymentProofUrls || []);
   const [assignedRoomIds, setAssignedRoomIds] = useState(() => booking.roomIds || []);
   const [actorMeta, setActorMeta] = useState({ name: "Owner", role: "owner", id: "" });
-  const hasConflicts = conflicts.length > 0;
+  const dynamicConflicts = React.useMemo(() => {
+    const probe = {
+      id: booking.id,
+      startDate: draft.checkInDate || booking.startDate,
+      endDate: draft.checkOutDate || booking.endDate || draft.checkInDate || booking.startDate,
+      checkInTime: draft.checkInTime || booking.checkInTime,
+      checkOutTime: draft.checkOutTime || booking.checkOutTime,
+      bookingForm: {
+        checkInTime: draft.checkInTime || booking.checkInTime,
+        checkOutTime: draft.checkOutTime || booking.checkOutTime,
+      },
+    };
+
+    return (allBookings || []).filter((entry) => {
+      if (entry.id?.toString() === booking.id?.toString()) return false;
+      const normalized = String(entry.status || entry.bookingForm?.status || "").toLowerCase();
+      if (!normalized.includes("confirm") && !normalized.includes("ongoing")) return false;
+      return overlapsByDateTime(entry, probe);
+    });
+  }, [allBookings, booking, draft]);
+
+  const hasConflicts = dynamicConflicts.length > 0;
 
   useEffect(() => {
     setAssignedRoomIds(booking.roomIds || []);
@@ -124,6 +145,10 @@ export default function BookingModernEditor({
 
   const status = draft.status || "Inquiry";
   const totalStayDays = formatTotalStayDays(draft.checkInDate, draft.checkOutDate);
+  const isStayRangeInvalid =
+    !!draft.checkInDate &&
+    !!draft.checkOutDate &&
+    new Date(draft.checkOutDate).getTime() < new Date(draft.checkInDate).getTime();
   const normalizedStatus = status.toLowerCase();
   const hasProof = Array.isArray(draft.paymentProofUrls) && draft.paymentProofUrls.length > 0;
   const effectivePaid = Number(draft.downpayment || 0) + (status === "Confirmed" ? Number(draft.pendingDownpayment || 0) : 0);
@@ -320,14 +345,15 @@ export default function BookingModernEditor({
                 approvedByName={approvedByName}
                 assignedRoomIds={assignedRoomIds}
                 resortRooms={resortRooms}
-                conflicts={conflicts}
+                conflicts={dynamicConflicts}
                 formatWeekdayLabel={formatWeekdayLabel}
                 onOpenConflict={() => {
-                  const conflictBooking = conflicts[0];
+                  const conflictBooking = dynamicConflicts[0];
                   if (!conflictBooking?.id) return;
                   onOpenBooking?.(conflictBooking.id);
                 }}
                 onOpenCalendar={onOpenCalendar}
+                isStayRangeInvalid={isStayRangeInvalid}
               />
             </div>
 
@@ -413,6 +439,7 @@ export default function BookingModernEditor({
         onSaveInline={handleSaveInline}
         onCancelInline={handleCancelInline}
         actionBusy={actionBusy}
+        disableSave={isStayRangeInvalid}
       />
       <Toast/>
     </div>
