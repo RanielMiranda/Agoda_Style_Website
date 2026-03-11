@@ -61,6 +61,15 @@ export async function handleSetStatusAction({
         checkOutDate: next.checkOutDate,
       });
       onStayConfirmed?.(message);
+      try {
+        await fetch("/api/booking/notify-caretakers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: booking.id }),
+        });
+      } catch (error) {
+        console.error("Caretaker SMS failed:", error?.message || error);
+      }
     }
   } finally {
     setActionBusy(false);
