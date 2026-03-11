@@ -277,14 +277,11 @@ export default function BookingModernEditor({
             <Button
               variant="outline"
               onClick={() => {
-                const confirmed = window.confirm("Delete this booking and all related form data?");
-                if (!confirmed) return;
-                if (typeof window !== "undefined") localStorage.removeItem(inlineDraftKey);
                 onDelete();
               }}
               className="rounded-full w-full sm:w-auto flex items-center justify-center bg-white shadow-sm border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs px-4 sm:px-6"
             >
-              Delete Booking
+              Cancel Booking
             </Button>
           </div>
         </div>

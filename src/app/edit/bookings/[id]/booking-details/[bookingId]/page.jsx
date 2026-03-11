@@ -187,27 +187,23 @@ export default function BookingDetailsPage() {
     }
   };
 
-  const archiveAndDeleteBooking = async () => {
+  const cancelBookingWithConfirmation = async () => {
     if (!booking) return;
-    const confirmed = window.confirm("Archive and delete this booking?");
+    const confirmed = window.confirm("Cancel this booking?");
     if (!confirmed) return;
     try {
-      const { error: archiveError } = await supabase.from("bookings_archive").insert({
-        source_booking_id: booking.id,
-        resort_id: booking.resortId || booking.resort_id || Number(id),
-        status: booking.status || booking.bookingForm?.status || null,
-        booking_form: booking.bookingForm || {},
-        room_ids: booking.roomIds || [],
-        start_date: booking.startDate || null,
-        end_date: booking.endDate || null,
-        check_in_time: booking.checkInTime || null,
-        check_out_time: booking.checkOutTime || null,
-      });
-      if (archiveError) throw archiveError;
-      await deleteBookingById(booking.id);
-      router.push(`/edit/bookings/${id}`);
+      await updateBookingById(booking.id, (entry) => ({
+        ...entry,
+        status: "Cancelled",
+        bookingForm: {
+          ...(entry.bookingForm || {}),
+          status: "Cancelled",
+          cancelledAt: new Date().toISOString(),
+        },
+      }));
+      toast({ message: "Booking cancelled.", color: "green" });
     } catch (err) {
-      toast({ message: `Archive failed: ${err.message}`, color: "red" });
+      toast({ message: `Cancel failed: ${err.message}`, color: "red" });
     }
   };
 
@@ -219,7 +215,7 @@ export default function BookingDetailsPage() {
       resortName={currentResort?.name}
       onBack={() => router.push(`/edit/bookings/${id}`)}
       onSave={(next) => updateBookingById(booking.id, next)}
-      onDelete={archiveAndDeleteBooking}
+      onDelete={cancelBookingWithConfirmation}
       onOpenForm={() => router.push(`/edit/bookings/${id}/booking-details/${booking.id}/form`)}
       onOpenTicket={() => router.push(`/ticket/${booking.id}`)}
       onOpenBooking={(targetId) => router.push(`/edit/bookings/${id}/booking-details/${targetId}`)}
