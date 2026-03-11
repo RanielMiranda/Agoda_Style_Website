@@ -18,12 +18,13 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { resort, loadResort, setResort, loading } = useResort();
-  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction } = useBookings();
+  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction, refreshBookings } = useBookings();
   const { loadBookingSupport, updateConcernStatus, sendTicketMessage, isMissingSupportTableError } = useSupport();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
   const [ownerReply, setOwnerReply] = useState("");
   const [statusAudits, setStatusAudits] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [refreshingMessages, setRefreshingMessages] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
   const lastOwnerReplySentAtRef = useRef(0);
@@ -81,6 +82,60 @@ export default function BookingDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [booking?.id]);
 
+  useEffect(() => {
+    if (!booking?.id) return;
+    const channel = supabase
+      .channel(`booking-live-${booking.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_messages", filter: `booking_id=eq.${booking.id}` },
+        () => loadSupportData(booking.id)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_issues", filter: `booking_id=eq.${booking.id}` },
+        () => loadSupportData(booking.id)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_issues_archive", filter: `booking_id=eq.${booking.id}` },
+        () => loadSupportData(booking.id)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings", filter: `id=eq.${booking.id}` },
+        () => {
+          refreshBookings();
+          loadStatusAudits(booking.id);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "booking_status_audit", filter: `booking_id=eq.${booking.id}` },
+        () => loadStatusAudits(booking.id)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "booking_transactions", filter: `booking_id=eq.${booking.id}` },
+        () => loadStatusAudits(booking.id)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [booking?.id, refreshBookings]);
+
+  useEffect(() => {
+    if (!booking?.id) return undefined;
+    const interval = setInterval(() => {
+      loadSupportData(booking.id);
+      loadStatusAudits(booking.id);
+      refreshBookings();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [booking?.id, refreshBookings]);
+
   const loadSupportData = async (activeBookingId) => {
     setRefreshingMessages(true);
     try {
@@ -109,7 +164,6 @@ export default function BookingDetailsPage() {
         .order("changed_at", { ascending: false });
       if (!error) {
         setStatusAudits(data || []);
-        return;
       }
       const missingActorName =
         error.message?.includes("actor_name") &&
@@ -125,6 +179,18 @@ export default function BookingDetailsPage() {
       setStatusAudits(fallback.data || []);
     } catch {
       setStatusAudits([]);
+    }
+
+    try {
+      const { data: transactionRows, error: transactionError } = await supabase
+        .from("booking_transactions")
+        .select("id, booking_id, method, amount, balance_after, note, created_at")
+        .eq("booking_id", activeBookingId)
+        .order("created_at", { ascending: false });
+      if (transactionError) throw transactionError;
+      setTransactions(transactionRows || []);
+    } catch {
+      setTransactions([]);
     }
   };
 
@@ -235,6 +301,7 @@ export default function BookingDetailsPage() {
       resortExtraServices={currentResort?.extraServices || []}
       allBookings={bookings || []}
       statusAudits={statusAudits}
+      transactions={transactions}
       resortPaymentImageUrl={currentResort?.payment_image_url}
     />
     <Toast />

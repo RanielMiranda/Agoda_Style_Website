@@ -163,6 +163,46 @@ export function useTicketData({ normalizedBookingId, accessToken, toast }) {
     fetchTicket();
   }, [fetchTicket]);
 
+  useEffect(() => {
+    if (!normalizedBookingId) return undefined;
+    const channel = supabase
+      .channel(`ticket-live-${normalizedBookingId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_messages", filter: `booking_id=eq.${normalizedBookingId}` },
+        () => fetchMessages(normalizedBookingId)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_issues", filter: `booking_id=eq.${normalizedBookingId}` },
+        () => fetchMessages(normalizedBookingId)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticket_issues_archive", filter: `booking_id=eq.${normalizedBookingId}` },
+        () => fetchMessages(normalizedBookingId)
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings", filter: `id=eq.${normalizedBookingId}` },
+        () => fetchTicket()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchMessages, fetchTicket, normalizedBookingId]);
+
+  useEffect(() => {
+    if (!normalizedBookingId) return undefined;
+    const interval = setInterval(() => {
+      fetchTicket();
+      fetchMessages(normalizedBookingId);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [fetchMessages, fetchTicket, normalizedBookingId]);
+
   return {
     loading,
     booking,

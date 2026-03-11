@@ -53,6 +53,7 @@ export default function BookingModernEditor({
   resortExtraServices = [],
   allBookings = [],
   statusAudits = [],
+  transactions = [],
   resortPaymentImageUrl,
 }) {
   const { toast, persistentToast } = useToast();
@@ -337,7 +338,7 @@ export default function BookingModernEditor({
               availableServices={resortExtraServices}
             />
 
-            <StatusAuditCardSection dbAudits={dbAudits} bookingFormAudits={bookingFormAudits} />
+            <StatusAuditCardSection dbAudits={dbAudits} bookingFormAudits={bookingFormAudits} transactions={transactions} />
           </div>
 
           <div className="space-y-6">

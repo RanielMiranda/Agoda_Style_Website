@@ -53,6 +53,14 @@ function resolveStayDates(row) {
   return { startDate, endDate, checkInTime, checkOutTime };
 }
 
+function withAutomationActor(nextForm) {
+  return {
+    ...nextForm,
+    lastActionRole: "system",
+    lastActionBy: "System automation",
+  };
+}
+
 export async function runPendingCheckoutAutomation({ limit = 500, nowMs = Date.now() } = {}) {
   const supabase = createServiceSupabaseClient();
   const nowIso = new Date(nowMs).toISOString();
@@ -176,12 +184,12 @@ export async function runBookingStatusAutomation({ limit = 500, nowMs = Date.now
   const failed = [];
 
   for (const row of paymentExpired) {
-    const nextBookingForm = {
+    const nextBookingForm = withAutomationActor({
       ...(row.booking_form || {}),
       status: "Cancelled",
       autoCancelledAt: nowIso,
       cancellationReason: "Payment deadline expired",
-    };
+    });
     const { error: updateError } = await supabase
       .from("bookings")
       .update({
@@ -201,11 +209,11 @@ export async function runBookingStatusAutomation({ limit = 500, nowMs = Date.now
   }
 
   for (const row of overdueCheckout) {
-    const nextBookingForm = {
+    const nextBookingForm = withAutomationActor({
       ...(row.booking_form || {}),
       status: "Pending Checkout",
       autoPendingCheckoutAt: nowIso,
-    };
+    });
     const { error: updateError } = await supabase
       .from("bookings")
       .update({
@@ -226,11 +234,11 @@ export async function runBookingStatusAutomation({ limit = 500, nowMs = Date.now
   }
 
   for (const row of shouldOngoing) {
-    const nextBookingForm = {
+    const nextBookingForm = withAutomationActor({
       ...(row.booking_form || {}),
       status: "Ongoing",
       autoOngoingAt: nowIso,
-    };
+    });
     const { error: updateError } = await supabase
       .from("bookings")
       .update({
