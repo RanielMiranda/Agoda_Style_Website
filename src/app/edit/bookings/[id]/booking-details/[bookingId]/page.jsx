@@ -27,6 +27,7 @@ export default function BookingDetailsPage() {
   const [transactions, setTransactions] = useState([]);
   const [refreshingMessages, setRefreshingMessages] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const lastOwnerReplySentAtRef = useRef(0);
 
   const hashString = (value) => {
@@ -127,14 +128,14 @@ export default function BookingDetailsPage() {
   }, [booking?.id, refreshBookings]);
 
   useEffect(() => {
-    if (!booking?.id) return undefined;
+    if (!booking?.id || isEditing) return undefined;
     const interval = setInterval(() => {
       loadSupportData(booking.id);
       loadStatusAudits(booking.id);
       refreshBookings();
     }, 15000);
     return () => clearInterval(interval);
-  }, [booking?.id, refreshBookings]);
+  }, [booking?.id, isEditing, refreshBookings]);
 
   const loadSupportData = async (activeBookingId) => {
     setRefreshingMessages(true);
@@ -303,6 +304,7 @@ export default function BookingDetailsPage() {
       statusAudits={statusAudits}
       transactions={transactions}
       resortPaymentImageUrl={currentResort?.payment_image_url}
+      onEditingChange={setIsEditing}
     />
     <Toast />
     <PersistentToast />

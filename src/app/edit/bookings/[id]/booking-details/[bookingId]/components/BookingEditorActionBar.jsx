@@ -74,7 +74,7 @@ export default function BookingEditorActionBar({
           </Button>
         </>
       ) : null}
-      {!showPaymentReviewActions && !isPendingCheckout && PREVIOUS_STATUS[draftStatus] ? (
+      {!isEditing && !showPaymentReviewActions && !isPendingCheckout && PREVIOUS_STATUS[draftStatus] ? (
         <Button
           variant="outline"
           className="rounded-full w-full md:w-auto px-6 md:px-8 h-11 md:h-12 font-bold text-xs border-slate-300 text-slate-600 hover:bg-slate-50"
@@ -113,7 +113,7 @@ export default function BookingEditorActionBar({
             Request Payment
           </Button>
         ) : isPendingCheckout ? (
-          checkoutPaymentApproved && !showPaymentReviewActions ? (
+          checkoutPaymentApproved && !showPaymentReviewActions && !isEditing ? (
             <Button
               className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => runWithConfirmation("Are you sure you want to confirm checkout?", onConfirmStay)}
@@ -124,7 +124,7 @@ export default function BookingEditorActionBar({
             </Button>
           ) : null
         ) : (
-          !showPaymentReviewActions ? (
+          !showPaymentReviewActions && !isEditing ? (
             <Button
               className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => runWithConfirmation(`Are you sure you want to ${primaryActionLabel.toLowerCase()}?`, onConfirmStay)}

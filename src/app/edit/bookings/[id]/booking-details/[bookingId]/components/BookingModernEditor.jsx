@@ -55,6 +55,7 @@ export default function BookingModernEditor({
   statusAudits = [],
   transactions = [],
   resortPaymentImageUrl,
+  onEditingChange,
 }) {
   const { toast, persistentToast } = useToast();
   const { activeAccount } = useAccounts();
@@ -66,6 +67,9 @@ export default function BookingModernEditor({
   const [proofPreviewUrls, setProofPreviewUrls] = useState(() => buildDraftFromBooking(booking).paymentProofUrls || []);
   const [assignedRoomIds, setAssignedRoomIds] = useState(() => booking.roomIds || []);
   const [actorMeta, setActorMeta] = useState({ name: "Owner", role: "owner", id: "" });
+  useEffect(() => {
+    onEditingChange?.(isEditing);
+  }, [isEditing, onEditingChange]);
   const dynamicConflicts = React.useMemo(() => {
     const probe = {
       id: booking.id,
@@ -88,6 +92,57 @@ export default function BookingModernEditor({
   }, [allBookings, booking, draft]);
 
   const hasConflicts = dynamicConflicts.length > 0;
+  const blockedRanges = React.useMemo(() => {
+    const normalizeRoomIds = (value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    };
+    const roomIds =
+      assignedRoomIds.length > 0
+        ? assignedRoomIds
+        : normalizeRoomIds(booking.roomIds || booking.room_ids);
+    if (!roomIds || roomIds.length === 0) return [];
+    return (allBookings || [])
+      .filter((entry) => {
+        if (entry.id?.toString() === booking.id?.toString()) return false;
+        const normalized = String(entry.status || entry.bookingForm?.status || "").toLowerCase();
+        if (!normalized.includes("confirm") && !normalized.includes("ongoing") && !normalized.includes("pending checkout")) {
+          return false;
+        }
+        const entryRoomIds = normalizeRoomIds(
+          entry.roomIds || entry.room_ids || entry.bookingForm?.assignedRoomIds
+        );
+        return entryRoomIds.some((roomId) => roomIds.includes(roomId));
+      })
+      .map((entry) => {
+        const startValue =
+          entry.startDate ||
+          entry.checkInDate ||
+          entry.bookingForm?.checkInDate ||
+          entry.bookingForm?.checkIn ||
+          "";
+        const endValue =
+          entry.endDate ||
+          entry.checkOutDate ||
+          entry.bookingForm?.checkOutDate ||
+          entry.bookingForm?.checkOut ||
+          startValue;
+        if (!startValue) return null;
+        const start = new Date(`${startValue}T00:00:00Z`);
+        const end = new Date(`${(endValue || startValue)}T00:00:00Z`);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+        return { start, end };
+      })
+      .filter(Boolean);
+  }, [allBookings, assignedRoomIds, booking.id, booking.roomIds]);
 
   useEffect(() => {
     setAssignedRoomIds(booking.roomIds || []);
@@ -352,9 +407,10 @@ export default function BookingModernEditor({
                   if (!conflictBooking?.id) return;
                   onOpenBooking?.(conflictBooking.id);
                 }}
-                onOpenCalendar={onOpenCalendar}
-                isStayRangeInvalid={isStayRangeInvalid}
-              />
+              onOpenCalendar={onOpenCalendar}
+              isStayRangeInvalid={isStayRangeInvalid}
+              blockedRanges={blockedRanges}
+            />
             </div>
 
             <AddOnsCardSection

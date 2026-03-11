@@ -10,7 +10,13 @@ import {
   startOfMonth,
 } from "@/lib/rangeCalendarUtils";
 
-export default function RangeCalendar({ startDate, endDate, onChange, activeDropdown }) {
+export default function RangeCalendar({
+  startDate,
+  endDate,
+  onChange,
+  activeDropdown,
+  blockedRanges = [],
+}) {
   const todayUTC = getUtcToday();
   const [baseMonth, setBaseMonth] = useState(startOfMonth(todayUTC));
 
@@ -37,6 +43,10 @@ export default function RangeCalendar({ startDate, endDate, onChange, activeDrop
             const isEnd = isSameDay(date, endDate);
             const inRange = isBetween(date, startDate, endDate);
             const isPast = date < todayUTC;
+            const isBlocked = (blockedRanges || []).some((range) => {
+              if (!range?.start || !range?.end) return false;
+              return date >= range.start && date <= range.end;
+            });
 
             return (
               <button
@@ -56,6 +66,7 @@ export default function RangeCalendar({ startDate, endDate, onChange, activeDrop
                   "flex h-10 w-10 items-center justify-center text-sm transition-colors",
                   isPast ? "cursor-not-allowed text-gray-300" : "hover:bg-blue-100",
                   inRange ? "rounded-md bg-blue-100 text-blue-700" : "rounded-full",
+                  isBlocked && !inRange && !isStart && !isEnd ? "rounded-md bg-rose-100 text-rose-700" : "",
                   isStart || isEnd ? "relative z-10 rounded-full bg-blue-600 font-semibold text-white hover:bg-blue-600" : "",
                 ].join(" ")}
                 disabled={isPast}
