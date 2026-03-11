@@ -11,7 +11,7 @@ export default function BookingDetailsFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { resort, loadResort, setResort, loading } = useResort();
-  const { bookings, createBooking, updateBookingById, deleteBookingById, loadingBookings } = useBookings();
+  const { bookings, createBooking, updateBookingById, loadingBookings } = useBookings();
 
   const resortId = params?.id;
   const bookingId = params?.bookingId;
@@ -127,30 +127,19 @@ export default function BookingDetailsFormPage() {
     router.push(`/edit/bookings/${resortId}/booking-details/${newBookingId}`);
   };
 
-  const handleDelete = () => {
-    if (isNewBooking) {
-      router.push(`/edit/bookings/${resortId}`);
-      return;
-    }
-    deleteBookingById(bookingId);
-    router.push(`/edit/bookings/${resortId}`);
-  };
-
   return (
     <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
       {(loading && !currentResort) || loadingBookings ? (
         <div className="text-center text-slate-500 mt-20">Loading booking form...</div>
       ) : (
       <BookingForm
-        title={isNewBooking ? "New Booking Form" : "Booking Form"}
         data={initialData}
         resortName={currentResort?.name}
-        roomOptions={currentResort?.rooms || []}
-        availableServices={currentResort?.extraServices || []}
+        resortProfileImage={currentResort?.profileImage}
+        resortPrice={Number(currentResort?.price || 0)}
+        resortServices={currentResort?.extraServices || []}
         storageKey={storageKey}
-        onCancel={() => router.back()}
         onSave={handleSave}
-        onDelete={!isNewBooking ? handleDelete : undefined}
       />
       )}
     </div>

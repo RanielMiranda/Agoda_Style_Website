@@ -9,9 +9,11 @@ function buildBaseUrl(request) {
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const forwardedHost = request.headers.get("x-forwarded-host");
   if (forwardedProto && forwardedHost) {
-    return `${forwardedProto}://${forwardedHost}`;
+    const host = forwardedHost.replace(/^portal\./i, "");
+    return `${forwardedProto}://${host}`;
   }
-  return request.nextUrl.origin;
+  const origin = request.nextUrl.origin;
+  return origin.replace(/\/\/portal\./i, "//");
 }
 
 function buildHtml({ guestName, resortName, ticketUrl, expiresAt }) {
