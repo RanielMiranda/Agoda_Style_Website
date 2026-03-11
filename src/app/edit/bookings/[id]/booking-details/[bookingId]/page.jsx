@@ -283,24 +283,8 @@ export default function BookingDetailsPage() {
       onBack={() => router.push(`/edit/bookings/${id}`)}
       onSave={(next) => updateBookingById(booking.id, next)}
       onDelete={cancelBookingWithConfirmation}
-      onOpenForm={() => {
-        if (typeof window === "undefined") return;
-        const host = window.location.host;
-        const portalHost = host.startsWith("portal.") ? host : `portal.${host}`;
-        const url = `${window.location.protocol}//${portalHost}/edit/bookings/${id}/booking-details/${booking.id}/form`;
-        window.open(url, "_blank", "noopener,noreferrer");
-      }}
-      onOpenTicket={() => {
-        if (typeof window === "undefined") return;
-        const host = window.location.host;
-        const baseHost = host.replace(/^portal\./, "");
-        const token = booking?.bookingForm?.ticketAccessToken
-          || booking?.booking_form?.ticketAccessToken
-          || booking?.booking_form?.ticket_access_token
-          || "";
-        const url = `${window.location.protocol}//${baseHost}/ticket/${booking.id}${token ? `?token=${encodeURIComponent(token)}` : ""}`;
-        window.open(url, "_blank", "noopener,noreferrer");
-      }}
+      onOpenForm={() => router.push(`/edit/bookings/${id}/booking-details/${booking.id}/form`)}
+      onOpenTicket={() => router.push(`/ticket/${booking.id}`)}
       onOpenBooking={(targetId) => router.push(`/edit/bookings/${id}/booking-details/${targetId}`)}
       onOpenCalendar={() => router.push(`/edit/bookings/${id}?tab=calendar`)}
       messages={messages}

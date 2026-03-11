@@ -1,195 +1,334 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getCheckoutMismatchMessage, isCheckoutAmountSettled } from "@/lib/bookingPayments";
+
+const DEFAULT_FORM = {
+  status: "Inquiry",
+  guestName: "",
+  address: "",
+  email: "",
+  phoneNumber: "",
+  adultCount: 0,
+  childrenCount: 0,
+  guestCount: 0,
+  roomCount: 1,
+  roomName: "",
+  sleepingGuests: 0,
+  baseRate: 0,
+  checkInDate: "",
+  checkInTime: "14:00",
+  checkOutDate: "",
+  checkOutTime: "11:00",
+  bookingAgent: "Direct",
+  turnoverAuthorizedPerson: "",
+  paymentMethod: "Pending",
+  paymentDeadline: "",
+  confirmationStub: null,
+  downpayment: 0,
+  totalAmount: 0,
+  resortServices: [],
+  notes: "",
+};
+
+const STATUS_PHASES = [
+  "Inquiry",
+  "Approved Inquiry",
+  "Pending Payment",
+  "Confirmed",
+  "Ongoing",
+  "Pending Checkout",
+  "Checked Out",
+];
 
 export default function BookingConfirmation({
   data,
   resortName,
-  resortProfileImage,
-  resortPrice = 0,
+  roomOptions = [],
+  availableServices = [],
+  readOnly = false,
+  title = "Booking Form",
+  onSave,
+  onCancel,
+  onDelete,
+  storageKey,
 }) {
-  const formData = data || {};
+  const [formData, setFormData] = useState(() => {
+    if (typeof window !== "undefined" && storageKey) {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) return { ...DEFAULT_FORM, ...(data || {}), ...JSON.parse(raw) };
+      } catch {
+        // ignore draft parse errors
+      }
+    }
+    return { ...DEFAULT_FORM, ...(data || {}) };
+  });
 
-  const selectedServices = Array.isArray(formData.resortServices)
-    ? formData.resortServices
-    : [];
-  const serviceTotal = useMemo(
-    () =>
-      (selectedServices || []).reduce(
-        (sum, entry) => sum + Number(entry?.cost || 0),
-        0
-      ),
-    [selectedServices]
-  );
-  const resortRental = Number(resortPrice || 0);
-  const computedTotal = resortRental + serviceTotal;
   const balanceDue = useMemo(
-    () => Math.max(0, computedTotal - Number(formData.downpayment || 0)),
-    [computedTotal, formData.downpayment]
+    () => Math.max(0, Number(formData.totalAmount || 0) - Number(formData.downpayment || 0)),
+    [formData.totalAmount, formData.downpayment]
   );
 
-  const resortInitials = (resortName || "Resort")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const assignedRooms = String(formData.roomName || "")
-    .split(",")
-    .map((name) => name.trim())
-    .filter(Boolean);
-  const totalPax = Number(formData.guestCount || 0)
-    || Number(formData.adultCount || 0) + Number(formData.childrenCount || 0);
+  const handleNumberChange = (field, value) => {
+    const parsed = Number(value);
+    const nextValue = Number.isNaN(parsed) ? 0 : parsed;
+    if (field === "adultCount" || field === "childrenCount") {
+      setFormData((prev) => {
+        const next = { ...prev, [field]: nextValue };
+        const pax = Number(next.adultCount || 0) + Number(next.childrenCount || 0);
+        return { ...next, guestCount: pax, pax };
+      });
+      return;
+    }
+    handleChange(field, nextValue);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (readOnly || !onSave) return;
+
+    const sameDay =
+      formData.checkInDate &&
+      formData.checkOutDate &&
+      formData.checkInDate === formData.checkOutDate;
+    if (sameDay && formData.checkInTime && formData.checkOutTime && formData.checkOutTime <= formData.checkInTime) {
+      alert("For same-day bookings, check-out time must be later than check-in time.");
+      return;
+    }
+    if (formData.status === "Checked Out") {
+      const isSettled = isCheckoutAmountSettled({
+        totalAmount: formData.totalAmount,
+        paidAmount: formData.downpayment,
+      });
+      if (!isSettled) {
+        alert(
+          getCheckoutMismatchMessage({
+            totalAmount: formData.totalAmount,
+            paidAmount: formData.downpayment,
+          })
+        );
+        return;
+      }
+      const confirmed = window.confirm("Confirm checkout for this booking?");
+      if (!confirmed) return;
+    }
+
+    if (storageKey && typeof window !== "undefined") {
+      localStorage.removeItem(storageKey);
+    }
+    onSave(formData);
+  };
+
+  useEffect(() => {
+    if (!storageKey || typeof window === "undefined") return;
+    const timer = setTimeout(() => {
+      localStorage.setItem(storageKey, JSON.stringify(formData));
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [formData, storageKey]);
+
+  const inputClass =
+    "w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-500";
+
+  const toggleAddon = (service) => {
+    setFormData((prev) => {
+      const selected = Array.isArray(prev.resortServices) ? prev.resortServices : [];
+      const exists = selected.some((entry) => entry?.name === service?.name);
+      return {
+        ...prev,
+        resortServices: exists
+          ? selected.filter((entry) => entry?.name !== service?.name)
+          : [
+              ...selected,
+              {
+                name: service?.name || "",
+                description: service?.description || "",
+                cost: Number(service?.cost || 0),
+              },
+            ],
+      };
+    });
+  };
 
   return (
-    <div className="max-w-[210mm] min-h-[297mm] mx-auto mt-10 mb-28 bg-white shadow-2xl border border-slate-200 rounded-[18px] px-10 py-12 docx-sheet">
-      <div className="flex flex-col items-center text-center border-b border-slate-200 pb-6 gap-3">
-        {resortProfileImage ? (
-          <img
-            src={resortProfileImage}
-            alt={`${resortName || "Resort"} logo`}
-            className="h-16 w-16 rounded-full object-cover shadow-md border border-slate-200"
-          />
-        ) : (
-          <div className="h-16 w-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-black shadow-md">
-            {resortInitials || "R"}
-          </div>
-        )}
-        <div className="space-y-1">
+    <div className="max-w-5xl mx-auto space-y-6 mt-[8vh]">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{title}</h1>
           <p className="text-sm text-slate-500">{resortName || "Resort"}</p>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">
-            Confirmation booking form
-          </h1>
+        </div>
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-wider text-slate-400">Status</p>
+          <p className="font-bold text-blue-600">{formData.status || "Inquiry"}</p>
         </div>
       </div>
     
-      <div className="space-y-8">
+      <div className="mt-5 flex items-center justify-end gap-3">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Back
+          </Button>
+        )}
+        {!readOnly && (
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            Save Booking Form
+          </Button>
+        )}
+        {!readOnly && onDelete && (
+          <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+            const confirmed = window.confirm("Delete this booking form?");
+            if (!confirmed) return;
+            if (storageKey && typeof window !== "undefined") localStorage.removeItem(storageKey);
+            onDelete();
+          }}>
+            Delete Form
+          </Button>
+        )}
+      </div>
+
+
+      <form onSubmit={handleSubmit}>
+        <Card className="p-6 md:p-8 space-y-8">
           <section className="space-y-3">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Guest Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Guest Name"><div className="text-sm font-bold text-slate-700">{formData.guestName || "-"}</div></Field>
-              <Field label="Email"><div className="text-sm font-bold text-slate-700">{formData.email || "-"}</div></Field>
-              <Field label="Phone Number"><div className="text-sm font-bold text-slate-700">{formData.phoneNumber || "-"}</div></Field>
-              <Field label="Address"><div className="text-sm font-bold text-slate-700">{formData.address || "-"}</div></Field>
+              <Field label="Guest Name"><input disabled={readOnly} className={inputClass} value={formData.guestName} onChange={(e) => handleChange("guestName", e.target.value)} /></Field>
+              <Field label="Email"><input disabled={readOnly} className={inputClass} type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} /></Field>
+              <Field label="Phone Number"><input disabled={readOnly} className={inputClass} value={formData.phoneNumber} onChange={(e) => handleChange("phoneNumber", e.target.value)} /></Field>
+              <Field label="Address"><input disabled={readOnly} className={inputClass} value={formData.address} onChange={(e) => handleChange("address", e.target.value)} /></Field>
             </div>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Stay & Booking Details</h2>
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Stay Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Field label="Check-In Date">
-                <div className="text-sm font-bold text-slate-700">{formatLongDate(formData.checkInDate)}</div>
-              </Field>
-              <Field label="Check-In Time">
-                <div className="text-sm font-bold text-slate-700">{formData.checkInTime || "--:--"}</div>
-              </Field>
-              <Field label="Check-Out Date">
-                <div className="text-sm font-bold text-slate-700">{formatLongDate(formData.checkOutDate)}</div>
-              </Field>
-              <Field label="Check-Out Time">
-                <div className="text-sm font-bold text-slate-700">{formData.checkOutTime || "--:--"}</div>
-              </Field>
-              <Field label="Adults"><div className="text-sm font-bold text-slate-700">{Number(formData.adultCount || 0)}</div></Field>
-              <Field label="Children"><div className="text-sm font-bold text-slate-700">{Number(formData.childrenCount || 0)}</div></Field>
-              <Field label="Guests"><div className="text-sm font-bold text-slate-700">{Number(formData.guestCount || 0)}</div></Field>
-              <Field label="Sleeping Guests"><div className="text-sm font-bold text-slate-700">{Number(formData.sleepingGuests || 0)}</div></Field>
-              <Field label="Assigned Rooms">
-                <div className="text-sm font-bold text-slate-700">
-                  {formData.roomName || "-"}
-                </div>
-              </Field>
-              <Field label="Total Pax">
-                <div className="text-sm font-bold text-slate-700">
-                  {Number(totalPax || 0)}
-                </div>
-              </Field>
-              <Field label="No. of Rooms">
-                <div className="text-sm font-bold text-slate-700">
-                  {assignedRooms.length}
-                </div>
-              </Field>
+              <Field label="Check-In Date"><input disabled={readOnly} className={inputClass} type="date" value={toDateValue(formData.checkInDate)} onChange={(e) => handleChange("checkInDate", e.target.value)} /></Field>
+              <Field label="Check-In Time"><input disabled={readOnly} className={inputClass} type="time" value={formData.checkInTime || ""} onChange={(e) => handleChange("checkInTime", e.target.value)} /></Field>
+              <Field label="Check-Out Date"><input disabled={readOnly} className={inputClass} type="date" value={toDateValue(formData.checkOutDate)} onChange={(e) => handleChange("checkOutDate", e.target.value)} /></Field>
+              <Field label="Check-Out Time"><input disabled={readOnly} className={inputClass} type="time" value={formData.checkOutTime || ""} onChange={(e) => handleChange("checkOutTime", e.target.value)} /></Field>
             </div>
           </section>
+
           <section className="space-y-3">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Payment Summary</h2>
-            <div className="space-y-4 text-sm text-slate-700">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">Total Amount Due</p>
-                  <div className="flex items-center justify-between">
-                    <span>Resort rental</span>
-                    <span className="font-bold">PHP {resortRental.toLocaleString()}</span>
-                  </div>
-                  {(selectedServices || []).length > 0 ? (
-                    selectedServices.map((service, index) => (
-                      <div key={`${service?.name || "service"}-${index}`} className="flex items-center justify-between">
-                        <span>{service?.name || "Service"}</span>
-                        <span className="font-bold">PHP {Number(service?.cost || 0).toLocaleString()}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span>Services</span>
-                      <span className="font-bold">PHP 0</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between border-t border-slate-200 pt-2">
-                    <span className="font-bold">Total due</span>
-                    <span className="font-black">PHP {computedTotal.toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">Payment Details</p>
-                  <div className="flex items-center justify-between">
-                    <span>Downpayment</span>
-                    <span className="font-bold">PHP {Number(formData.downpayment || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Payment channel</span>
-                    <span className="font-bold">{formData.paymentMethod || "Pending"}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-bold">Total balance</span>
-                <span className="font-black">PHP {balanceDue.toLocaleString()}</span>
-              </div>
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Booking + Payment</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Field label="Adults"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.adultCount} onChange={(e) => handleNumberChange("adultCount", e.target.value)} /></Field>
+              <Field label="Children"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.childrenCount} onChange={(e) => handleNumberChange("childrenCount", e.target.value)} /></Field>
+              <Field label="Guests"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.guestCount} onChange={(e) => handleNumberChange("guestCount", e.target.value)} /></Field>
+              <Field label="Sleeping Guests"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.sleepingGuests} onChange={(e) => handleNumberChange("sleepingGuests", e.target.value)} /></Field>
+              <Field label="Room">
+                <select
+                  disabled={readOnly}
+                  className={inputClass}
+                  value={formData.roomName || ""}
+                  onChange={(e) => handleChange("roomName", e.target.value)}
+                >
+                  <option value="">Select room</option>
+                  {roomOptions.map((room) => (
+                    <option key={room.id} value={room.name}>
+                      {room.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Base Rate"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.baseRate} onChange={(e) => handleNumberChange("baseRate", e.target.value)} /></Field>
+              <Field label="Payment Method">
+                <select disabled={readOnly} className={inputClass} value={formData.paymentMethod || "Pending"} onChange={(e) => handleChange("paymentMethod", e.target.value)}>
+                  <option value="Pending">Pending</option>
+                  <option value="GCash">GCash</option>
+                  <option value="Bank">Bank</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </Field>
+              <Field label="Total Amount"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.totalAmount} onChange={(e) => handleNumberChange("totalAmount", e.target.value)} /></Field>
+              <Field label="Downpayment"><input disabled={readOnly} className={inputClass} type="number" min="0" value={formData.downpayment} onChange={(e) => handleNumberChange("downpayment", e.target.value)} /></Field>
+              <Field label="Status">
+                <select disabled={readOnly} className={inputClass} value={formData.status || "Inquiry"} onChange={(e) => handleChange("status", e.target.value)}>
+                  {STATUS_PHASES.map((phase) => (
+                    <option key={phase} value={phase}>{phase}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Payment Deadline">
+                <input
+                  disabled={readOnly}
+                  className={inputClass}
+                  type="datetime-local"
+                  value={toDateTimeLocalValue(formData.paymentDeadline)}
+                  onChange={(e) => handleChange("paymentDeadline", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                />
+              </Field>
+              <Field label="Confirmation Stub">
+                <input
+                  disabled
+                  className={`${inputClass} bg-slate-50`}
+                  value={formData.confirmationStub?.code || "Auto-generated on confirmation"}
+                />
+              </Field>
+              <Field label="Balance Due"><input disabled className={`${inputClass} bg-slate-50`} value={balanceDue} /></Field>
             </div>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Notes</h2>
-            <div className="text-sm text-slate-700 whitespace-pre-wrap">
-              {formData.notes || "No notes provided."}
-            </div>
+            <textarea
+              disabled={readOnly}
+              className={`${inputClass} min-h-24`}
+              value={formData.notes || ""}
+              onChange={(e) => handleChange("notes", e.target.value)}
+              placeholder="Special requests, payment remarks, or internal notes"
+            />
           </section>
 
-        </div>
-      <div className="fixed bottom-4 left-4 right-4 md:left-1/2 md:right-auto bg-blue-600 hover:bg-blue-700 md:-translate-x-1/2 z-50 flex items-center justify-between gap-3 bg-white/95 backdrop-blur border border-slate-200 shadow-xl rounded-2xl px-4 py-3 print:hidden">
-        <Button type="button" variant="" onClick={() => window.print()}>
-          Download
-        </Button>
-      </div>
-      <style jsx global>{`
-        @media print {
-          body {
-            background: #fff !important;
-          }
-          .docx-sheet {
-            margin: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            width: 210mm !important;
-            min-height: 297mm !important;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-        }
-      `}</style>
+          <section className="space-y-3">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">Add-ons</h2>
+            <div className="space-y-3">
+              {availableServices.length > 0 ? (
+                availableServices.map((service, index) => {
+                  const selected = (formData.resortServices || []).some((entry) => entry?.name === service?.name);
+                  return (
+                    <button
+                      key={`${service?.name || "service"}-${index}`}
+                      type="button"
+                      disabled={readOnly}
+                      onClick={() => toggleAddon(service)}
+                      className={`w-full text-left rounded-xl border px-4 py-4 transition-all disabled:opacity-60 ${
+                        selected
+                          ? "border-blue-300 bg-blue-50 ring-1 ring-blue-100"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-black text-slate-800">{service?.name || "Service"}</p>
+                          {service?.description ? (
+                            <p className="mt-1 text-xs text-slate-500">{service.description}</p>
+                          ) : null}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-blue-600">PHP {Number(service?.cost || 0).toLocaleString()}</p>
+                          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                            {selected ? "Selected" : "Tap to add"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-slate-400">This resort has no configured extra services yet.</p>
+              )}
+            </div>
+          </section>
+        </Card>
+      </form>
     </div>
   );
 }
@@ -203,13 +342,18 @@ function Field({ label, children }) {
   );
 }
 
-function formatLongDate(value) {
-  if (!value) return "-";
+function toDateValue(value) {
+  if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  return d.toISOString().slice(0, 10);
+}
+
+function toDateTimeLocalValue(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60 * 1000);
+  return local.toISOString().slice(0, 16);
 }
