@@ -125,6 +125,7 @@ export default function ResortDetailPage({ name }) {
     ? selectedRooms.map((room) => room.name).filter(Boolean).join(", ")
     : "";
   const hasAvailabilityConflict = unavailableRoomIds.length > 0;
+  const roomBlockingIds = [];
 
 const handleSubmitInquiry = async (submittedData) => {
     try {
@@ -154,8 +155,14 @@ const handleSubmitInquiry = async (submittedData) => {
       const pax = Number(submittedData.guestCount || submittedData.pax || adultCount + childrenCount || 0);
       const ticketAccessToken = generateTicketAccessToken();
       const ticketAccessExpiresAt = getTicketAccessExpiry(30);
+      const agentTicketAccessToken = submittedData.inquirerType === "agent" ? generateTicketAccessToken() : "";
+      const agentTicketAccessExpiresAt = submittedData.inquirerType === "agent" ? getTicketAccessExpiry(30) : "";
       const bookingForm = {
+        inquirerType: submittedData.inquirerType || "client",
+        agentName: submittedData.agentName || "",
         guestName: submittedData.guestName || "",
+        stayingGuestName: submittedData.stayingGuestName || "",
+        stayingGuestEmail: submittedData.stayingGuestEmail || "",
         email: submittedData.email || "",
         phoneNumber: submittedData.contactNumber || "",
         address: submittedData.address || submittedData.area || "",
@@ -181,6 +188,8 @@ const handleSubmitInquiry = async (submittedData) => {
         notes: submittedData.message || "",
         ticketAccessToken,
         ticketAccessExpiresAt,
+        agentTicketAccessToken,
+        agentTicketAccessExpiresAt,
       };
 
       const { error } = await supabase.from("bookings").upsert({
@@ -192,6 +201,7 @@ const handleSubmitInquiry = async (submittedData) => {
         check_in_time: submittedData.checkInTime || "14:00",
         check_out_time: submittedData.checkOutTime || "11:00",
         status: "Inquiry",
+        inquirer_type: submittedData.inquirerType === "agent",
         adult_count: adultCount,
         children_count: childrenCount,
         pax,
@@ -208,6 +218,7 @@ const handleSubmitInquiry = async (submittedData) => {
             resort_id: Number(resort.id),
             sender_role: "client",
             sender_name: submittedData.guestName || "Client",
+            visibility: submittedData.inquirerType === "agent",
             message: submittedData.message,
           });
         } catch (messageError) {
@@ -271,7 +282,7 @@ const handleSubmitInquiry = async (submittedData) => {
 
               <RoomsSection
                 className="px-0 pb-10"
-                unavailableRoomIds={unavailableRoomIds}
+                unavailableRoomIds={roomBlockingIds}
                 selectedRoomIds={selectedRoomIds}
                 onToggleRoomSelection={(roomId) =>
                   setSelectedRoomIds((prev) =>
@@ -301,16 +312,14 @@ const handleSubmitInquiry = async (submittedData) => {
                   </div>
                 ) : null}
                 <button
-                  className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
+                  className={`w-full rounded-2xl px-4 py-3.5 text-sm font-bold text-white transition ${
+                    hasAvailabilityConflict ? "bg-slate-300 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-800"
+                  }`}
                   onClick={() => {
-                    if (hasAvailabilityConflict) {
-                      toast({
-                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
-                        color: "amber",
-                      });
-                    }
+                    if (hasAvailabilityConflict) return;
                     setContactOpen(true);
                   }}
+                  disabled={hasAvailabilityConflict}
                 >
                   Contact Owner
                 </button>
@@ -352,7 +361,7 @@ const handleSubmitInquiry = async (submittedData) => {
           isOpen={contactOpen}
           onClose={() => setContactOpen(false)}
           resort={resort}
-          unavailableRoomIds={unavailableRoomIds}
+          unavailableRoomIds={roomBlockingIds}
           initialSelectedRoomIds={selectedRoomIds}
           onSubmitInquiry={handleSubmitInquiry}
         />
@@ -396,17 +405,15 @@ const handleSubmitInquiry = async (submittedData) => {
                   selectedRoomSummary={selectedRoomSummary}
                 />
                 <button
-                  className="mt-4 w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white"
+                  className={`mt-4 w-full rounded-2xl px-4 py-3.5 text-sm font-bold text-white ${
+                    hasAvailabilityConflict ? "bg-slate-300 cursor-not-allowed" : "bg-slate-900"
+                  }`}
                   onClick={() => {
+                    if (hasAvailabilityConflict) return;
                     setMobileFiltersOpen(false);
-                    if (hasAvailabilityConflict) {
-                      toast({
-                        message: "Selected dates have conflicts. You can still contact the owner to request alternatives.",
-                        color: "amber",
-                      });
-                    }
                     setContactOpen(true);
                   }}
+                  disabled={hasAvailabilityConflict}
                 >
                   Contact Owner
                 </button>

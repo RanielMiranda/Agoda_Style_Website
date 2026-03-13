@@ -60,7 +60,8 @@ alter table public.bookings
   add column if not exists children_count integer not null default 0,
   add column if not exists pax integer not null default 0,
   add column if not exists sleeping_guests integer not null default 0,
-  add column if not exists room_count integer not null default 1;
+  add column if not exists room_count integer not null default 1,
+  add column if not exists inquirer_type boolean not null default false;
 
 create table if not exists public.booking_transactions (
   id bigint generated always as identity primary key,
@@ -115,7 +116,8 @@ set
     pax
   ),
   sleeping_guests = coalesce((booking_form->>'sleepingGuests')::int, sleeping_guests),
-  room_count = coalesce((booking_form->>'roomCount')::int, room_count)
+  room_count = coalesce((booking_form->>'roomCount')::int, room_count),
+  inquirer_type = coalesce((booking_form->>'inquirerType') = 'agent', inquirer_type)
 where booking_form <> '{}'::jsonb;
 
 -- ==========================================
@@ -127,9 +129,13 @@ create table if not exists public.ticket_messages (
   resort_id bigint references public.resorts(id) on delete cascade,
   sender_role text not null check (sender_role in ('client', 'owner', 'admin')),
   sender_name text,
+  visibility boolean,
   message text not null,
   created_at timestamptz not null default now()
 );
+
+alter table public.ticket_messages
+  add column if not exists visibility boolean;
 
 create table if not exists public.owner_admin_messages (
   id bigint generated always as identity primary key,
@@ -393,6 +399,7 @@ create or replace function public.send_ticket_message_safe(
   p_sender_role text,
   p_sender_name text,
   p_message text,
+  p_visibility boolean default null,
   p_idempotency_key text default null
 )
 returns public.ticket_messages
@@ -425,6 +432,7 @@ begin
     resort_id,
     sender_role,
     sender_name,
+    visibility,
     message,
     idempotency_key
   )
@@ -433,6 +441,7 @@ begin
     p_resort_id,
     p_sender_role,
     p_sender_name,
+    p_visibility,
     p_message,
     p_idempotency_key
   )
@@ -442,7 +451,7 @@ begin
 end;
 $$;
 
-grant execute on function public.send_ticket_message_safe(text, bigint, text, text, text, text) to anon, authenticated, service_role;
+grant execute on function public.send_ticket_message_safe(text, bigint, text, text, text, boolean, text) to anon, authenticated, service_role;
 
 -- ==========================================
 -- Phase 9: Lean Email Usage Tracking

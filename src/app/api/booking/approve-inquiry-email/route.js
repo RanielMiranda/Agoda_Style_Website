@@ -78,7 +78,10 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, skipped: true, reason: "Already sent" }, { status: 200 });
   }
 
-  const recipientEmail = booking.booking_form?.email || "";
+  const isAgent = String(booking.booking_form?.inquirerType || "").toLowerCase() === "agent";
+  const recipientEmail = isAgent
+    ? (booking.booking_form?.email || "")
+    : (booking.booking_form?.stayingGuestEmail || booking.booking_form?.email || "");
   if (!recipientEmail) {
     return NextResponse.json({ ok: false, error: "Booking has no client email" }, { status: 400 });
   }
@@ -89,8 +92,11 @@ export async function POST(request) {
     .eq("id", Number(booking.resort_id))
     .maybeSingle();
 
-  const ticketToken = booking.booking_form?.ticketAccessToken;
-  const ticketUrl = `${buildBaseUrl(request)}/ticket/${booking.id}${ticketToken ? `?token=${encodeURIComponent(ticketToken)}` : ""}`;
+  const clientToken = booking.booking_form?.ticketAccessToken;
+  const agentToken = booking.booking_form?.agentTicketAccessToken;
+  const ticketToken = isAgent ? agentToken : clientToken;
+  const baseUrl = buildBaseUrl(request);
+  const ticketUrl = `${baseUrl}/ticket/${booking.id}${ticketToken ? `?token=${encodeURIComponent(ticketToken)}` : ""}`;
   const payload = {
     from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
     to: [recipientEmail],
@@ -99,7 +105,7 @@ export async function POST(request) {
       guestName: booking.booking_form?.guestName,
       resortName: resort?.name,
       ticketUrl,
-      expiresAt: booking.booking_form?.ticketAccessExpiresAt,
+      expiresAt: isAgent ? booking.booking_form?.agentTicketAccessExpiresAt : booking.booking_form?.ticketAccessExpiresAt,
     }),
   };
 

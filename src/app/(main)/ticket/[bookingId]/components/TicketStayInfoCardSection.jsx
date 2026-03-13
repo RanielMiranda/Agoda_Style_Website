@@ -16,7 +16,9 @@ export function TicketStayInfoCardSection({
   approvedByName,
   assignedRoomNames,
   entryCode,
+  viewerRole,
 }) {
+  const displayGuestName = form?.stayingGuestName || form?.guestName || "—";
   return (
     <Card
       id={id}
@@ -26,7 +28,7 @@ export function TicketStayInfoCardSection({
         Stay Information
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <TicketRow label="Guest Name" value={form?.guestName} />
+        <TicketRow label="Guest Name" value={displayGuestName} />
         <TicketRow label="Status" value={booking?.status || "Inquiry"} isStatus />
         <TicketRow label="Pax" value={form?.guestCount ?? 0} />
         <TicketRow label="Adults" value={form?.adultCount ?? 0} />
@@ -57,10 +59,11 @@ export function TicketStayInfoCardSection({
 /**
  * Builds the same rows shown in the stay card, for use in print/download HTML (stay info only).
  */
-export function buildStayInfoRows({ form, booking, resort, approvedByName, assignedRoomNames, entryCode }) {
+export function buildStayInfoRows({ form, booking, resort, approvedByName, assignedRoomNames, entryCode, viewerRole }) {
+  const displayGuestName = form?.stayingGuestName || form?.guestName || "—";
   return [
     ["Resort", resort?.name || "—"],
-    ["Guest Name", form?.guestName || "—"],
+    ["Guest Name", displayGuestName],
     ["Status", booking?.status || "Inquiry"],
     ["Approved By", approvedByName || "—"],
     ["Pax", String(form?.guestCount ?? 0)],

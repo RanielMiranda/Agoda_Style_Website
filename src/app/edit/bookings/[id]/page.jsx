@@ -21,7 +21,7 @@ import RentalManager from "./components/RentalManager";
 import LiveConcernsPanel from "./components/LiveConcernsPanel";
 import AuditArchivePanel from "./components/AuditArchivePanel";
 import BookingSummaryCards from "./components/BookingSummaryCards";
-
+import Toast from "@/components/ui/toast/Toast"
 export default function BookingManagementPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -397,6 +397,7 @@ export default function BookingManagementPage() {
           )}
         </main>
       </div>
+      <Toast/>
     </div>
   );
 }

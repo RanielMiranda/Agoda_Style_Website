@@ -54,6 +54,10 @@ export function getNextRange({ date, startDate, endDate, activeDropdown }) {
   }
 
   if (isStart) {
+    if (activeDropdown === "end") {
+      // Allow same-day check-in/out.
+      return { start: startDate, end: startDate };
+    }
     if (endDate) {
       return { start: endDate, end: null };
     }

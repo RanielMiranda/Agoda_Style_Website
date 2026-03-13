@@ -43,6 +43,8 @@ export default function BookingModernEditor({
   issues,
   ownerReply,
   setOwnerReply,
+  ownerReplyTarget,
+  setOwnerReplyTarget,
   onSendReply,
   onRefreshMessages,
   refreshingMessages = false,
@@ -56,6 +58,7 @@ export default function BookingModernEditor({
   transactions = [],
   resortPaymentImageUrl,
   onEditingChange,
+  proofOverrideForm,
 }) {
   const { toast, persistentToast } = useToast();
   const { activeAccount } = useAccounts();
@@ -174,15 +177,31 @@ export default function BookingModernEditor({
     if (!isEditing) setDraft(next);
   }, [booking, inlineDraftKey, isEditing]);
 
+  const proofSource = proofOverrideForm || draft;
+  const paymentReviewPending =
+    (proofOverrideForm?.paymentPendingApproval ?? draft.paymentPendingApproval) === true;
+
   useEffect(() => {
-    setProofPreviewUrls(Array.isArray(draft.paymentProofUrls) ? draft.paymentProofUrls : []);
-  }, [draft.paymentProofUrls]);
+    if (!proofOverrideForm || isEditing) return;
+    setDraft((prev) => ({
+      ...prev,
+      paymentPendingApproval: proofOverrideForm.paymentPendingApproval ?? prev.paymentPendingApproval,
+      pendingDownpayment: proofOverrideForm.pendingDownpayment ?? prev.pendingDownpayment,
+      pendingPaymentMethod: proofOverrideForm.pendingPaymentMethod ?? prev.pendingPaymentMethod,
+      paymentProofUrl: proofOverrideForm.paymentProofUrl ?? prev.paymentProofUrl,
+      paymentProofUrls: proofOverrideForm.paymentProofUrls ?? prev.paymentProofUrls,
+      paymentSubmittedAt: proofOverrideForm.paymentSubmittedAt ?? prev.paymentSubmittedAt,
+    }));
+  }, [proofOverrideForm, isEditing]);
+  useEffect(() => {
+    setProofPreviewUrls(Array.isArray(proofSource.paymentProofUrls) ? proofSource.paymentProofUrls : []);
+  }, [proofSource.paymentProofUrls]);
 
   const resolveSignedProofUrls = async () => {
-    if (!Array.isArray(draft.paymentProofUrls) || draft.paymentProofUrls.length === 0) return;
+    if (!Array.isArray(proofSource.paymentProofUrls) || proofSource.paymentProofUrls.length === 0) return;
     try {
       const signedUrls = await Promise.all(
-        draft.paymentProofUrls.map(async (proofUrl) => (await createSignedProofUrl?.(proofUrl, 60 * 60)) || proofUrl)
+        proofSource.paymentProofUrls.map(async (proofUrl) => (await createSignedProofUrl?.(proofUrl, 60 * 60)) || proofUrl)
       );
       setProofPreviewUrls(signedUrls.filter(Boolean));
     } catch {
@@ -205,7 +224,7 @@ export default function BookingModernEditor({
     !!draft.checkOutDate &&
     new Date(draft.checkOutDate).getTime() < new Date(draft.checkInDate).getTime();
   const normalizedStatus = status.toLowerCase();
-  const hasProof = Array.isArray(draft.paymentProofUrls) && draft.paymentProofUrls.length > 0;
+  const hasProof = Array.isArray(proofSource.paymentProofUrls) && proofSource.paymentProofUrls.length > 0;
   const effectivePaid = Number(draft.downpayment || 0) + (status === "Confirmed" ? Number(draft.pendingDownpayment || 0) : 0);
   const balance = Math.max(0, Number(draft.totalAmount || 0) - effectivePaid);
   const paymentDeadlineDate = draft.paymentDeadline ? new Date(draft.paymentDeadline) : null;
@@ -279,9 +298,12 @@ export default function BookingModernEditor({
       resortName,
       persist,
       onStayConfirmed: (message) => {
-        persistentToast?.({
-          message: message || "Caretaker notification prepared for confirmed stay.",
+        const guestLabel = draft.stayingGuestName || draft.guestName || "Guest";
+        const detail = message ? ` ${message}` : "";
+        toast?.({
+          message: `Booking for "${guestLabel}" has been confirmed`,
           color: "emerald",
+          duration: 4000,
         });
       },
     });
@@ -420,14 +442,13 @@ export default function BookingModernEditor({
               availableServices={resortExtraServices}
             />
 
-            <StatusAuditCardSection dbAudits={dbAudits} bookingFormAudits={bookingFormAudits} transactions={transactions} />
           </div>
 
           <div className="space-y-6">
             <ProofCardSection
               hasProof={hasProof}
               proofPreviewUrls={proofPreviewUrls}
-              draft={draft}
+              draft={proofSource}
               resolveSignedProofUrl={resolveSignedProofUrls}
             />
 
@@ -443,7 +464,7 @@ export default function BookingModernEditor({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <AssignRoomsCardSection
             resortRooms={resortRooms}
             assignedRoomIds={assignedRoomIds}
@@ -451,23 +472,28 @@ export default function BookingModernEditor({
             isRoomConflicting={isRoomConflicting}
             isEditing={isEditing}
           />
-
-          <MessagesInboxCardSection
-            issues={issues}
-            onResolveIssue={onResolveIssue}
-            messages={messages}
-            onRefreshMessages={onRefreshMessages}
-            refreshingMessages={refreshingMessages}
-            ownerReply={ownerReply}
-            setOwnerReply={setOwnerReply}
-            onSendReply={onSendReply}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MessagesInboxCardSection
+              issues={issues}
+              onResolveIssue={onResolveIssue}
+              messages={messages}
+              onRefreshMessages={onRefreshMessages}
+              refreshingMessages={refreshingMessages}
+              ownerReply={ownerReply}
+              setOwnerReply={setOwnerReply}
+              ownerReplyTarget={ownerReplyTarget}
+              setOwnerReplyTarget={setOwnerReplyTarget}
+              onSendReply={onSendReply}
+              inquirerType={draft.inquirerType}
+            />
+            <StatusAuditCardSection dbAudits={dbAudits} bookingFormAudits={bookingFormAudits} transactions={transactions} />
+          </div>
         </div>
       </div>
 
       <BookingEditorActionBar
         showDecisionActions={showDecisionActions}
-        showPaymentReviewActions={draft.paymentPendingApproval}
+        showPaymentReviewActions={paymentReviewPending}
         checkoutPaymentRequested={!!draft.checkoutPaymentRequestedAt}
         checkoutPaymentApproved={
           normalizedStatus === "pending checkout"
