@@ -188,6 +188,22 @@ export default function ContactOwnerModal({
     setFormData((prev) => ({ ...prev, stayingGuestName: nextName }));
   }, [formData.guestName, formData.inquirerType, formData.stayingGuestName]);
 
+  const autoGuestEmailRef = useRef("");
+  useEffect(() => {
+    if (formData.inquirerType !== "client") return;
+    const shouldSync =
+      !formData.stayingGuestEmail ||
+      formData.stayingGuestEmail === autoGuestEmailRef.current;
+    if (!shouldSync) return;
+    const nextEmail = formData.email || "";
+    if (formData.stayingGuestEmail === nextEmail) {
+      autoGuestEmailRef.current = nextEmail;
+      return;
+    }
+    autoGuestEmailRef.current = nextEmail;
+    setFormData((prev) => ({ ...prev, stayingGuestEmail: nextEmail }));
+  }, [formData.email, formData.inquirerType, formData.stayingGuestEmail]);
+
   const autoAgentContactRef = useRef("");
   useEffect(() => {
     if (formData.inquirerType !== "agent") return;
@@ -383,16 +399,18 @@ export default function ContactOwnerModal({
 
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-slate-400 ml-1">Guest Name</label>
-                  <input name="stayingGuestName" value={formData.stayingGuestName ?? ""} onChange={handleChange} type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="Guest full name" />
+              {formData.inquirerType !== "client" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-black uppercase text-slate-400 ml-1">Guest Name</label>
+                    <input name="stayingGuestName" value={formData.stayingGuestName ?? ""} onChange={handleChange} type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="Guest full name" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-black uppercase text-slate-400 ml-1">Guest Email</label>
+                    <input name="stayingGuestEmail" value={formData.stayingGuestEmail ?? ""} onChange={handleChange} type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="guest@example.com" />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-slate-400 ml-1">Guest Email</label>
-                  <input name="stayingGuestEmail" value={formData.stayingGuestEmail ?? ""} onChange={handleChange} type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="guest@example.com" />
-                </div>
-              </div>
+              ) : null}
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-black uppercase text-slate-400 ml-1">Adults</label>
