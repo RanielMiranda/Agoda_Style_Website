@@ -56,6 +56,7 @@ export default function BookingModernEditor({
   transactions = [],
   resortPaymentImageUrl,
   onEditingChange,
+  proofOverrideForm,
 }) {
   const { toast, persistentToast } = useToast();
   const { activeAccount } = useAccounts();
@@ -174,15 +175,16 @@ export default function BookingModernEditor({
     if (!isEditing) setDraft(next);
   }, [booking, inlineDraftKey, isEditing]);
 
+  const proofSource = proofOverrideForm || draft;
   useEffect(() => {
-    setProofPreviewUrls(Array.isArray(draft.paymentProofUrls) ? draft.paymentProofUrls : []);
-  }, [draft.paymentProofUrls]);
+    setProofPreviewUrls(Array.isArray(proofSource.paymentProofUrls) ? proofSource.paymentProofUrls : []);
+  }, [proofSource.paymentProofUrls]);
 
   const resolveSignedProofUrls = async () => {
-    if (!Array.isArray(draft.paymentProofUrls) || draft.paymentProofUrls.length === 0) return;
+    if (!Array.isArray(proofSource.paymentProofUrls) || proofSource.paymentProofUrls.length === 0) return;
     try {
       const signedUrls = await Promise.all(
-        draft.paymentProofUrls.map(async (proofUrl) => (await createSignedProofUrl?.(proofUrl, 60 * 60)) || proofUrl)
+        proofSource.paymentProofUrls.map(async (proofUrl) => (await createSignedProofUrl?.(proofUrl, 60 * 60)) || proofUrl)
       );
       setProofPreviewUrls(signedUrls.filter(Boolean));
     } catch {
@@ -205,7 +207,7 @@ export default function BookingModernEditor({
     !!draft.checkOutDate &&
     new Date(draft.checkOutDate).getTime() < new Date(draft.checkInDate).getTime();
   const normalizedStatus = status.toLowerCase();
-  const hasProof = Array.isArray(draft.paymentProofUrls) && draft.paymentProofUrls.length > 0;
+  const hasProof = Array.isArray(proofSource.paymentProofUrls) && proofSource.paymentProofUrls.length > 0;
   const effectivePaid = Number(draft.downpayment || 0) + (status === "Confirmed" ? Number(draft.pendingDownpayment || 0) : 0);
   const balance = Math.max(0, Number(draft.totalAmount || 0) - effectivePaid);
   const paymentDeadlineDate = draft.paymentDeadline ? new Date(draft.paymentDeadline) : null;
@@ -427,7 +429,7 @@ export default function BookingModernEditor({
             <ProofCardSection
               hasProof={hasProof}
               proofPreviewUrls={proofPreviewUrls}
-              draft={draft}
+              draft={proofSource}
               resolveSignedProofUrl={resolveSignedProofUrls}
             />
 

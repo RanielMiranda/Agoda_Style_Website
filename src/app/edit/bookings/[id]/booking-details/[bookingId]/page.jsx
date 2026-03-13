@@ -18,13 +18,14 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { resort, loadResort, setResort, loading } = useResort();
-  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction, refreshBookings } = useBookings();
+  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction } = useBookings();
   const { loadBookingSupport, updateConcernStatus, sendTicketMessage, isMissingSupportTableError } = useSupport();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
   const [ownerReply, setOwnerReply] = useState("");
   const [statusAudits, setStatusAudits] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [proofOverrideForm, setProofOverrideForm] = useState(null);
   const [refreshingMessages, setRefreshingMessages] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -80,6 +81,7 @@ export default function BookingDetailsPage() {
     if (!booking?.id) return;
     loadSupportData(booking.id);
     loadStatusAudits(booking.id);
+    loadProofData(booking.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [booking?.id]);
 
@@ -106,8 +108,7 @@ export default function BookingDetailsPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "bookings", filter: `id=eq.${booking.id}` },
         () => {
-          refreshBookings();
-          loadStatusAudits(booking.id);
+          loadProofData(booking.id);
         }
       )
       .on(
@@ -125,17 +126,17 @@ export default function BookingDetailsPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [booking?.id, refreshBookings]);
+  }, [booking?.id]);
 
   useEffect(() => {
     if (!booking?.id || isEditing) return undefined;
     const interval = setInterval(() => {
       loadSupportData(booking.id);
       loadStatusAudits(booking.id);
-      refreshBookings();
+      loadProofData(booking.id);
     }, 15000);
     return () => clearInterval(interval);
-  }, [booking?.id, isEditing, refreshBookings]);
+  }, [booking?.id, isEditing]);
 
   const loadSupportData = async (activeBookingId) => {
     setRefreshingMessages(true);
@@ -192,6 +193,20 @@ export default function BookingDetailsPage() {
       setTransactions(transactionRows || []);
     } catch {
       setTransactions([]);
+    }
+  };
+
+  const loadProofData = async (activeBookingId) => {
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("booking_form")
+        .eq("id", activeBookingId)
+        .maybeSingle();
+      if (error) throw error;
+      setProofOverrideForm(data?.booking_form || null);
+    } catch {
+      setProofOverrideForm(null);
     }
   };
 
@@ -275,7 +290,7 @@ export default function BookingDetailsPage() {
   };
 
   return (
-    <div>
+    <div className = "mt-10">
     <BookingModernEditor
       key={booking.id}
       booking={booking}
@@ -317,6 +332,7 @@ export default function BookingDetailsPage() {
       transactions={transactions}
       resortPaymentImageUrl={currentResort?.payment_image_url}
       onEditingChange={setIsEditing}
+      proofOverrideForm={proofOverrideForm}
     />
     <Toast />
     <PersistentToast />
