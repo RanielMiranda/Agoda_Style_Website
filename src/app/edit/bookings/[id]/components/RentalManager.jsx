@@ -22,15 +22,21 @@
         const form = booking.bookingForm || {};
         const roomId = booking.roomIds?.[0];
         const roomName = resort?.rooms?.find((r) => r.id === roomId)?.name || form.roomName || "Room";
+        const inquirerType = (booking.inquirerType || form.inquirerType || "client").toString().toLowerCase();
+        const displayName =
+          inquirerType === "agent"
+            ? (form.agentName || form.guestName || "Agent")
+            : (form.guestName || "Client");
         return {
           bookingId: booking.id,
-          guestName: form.guestName || "Guest",
+          guestName: displayName,
           room: roomName,
           email: form.email || "No email",
           status: form.status || booking.status || "Inquiry",
           normalizedStatus: (form.status || booking.status || "Inquiry").toLowerCase(),
           checkInDate: booking.startDate || form.checkInDate || "",
           checkOutDate: booking.endDate || form.checkOutDate || "",
+          inquirerType,
         };
       });
     }, [bookings, resort?.rooms]);
@@ -87,34 +93,47 @@
             grouped[activeTab].map((item) => (
               <div
                 key={item.bookingId}
-                className="group flex flex-col lg:flex-row lg:items-center gap-3 p-3 rounded-xl border border-slate-100 bg-white hover:border-blue-200 transition-all"
+                className="group flex flex-col lg:flex-row lg:items-stretch gap-3 p-4 rounded-2xl border border-slate-200 bg-white/95 shadow-sm hover:shadow-md hover:border-slate-300 transition-all"
               >
-                <div className="flex items-center gap-3 min-w-0 lg:flex-1">
-                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shrink-0">
+                <div className="flex items-start gap-3 min-w-0 lg:flex-1">
+                  <div className="h-11 w-11 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shrink-0">
                     <User size={16} />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 uppercase tracking-tight">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-blue-600/10 text-blue-700 uppercase tracking-tight">
                         {item.status}
-                      </span>                      
-                      <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-md text-slate-500 uppercase tracking-tight">{item.room}</span>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                        {item.checkInDate} <ChevronRight size={10}/> {item.checkOutDate}
                       </span>
-                      <span className="text-[11px] text-slate-400 truncate">{item.email}</span>
+                      <span className="text-[10px] font-black px-2 py-0.5 bg-slate-100 rounded-md text-slate-600 uppercase tracking-tight">
+                        {item.room}
+                      </span>
+                      <span className="text-[11px] font-black text-slate-500 uppercase inline-flex items-center gap-1">
+                        {item.checkInDate} <ChevronRight size={10} /> {item.checkOutDate}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h3 className="text-sm font-black text-slate-900 truncate">{item.guestName}</h3>
+                      <span className="text-[11px] text-slate-500 truncate">{item.email}</span>
                     </div>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 justify-end lg:shrink-0">
-                  <Button 
-                    variant="ghost" 
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Type</span>
+                    <span className={`text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${
+                      item.inquirerType === "agent"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-emerald-100 text-emerald-700"
+                    }`}>
+                      {item.inquirerType === "agent" ? "Agent" : "Client"}
+                    </span>
+                  </div>
+                <div className="flex items-center justify-between lg:flex-col lg:justify-center lg:items-center lg:w-40 gap-3 lg:border-l lg:border-slate-100 lg:pl-4">
+                  <Button
+                    variant="ghost"
                     className="items-center justify-center rounded-xl font-bold text-xs h-9 hover:bg-slate-50 flex gap-2"
                     onClick={() => onOpenDetails(item, item.bookingId)}
                   >
-                    Manage <ArrowUpRight size={14}/>
+                    Manage <ArrowUpRight size={14} />
                   </Button>
                 </div>
               </div>

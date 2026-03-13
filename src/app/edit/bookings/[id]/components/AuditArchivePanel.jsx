@@ -65,46 +65,65 @@ export default function AuditArchivePanel({
               : "border-emerald-200 bg-emerald-50/60";
             const badgeTone = isCancelled ? "bg-rose-600" : "bg-emerald-600";
             const badgeLabel = isCancelled ? "Cancelled" : "Checked Out";
+            const inquirerType = (item.inquirerType || item.bookingForm?.inquirerType || "client").toString().toLowerCase();
+            const roomLabel = item.bookingForm?.roomName || "Room";
+            const checkIn = item.startDate || item.bookingForm?.checkInDate || "-";
+            const checkOut = item.endDate || item.bookingForm?.checkOutDate || "-";
+            const guestName = item.bookingForm?.guestName || "Guest";
+            const guestEmail = item.bookingForm?.email || "No email";
 
             return (
               <div
                 key={`checkedout-${item.id}`}
-                className={`p-3 rounded-xl border ${cardTone}`}
+                className={`p-4 rounded-2xl border ${cardTone}`}
               >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-                <div className="min-w-0 lg:flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-tight text-white inline-flex items-center gap-1 ${badgeTone}`}>
-                      <ArrowRightLeft size={10} />
-                      {badgeLabel}
-                    </span>
-                    <span className="text-sm text-slate-700 leading-snug break-words">
-                      Ticket: <span className="font-black text-slate-900">#{item.id}</span>
-                    </span>
-                    <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
-                      <User2 size={11} />
-                      {item.bookingForm?.guestName || "Guest"}
-                    </span>
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-3">
+                  <div className="min-w-0 lg:flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-tight text-white inline-flex items-center gap-1 ${badgeTone}`}>
+                        <ArrowRightLeft size={10} />
+                        {badgeLabel}
+                      </span>
+                      <span className="text-[10px] font-black px-2 py-0.5 bg-white/80 rounded-md text-slate-600 uppercase tracking-tight">
+                        {roomLabel}
+                      </span>
+                      <span className="text-[11px] font-black text-slate-600 uppercase inline-flex items-center gap-1">
+                        {checkIn} <ArrowRightLeft size={10} /> {checkOut}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-sm font-black text-slate-900">{guestName}</span>
+                      <span className="text-[11px] text-slate-600">{guestEmail}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 flex items-center gap-1">
                       <Clock3 size={10} /> {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "-"}
-                    </span>
-                  </div>
-                </div>
-                {hasUnresolvedIssue ? (
-                  <div className="lg:flex-1 flex items-center justify-center">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-rose-600">
-                      Unresolved issue
                     </div>
                   </div>
-                ) : (
-                  <div className="lg:flex-1" />
-                )}
-                <div className="flex items-center gap-2 flex-wrap lg:justify-end">
-                  <Button
-                    variant="outline"
-                    className="h-8 px-3 text-xs font-bold"
-                    onClick={() => onOpenBooking?.(item.id)}
-                  >
+
+                  <div className="flex items-center justify-between lg:flex-col lg:justify-center lg:items-center lg:w-40 gap-3 lg:border-l lg:border-white/60 lg:pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Type</span>
+                      <span className={`text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${
+                        inquirerType === "agent"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-emerald-100 text-emerald-700"
+                      }`}>
+                        {inquirerType === "agent" ? "Agent" : "Client"}
+                      </span>
+                    </div>
+                    {hasUnresolvedIssue ? (
+                      <div className="text-[10px] font-black uppercase tracking-widest text-rose-600">
+                        Unresolved issue
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap lg:justify-end">
+                    <Button
+                      variant="outline"
+                      className="h-8 px-3 text-xs font-bold"
+                      onClick={() => onOpenBooking?.(item.id)}
+                    >
                       Open Booking
                     </Button>
                     <Button
@@ -127,27 +146,44 @@ export default function AuditArchivePanel({
           {declinedBookings.map((item) => (
             <div
               key={`declined-${item.id}`}
-              className="p-3 rounded-xl border border-rose-200 bg-rose-50/60"
+              className="p-4 rounded-2xl border border-rose-200 bg-rose-50/60"
             >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-                <div className="min-w-0 lg:flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-stretch gap-3">
+                <div className="min-w-0 lg:flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-tight bg-rose-600 text-white inline-flex items-center gap-1">
                       <ArrowRightLeft size={10} />
                       Declined Inquiry
                     </span>
-                    <span className="text-sm text-slate-700 leading-snug break-words">
-                      Ticket: <span className="font-black text-slate-900">#{item.id}</span>
+                    <span className="text-[10px] font-black px-2 py-0.5 bg-white/80 rounded-md text-slate-600 uppercase tracking-tight">
+                      {item.bookingForm?.roomName || "Room"}
                     </span>
-                    <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
-                      <User2 size={11} />
-                      {item.bookingForm?.guestName || "Guest"}
+                    <span className="text-[11px] font-black text-slate-600 uppercase inline-flex items-center gap-1">
+                      {item.startDate || item.bookingForm?.checkInDate || "-"} <ArrowRightLeft size={10} /> {item.endDate || item.bookingForm?.checkOutDate || "-"}
                     </span>
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                      <Clock3 size={10} /> {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "-"}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-sm font-black text-slate-900">{item.bookingForm?.guestName || "Guest"}</span>
+                    <span className="text-[11px] text-slate-600">{item.bookingForm?.email || "No email"}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                    <Clock3 size={10} /> {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "-"}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between lg:flex-col lg:justify-center lg:items-center lg:w-40 gap-3 lg:border-l lg:border-white/60 lg:pl-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Type</span>
+                    <span className={`text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${
+                      (item.inquirerType || item.bookingForm?.inquirerType || "client").toString().toLowerCase() === "agent"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-emerald-100 text-emerald-700"
+                    }`}>
+                      {(item.inquirerType || item.bookingForm?.inquirerType || "client").toString().toLowerCase() === "agent" ? "Agent" : "Client"}
                     </span>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2 flex-wrap lg:justify-end">
                   <Button
                     variant="outline"

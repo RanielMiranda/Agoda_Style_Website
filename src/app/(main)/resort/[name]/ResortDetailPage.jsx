@@ -155,7 +155,10 @@ const handleSubmitInquiry = async (submittedData) => {
       const ticketAccessToken = generateTicketAccessToken();
       const ticketAccessExpiresAt = getTicketAccessExpiry(30);
       const bookingForm = {
+        inquirerType: submittedData.inquirerType || "client",
+        agentName: submittedData.agentName || "",
         guestName: submittedData.guestName || "",
+        stayingGuestName: submittedData.stayingGuestName || "",
         email: submittedData.email || "",
         phoneNumber: submittedData.contactNumber || "",
         address: submittedData.address || submittedData.area || "",
@@ -192,6 +195,7 @@ const handleSubmitInquiry = async (submittedData) => {
         check_in_time: submittedData.checkInTime || "14:00",
         check_out_time: submittedData.checkOutTime || "11:00",
         status: "Inquiry",
+        inquirer_type: submittedData.inquirerType || "client",
         adult_count: adultCount,
         children_count: childrenCount,
         pax,
