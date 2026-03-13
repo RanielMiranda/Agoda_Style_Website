@@ -49,16 +49,26 @@ export default function StayCardSection({
     }
     const start = rangeStart;
     const end = rangeEnd;
+    if (!start && end && date > end) {
+      setField("checkInDate", toIsoDate(date));
+      setField("checkOutDate", toIsoDate(date));
+      return;
+    }
+    if (start && end && date > end) {
+      setField("checkInDate", toIsoDate(date));
+      setField("checkOutDate", toIsoDate(date));
+      return;
+    }
     if (start && end) {
       setField("checkInDate", toIsoDate(date));
-      setField("checkOutDate", "");
+      setField("checkOutDate", toIsoDate(end));
       return;
     }
     if (!start || date <= start) {
       const nextStart = date;
       const nextEnd = start && start >= date ? start : end;
       setField("checkInDate", toIsoDate(nextStart));
-      setField("checkOutDate", toIsoDate(nextEnd));
+      setField("checkOutDate", toIsoDate(nextEnd || nextStart));
       return;
     }
     setField("checkInDate", toIsoDate(start));

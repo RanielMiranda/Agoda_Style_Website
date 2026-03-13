@@ -136,16 +136,6 @@ export default function BookingEditorActionBar({
           ) : null
         )
       ) : null}
-      {showDecisionActions && isDeclined ? (
-        <Button
-          className="rounded-full w-full md:w-auto flex items-center justify-center px-6 md:px-10 h-11 md:h-12 font-bold shadow-lg transition-all flex gap-2 bg-rose-600 hover:bg-rose-700 text-white"
-          onClick={() => runWithConfirmation("Are you sure you want to delete this ticket?", onDeleteTicket)}
-          disabled={actionBusy}
-        >
-          <Trash2 size={18} />
-          Delete Ticket
-        </Button>
-      ) : null}
       {!isEditing ? (
         <Button
           onClick={() => {

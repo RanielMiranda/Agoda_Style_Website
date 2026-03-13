@@ -178,6 +178,21 @@ export default function BookingModernEditor({
   }, [booking, inlineDraftKey, isEditing]);
 
   const proofSource = proofOverrideForm || draft;
+  const paymentReviewPending =
+    (proofOverrideForm?.paymentPendingApproval ?? draft.paymentPendingApproval) === true;
+
+  useEffect(() => {
+    if (!proofOverrideForm || isEditing) return;
+    setDraft((prev) => ({
+      ...prev,
+      paymentPendingApproval: proofOverrideForm.paymentPendingApproval ?? prev.paymentPendingApproval,
+      pendingDownpayment: proofOverrideForm.pendingDownpayment ?? prev.pendingDownpayment,
+      pendingPaymentMethod: proofOverrideForm.pendingPaymentMethod ?? prev.pendingPaymentMethod,
+      paymentProofUrl: proofOverrideForm.paymentProofUrl ?? prev.paymentProofUrl,
+      paymentProofUrls: proofOverrideForm.paymentProofUrls ?? prev.paymentProofUrls,
+      paymentSubmittedAt: proofOverrideForm.paymentSubmittedAt ?? prev.paymentSubmittedAt,
+    }));
+  }, [proofOverrideForm, isEditing]);
   useEffect(() => {
     setProofPreviewUrls(Array.isArray(proofSource.paymentProofUrls) ? proofSource.paymentProofUrls : []);
   }, [proofSource.paymentProofUrls]);
@@ -283,9 +298,12 @@ export default function BookingModernEditor({
       resortName,
       persist,
       onStayConfirmed: (message) => {
-        persistentToast?.({
-          message: message || "Caretaker notification prepared for confirmed stay.",
+        const guestLabel = draft.stayingGuestName || draft.guestName || "Guest";
+        const detail = message ? ` ${message}` : "";
+        toast?.({
+          message: `Booking for "${guestLabel}" has been confirmed.${detail}`,
           color: "emerald",
+          duration: 4000,
         });
       },
     });
@@ -475,7 +493,7 @@ export default function BookingModernEditor({
 
       <BookingEditorActionBar
         showDecisionActions={showDecisionActions}
-        showPaymentReviewActions={draft.paymentPendingApproval}
+        showPaymentReviewActions={paymentReviewPending}
         checkoutPaymentRequested={!!draft.checkoutPaymentRequestedAt}
         checkoutPaymentApproved={
           normalizedStatus === "pending checkout"

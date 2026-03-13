@@ -266,17 +266,25 @@ export default function ContactOwnerModal({
     const selectedRoomNames = (availableRooms || [])
       .filter((room) => selectedRoomIds.includes(room.id))
       .map((room) => room.name);
+    const clientNormalized =
+      formData.inquirerType === "client"
+        ? {
+            ...formData,
+            stayingGuestName: formData.guestName || "",
+            stayingGuestEmail: formData.email || "",
+          }
+        : formData;
     const normalized =
       selectedRoomIds.length > 0
         ? {
-            ...formData,
+            ...clientNormalized,
             selectedRoomIds,
             selectedRoomNames,
             roomCount: selectedRoomIds.length,
             roomId: selectedRoomIds[0] || "",
             roomName: selectedRoomNames.join(", "),
           }
-        : formData;
+        : clientNormalized;
     onSubmitInquiry(normalized);
     handleClose();
   };
