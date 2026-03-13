@@ -599,7 +599,7 @@ export default function BookingCreationTemplate({
                         <span className={`font-bold text-sm ${formData.selectedServices.includes(service.name) ? "text-blue-700" : "text-slate-700"}`}>
                           {service.name}
                         </span>
-                        {service.price && <span className="text-xs text-slate-400">?{service.price}</span>}
+                        {service.price && <span className="text-xs text-slate-400">PHP {service.price}</span>}
                       </div>
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
                         formData.selectedServices.includes(service.name) ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-300"

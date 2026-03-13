@@ -241,14 +241,30 @@ create table if not exists public.owner_admin_messages_archive (
 alter table public.owner_admin_messages_archive
   add column if not exists sender_image text;
 
+create table if not exists public.booking_archive (
+  id uuid primary key default gen_random_uuid(),
+  resort_id bigint not null references public.resorts(id) on delete cascade,
+  booking_form jsonb not null default '{}'::jsonb,
+  start_date date,
+  end_date date,
+  check_in_time text,
+  check_out_time text,
+  room_count integer,
+  archived_at timestamptz not null default now(),
+  reopen_deadline timestamptz
+);
+
 create index if not exists ticket_issues_archive_resort_idx on public.ticket_issues_archive(resort_id);
 create index if not exists ticket_issues_archive_booking_idx on public.ticket_issues_archive(booking_id);
 create index if not exists ticket_issues_archive_resolved_idx on public.ticket_issues_archive(resolved_at desc);
 create index if not exists owner_admin_messages_archive_resort_idx on public.owner_admin_messages_archive(resort_id);
 create index if not exists owner_admin_messages_archive_resolved_idx on public.owner_admin_messages_archive(resolved_at desc);
+create index if not exists booking_archive_resort_idx on public.booking_archive(resort_id);
+create index if not exists booking_archive_archived_idx on public.booking_archive(archived_at desc);
 
 alter table public.ticket_issues_archive enable row level security;
 alter table public.owner_admin_messages_archive enable row level security;
+alter table public.booking_archive enable row level security;
 
 drop policy if exists ticket_issues_archive_all_access on public.ticket_issues_archive;
 create policy ticket_issues_archive_all_access on public.ticket_issues_archive
@@ -258,6 +274,12 @@ with check (true);
 
 drop policy if exists owner_admin_messages_archive_all_access on public.owner_admin_messages_archive;
 create policy owner_admin_messages_archive_all_access on public.owner_admin_messages_archive
+for all
+using (true)
+with check (true);
+
+drop policy if exists booking_archive_all_access on public.booking_archive;
+create policy booking_archive_all_access on public.booking_archive
 for all
 using (true)
 with check (true);

@@ -7,6 +7,7 @@ import {
   Clock3,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import { useResort } from "@/components/useclient/ContextEditor";
 import { useBookings } from "@/components/useclient/BookingsClient";
@@ -15,6 +16,8 @@ import { Button } from "@/components/ui/button";
 
 const GROUP_COLORS = ["bg-blue-600", "bg-orange-500", "bg-emerald-600", "bg-amber-500"];
 const GROUP_COLOR_HEX = ["#2563eb", "#f97316", "#059669", "#f59e0b"];
+const ARCHIVE_COLORS = ["bg-slate-800", "bg-slate-700", "bg-slate-900", "bg-slate-600"];
+const ARCHIVE_COLOR_HEX = ["#1f2937", "#334155", "#0f172a", "#475569"];
 
 function getNormalizedStatus(booking) {
   return String(booking?.status || booking?.bookingForm?.status || "").toLowerCase();
@@ -54,7 +57,7 @@ function getBookingEndDate(booking) {
   return booking?.endDate || booking?.bookingForm?.checkOutDate || getBookingStartDate(booking);
 }
 
-export default function BookingCalendar() {
+export default function BookingCalendar({ archivedBookings = [] }) {
   const { resort } = useResort();
   const { bookings } = useBookings();
   const router = useRouter();
@@ -62,6 +65,8 @@ export default function BookingCalendar() {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarMode, setCalendarMode] = useState("all"); // all | confirmed | inquiry
+  const [showArchived, setShowArchived] = useState(false);
+  const [archiveSearch, setArchiveSearch] = useState("");
   const calendarModes = [
     { id: "all", label: "All Bookings" },
     { id: "confirmed", label: "Confirmed / Ongoing" },
@@ -71,19 +76,47 @@ export default function BookingCalendar() {
   const nextMode = calendarModes[(currentModeIndex + 1) % calendarModes.length];
 
   const bookingList = useMemo(() => bookings || resort?.bookings || [], [bookings, resort?.bookings]);
+  const archivedList = useMemo(() => archivedBookings || [], [archivedBookings]);
+  const normalizedArchiveSearch = archiveSearch.trim().toLowerCase();
+  const filteredArchivedList = useMemo(() => {
+    if (!normalizedArchiveSearch) return archivedList;
+    return archivedList.filter((entry) => {
+      const form = entry.bookingForm || {};
+      const fields = [
+        form.stayingGuestName,
+        form.guestName,
+        form.agentName,
+        entry.startDate,
+        entry.endDate,
+      ];
+      return fields.some((value) => String(value || "").toLowerCase().includes(normalizedArchiveSearch));
+    });
+  }, [archivedList, normalizedArchiveSearch]);
+
   const getBookingColor = (booking) => {
+    if (booking?.isArchived) {
+      const index = filteredArchivedList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
+      if (index < 0) return ARCHIVE_COLORS[0];
+      return ARCHIVE_COLORS[index % ARCHIVE_COLORS.length];
+    }
     const index = bookingList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
     if (index < 0) return GROUP_COLORS[0];
     return GROUP_COLORS[index % GROUP_COLORS.length];
   };
   const getBookingColorHex = (booking) => {
+    if (booking?.isArchived) {
+      const index = filteredArchivedList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
+      if (index < 0) return ARCHIVE_COLOR_HEX[0];
+      return ARCHIVE_COLOR_HEX[index % ARCHIVE_COLOR_HEX.length];
+    }
     const index = bookingList.findIndex((entry) => entry.id?.toString() === booking.id?.toString());
     if (index < 0) return GROUP_COLOR_HEX[0];
     return GROUP_COLOR_HEX[index % GROUP_COLOR_HEX.length];
   };
 
-  const getDateBookings = (dateString) =>
-    bookingList.filter((booking) => {
+  const getDateBookings = (dateString) => {
+    const sourceList = showArchived ? [...bookingList, ...filteredArchivedList] : bookingList;
+    return sourceList.filter((booking) => {
       if (!shouldShowOnCalendar(booking)) return false;
       if (calendarMode === "confirmed" && !isConfirmedStatus(booking)) return false;
       if (calendarMode === "inquiry" && !isInquiryStatus(booking)) return false;
@@ -97,11 +130,14 @@ export default function BookingCalendar() {
         (dateString > startDate && dateString < endDate)
       );
     });
+  };
 
   const getBookingTooltip = (booking) => {
-    const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
-    const checkOut = booking?.checkOutTime || booking?.bookingForm?.checkOutTime || "--:--";
-    return `Time In: ${checkIn} - Time Out: ${checkOut}`;
+    const form = booking?.bookingForm || {};
+    const checkIn = booking?.checkInTime || form.checkInTime || "--:--";
+    const checkOut = booking?.checkOutTime || form.checkOutTime || "--:--";
+    const guestName = form.stayingGuestName || form.guestName || "Guest";
+    return `Guest: ${guestName} | Time In: ${checkIn} - Time Out: ${checkOut}`;
   };
 
   const getDateTooltip = (dateBookings) => {
@@ -220,10 +256,10 @@ export default function BookingCalendar() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
           <div>
             <h2 className="text-2xl font-black text-blue-600 flex items-center gap-3 uppercase tracking-tight">
-              <CalendarIcon size={28} className="text-blue-600" /> 
-              Resort Schedule
+              <CalendarIcon size={28} className="text-blue-600" />
+              Bookings Calendar
             </h2>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Read-only whole-resort availability overview</p>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Current and archived booking activity</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button
@@ -234,9 +270,30 @@ export default function BookingCalendar() {
             >
               {calendarModes.find((mode) => mode.id === calendarMode)?.label || "All Bookings"}
             </Button>
+            <Button
+              type="button"
+              variant={showArchived ? "default" : "outline"}
+              className="h-9 px-3 text-[11px] font-bold"
+              onClick={() => setShowArchived((prev) => !prev)}
+            >
+              {showArchived ? "Past Bookings On" : "Show Past Bookings"}
+            </Button>
           </div>
         
         </div>
+        {showArchived ? (
+          <div className="flex items-center gap-3">
+            <div className="relative w-full max-w-md">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                value={archiveSearch}
+                onChange={(e) => setArchiveSearch(e.target.value)}
+                placeholder="Search archived guest or agent name"
+                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs font-semibold text-slate-600"
+              />
+            </div>
+          </div>
+        ) : null}
 
         {/* THE CALENDAR GRID - Now much larger */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-12 bg-slate-50/50 p-4 sm:p-8 rounded-[2rem] border border-slate-100 relative">
@@ -255,10 +312,10 @@ export default function BookingCalendar() {
         {/* Active Ranges Summary at bottom of calendar */}
         {/* ... (keep your existing active ranges list) */}
       </div>
-              <div className="space-y-2">
+        <div className="space-y-2">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Resort Booking Ranges</p>
           <div className="flex flex-wrap gap-3">
-            {bookingList
+            {(showArchived ? [...bookingList, ...filteredArchivedList] : bookingList)
               .filter((booking) => shouldShowOnCalendar(booking))
               .filter((booking) => {
                 if (calendarMode === "confirmed") return isConfirmedStatus(booking);
@@ -268,7 +325,7 @@ export default function BookingCalendar() {
               .map((booking) => {
                 const checkIn = booking?.checkInTime || booking?.bookingForm?.checkInTime || "--:--";
                 const checkOut = booking?.checkOutTime || booking?.bookingForm?.checkOutTime || "--:--";
-                const guestName = booking?.bookingForm?.guestName || "Guest";
+                const guestName = booking?.bookingForm?.stayingGuestName || booking?.bookingForm?.guestName || "Guest";
                 const roomLabel = getStatusLabel(booking);
 
                 return (

@@ -36,6 +36,8 @@ export default function BookingManagementPage() {
   const [loadingConcerns, setLoadingConcerns] = useState(false);
   const [audits, setAudits] = useState([]);
   const [loadingAudits, setLoadingAudits] = useState(false);
+  const [archivedBookings, setArchivedBookings] = useState([]);
+  const [loadingArchivedBookings, setLoadingArchivedBookings] = useState(false);
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
   const [addingBooking, setAddingBooking] = useState(false);
   
@@ -182,6 +184,42 @@ export default function BookingManagementPage() {
     }
   };
 
+  const loadArchivedBookings = async () => {
+    if (!resortId) return;
+    setLoadingArchivedBookings(true);
+    try {
+      const { data, error } = await supabase
+        .from("booking_archive")
+        .select("id, resort_id, booking_form, start_date, end_date, check_in_time, check_out_time, room_count, archived_at")
+        .eq("resort_id", resortId)
+        .order("archived_at", { ascending: false });
+      if (error) throw error;
+      const mapped = (data || []).map((row) => ({
+        id: row.id,
+        resortId: row.resort_id,
+        startDate: row.start_date || row.booking_form?.checkInDate || null,
+        endDate: row.end_date || row.booking_form?.checkOutDate || null,
+        checkInTime: row.check_in_time || row.booking_form?.checkInTime || "14:00",
+        checkOutTime: row.check_out_time || row.booking_form?.checkOutTime || "11:00",
+        roomCount: row.room_count || row.booking_form?.roomCount || 1,
+        bookingForm: row.booking_form || {},
+        archivedAt: row.archived_at,
+        isArchived: true,
+      }));
+      setArchivedBookings(mapped);
+    } catch (error) {
+      const missingTable =
+        error.message?.includes("booking_archive") &&
+        (error.message?.includes("does not exist") || error.message?.includes("schema cache"));
+      if (!missingTable) {
+        console.error("Archive load error:", error.message);
+      }
+      setArchivedBookings([]);
+    } finally {
+      setLoadingArchivedBookings(false);
+    }
+  };
+
 
   useEffect(() => {
     if (!resortId) return;
@@ -207,6 +245,12 @@ export default function BookingManagementPage() {
     loadAudits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookings]);
+
+  useEffect(() => {
+    if (!resortId) return;
+    loadArchivedBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resortId]);
 
   const handleResolveConcern = async (issueId) => {
     const confirmed = window.confirm("Resolve and permanently delete this concern?");
@@ -283,6 +327,10 @@ export default function BookingManagementPage() {
 
   const openDetails = (targetBookingId) => {
     router.push(`/edit/bookings/${id}/booking-details/${targetBookingId}`);
+  };
+
+  const refreshAuditArchive = async () => {
+    await Promise.all([loadAudits(), loadArchivedBookings()]);
   };
 
   const handleCreateBooking = async (payload) => {
@@ -403,7 +451,7 @@ export default function BookingManagementPage() {
             }`}
           >
             <CalendarIcon size={18} />
-            Availability Calendar
+            Bookings Calendar
             {activeTab === "calendar" && <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-600 rounded-t-full" />}
           </button>
 
@@ -439,7 +487,7 @@ export default function BookingManagementPage() {
             </div>
           ) : activeTab === "calendar" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <BookingCalendar fullWidth />
+              <BookingCalendar fullWidth archivedBookings={archivedBookings} />
             </div>
           ) : activeTab === "concerns" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -458,8 +506,9 @@ export default function BookingManagementPage() {
                 audits={audits}
                 declinedBookings={declinedBookings}
                 checkedOutBookings={checkedOutBookings}
-                loading={loadingAudits}
-                onRefresh={loadAudits}
+                archivedBookings={archivedBookings}
+                loading={loadingAudits || loadingArchivedBookings}
+                onRefresh={refreshAuditArchive}
                 onOpenBooking={(bookingTargetId) => openDetails(bookingTargetId)}
                 onReopenDeclined={handleReopenDeclined}
                 onDeleteDeclined={handleDeleteDeclined}
