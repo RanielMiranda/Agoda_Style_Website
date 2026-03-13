@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { BUCKET_NAME } from "@/lib/utils";
+import { BUCKET_NAME, convertImageFileToWebp } from "@/lib/utils";
 import { isMissingSupportTableError, toSafeSegment } from "./helpers";
 import { useSupport } from "@/components/useclient/SupportClient";
 
@@ -58,11 +58,16 @@ export function useTicketActions({
     const safeTicket = toSafeSegment(normalizedBookingId);
     const uploadedUrls = [];
     for (const [index, proofFile] of proofFiles.entries()) {
-      const extension = ((proofFile.name?.split(".").pop() || "webp").replace(/[^a-z0-9]/gi, "").toLowerCase() || "webp");
-      const path = `resort-bookings/${safeResort}/${safeTicket}/proof-${index + 1}.${extension}`;
-      const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, proofFile, {
+      const normalizedFile = await convertImageFileToWebp(proofFile);
+      const baseName = normalizedFile?.name ? normalizedFile.name.replace(/\.[^.]+$/, "") : `proof-${index + 1}`;
+      const safeBase = String(baseName || `proof-${index + 1}`)
+        .trim()
+        .replace(/[^a-z0-9-_]/gi, "-")
+        .toLowerCase();
+      const path = `resort-bookings/${safeResort}/${safeTicket}/${safeBase || `proof-${index + 1}`}.webp`;
+      const { error } = await supabase.storage.from(BUCKET_NAME).upload(path, normalizedFile, {
         upsert: true,
-        contentType: proofFile.type || "image/webp",
+        contentType: normalizedFile?.type || "image/webp",
       });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);

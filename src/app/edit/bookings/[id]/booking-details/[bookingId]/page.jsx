@@ -12,6 +12,7 @@ import PersistentToast from "@/components/ui/toast/PersistentToast";
 import BookingModernEditor from "./components/BookingModernEditor";
 import { overlapsByDateTime } from "./components/bookingEditorUtils";
 import { supabase } from "@/lib/supabase";
+import { BUCKET_NAME } from "@/lib/utils";
 
 export default function BookingDetailsPage() {
   const { id, bookingId } = useParams();
@@ -45,6 +46,42 @@ export default function BookingDetailsPage() {
     const bucket = Math.floor(Date.now() / 5000);
     const base = `${booking?.id || ""}:owner:${message}`.toLowerCase().trim();
     return `ticket-msg:${bucket}:${hashString(base)}`;
+  };
+
+  const toSafeSegment = (value) =>
+    String(value || "unknown")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-_\s]/g, "")
+      .replace(/\s+/g, "-");
+
+  const listStorageFilesRecursively = async (prefix) => {
+    const filePaths = [];
+    const walk = async (folderPath) => {
+      let offset = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase.storage.from(BUCKET_NAME).list(folderPath, {
+          limit: 100,
+          offset,
+          sortBy: { column: "name", order: "asc" },
+        });
+        if (error) throw error;
+        const entries = data || [];
+        for (const entry of entries) {
+          const currentPath = folderPath ? `${folderPath}/${entry.name}` : entry.name;
+          if (entry.id) {
+            filePaths.push(currentPath);
+          } else {
+            await walk(currentPath);
+          }
+        }
+        hasMore = entries.length === 100;
+        offset += 100;
+      }
+    };
+    if (prefix) await walk(prefix);
+    return filePaths;
   };
 
   useEffect(() => {
@@ -269,6 +306,26 @@ export default function BookingDetailsPage() {
   const handleResolveIssue = async (issueId) => {
     try {
       await updateConcernStatus(issueId, "resolved");
+      try {
+        const resortName =
+          currentResort?.name ||
+          booking?.bookingForm?.resortName ||
+          booking?.booking_form?.resortName ||
+          `resort-${booking?.resort_id || booking?.resortId || "unknown"}`;
+        const safeResort = toSafeSegment(resortName);
+        const safeTicket = toSafeSegment(booking?.id || bookingId || "unknown");
+        const prefix = `resort-bookings/${safeResort}/${safeTicket}`;
+        const allPaths = await listStorageFilesRecursively(prefix);
+        if (allPaths.length > 0) {
+          for (let i = 0; i < allPaths.length; i += 100) {
+            const chunk = allPaths.slice(i, i + 100);
+            const { error: removeError } = await supabase.storage.from(BUCKET_NAME).remove(chunk);
+            if (removeError) throw removeError;
+          }
+        }
+      } catch (storageError) {
+        console.error("Failed to remove proof files:", storageError?.message || storageError);
+      }
       await loadSupportData(booking.id);
       toast({ message: "Issue marked as resolved.", color: "green" });
     } catch (err) {
