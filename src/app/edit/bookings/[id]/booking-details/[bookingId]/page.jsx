@@ -26,6 +26,7 @@ export default function BookingDetailsPage() {
   const [statusAudits, setStatusAudits] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [proofOverrideForm, setProofOverrideForm] = useState(null);
+  const [ownerReplyTarget, setOwnerReplyTarget] = useState("all");
   const [refreshingMessages, setRefreshingMessages] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -241,7 +242,12 @@ export default function BookingDetailsPage() {
         resort_id: booking.resortId || booking.resort_id || Number(id),
         sender_role: "owner",
         sender_name: "Owner",
-        visibility: null,
+        visibility:
+          ownerReplyTarget === "agent"
+            ? true
+            : ownerReplyTarget === "client"
+              ? false
+              : null,
         message: ownerReply.trim(),
         idempotency_key: buildOwnerIdempotencyKey(ownerReply),
       };
@@ -319,6 +325,8 @@ export default function BookingDetailsPage() {
       issues={issues}
       ownerReply={ownerReply}
       setOwnerReply={setOwnerReply}
+      ownerReplyTarget={ownerReplyTarget}
+      setOwnerReplyTarget={setOwnerReplyTarget}
       onSendReply={handleSendReply}
       onRefreshMessages={() => loadSupportData(booking.id)}
       refreshingMessages={refreshingMessages}

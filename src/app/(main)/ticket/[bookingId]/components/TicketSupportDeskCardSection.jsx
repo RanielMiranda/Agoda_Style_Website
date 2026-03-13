@@ -82,13 +82,15 @@ export function TicketSupportDeskCardSection({
                     : "bg-white text-slate-700 mr-8 border border-slate-100"
                 }`}
               >
-                <p className="font-black uppercase tracking-wider text-[9px] mb-1">{getSupportConversationLabel(msg)}</p>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <p className="font-black uppercase tracking-wider text-[9px]">{getSupportConversationLabel(msg)}</p>
+                  {msg.createdAt ? (
+                    <span className="text-[9px] text-slate-400">
+                      {new Date(msg.createdAt).toLocaleString()}
+                    </span>
+                  ) : null}
+                </div>
                 <p>{msg.body}</p>
-                {msg.createdAt ? (
-                  <p className="mt-1 text-[10px] text-slate-400">
-                    {new Date(msg.createdAt).toLocaleString()}
-                  </p>
-                ) : null}
               </div>
             ))
           )}

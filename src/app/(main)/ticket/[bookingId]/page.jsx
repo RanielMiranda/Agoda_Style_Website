@@ -108,6 +108,7 @@ export default function ClientTicketPage() {
         canAccessEntryPass={canAccessEntryPass}
         onPrintEntryPass={openPrintEntryPass}
         onDownloadTicket={downloadTicket}
+        viewerRole={viewerRole}
       />
 
       <TicketStayInfoCardSection
@@ -117,6 +118,7 @@ export default function ClientTicketPage() {
         approvedByName={stayInfoPayload?.approvedByName}
         assignedRoomNames={stayInfoPayload?.assignedRoomNames}
         entryCode={stayInfoPayload?.entryCode}
+        viewerRole={viewerRole}
       />
 
       <TicketPaymentCardSection
@@ -142,14 +144,16 @@ export default function ClientTicketPage() {
         }
       />
 
-      <TicketAddOnsCardSection
-        key={`${booking.id}:${form.addOnsUpdatedAt || ""}:${JSON.stringify(form.resortServices || [])}`}
-        initialServices={Array.isArray(form.resortServices) ? form.resortServices : []}
-        availableServices={Array.isArray(resort?.extraServices) ? resort.extraServices : []}
-        onSubmit={handleSubmitAddOns}
-        isSubmitting={isSavingAddOns}
-        canEdit={!status.includes("checked out") && !status.includes("cancel") && !status.includes("declined")}
-      />
+      {viewerRole !== "agent" ? (
+        <TicketAddOnsCardSection
+          key={`${booking.id}:${form.addOnsUpdatedAt || ""}:${JSON.stringify(form.resortServices || [])}`}
+          initialServices={Array.isArray(form.resortServices) ? form.resortServices : []}
+          availableServices={Array.isArray(resort?.extraServices) ? resort.extraServices : []}
+          onSubmit={handleSubmitAddOns}
+          isSubmitting={isSavingAddOns}
+          canEdit={!status.includes("checked out") && !status.includes("cancel") && !status.includes("declined")}
+        />
+      ) : null}
 
       <TicketSupportDeskCardSection
         resort={resort}

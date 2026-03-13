@@ -211,11 +211,15 @@ export function useTicketActions({
     setIsSendingMessage(true);
     try {
       lastMessageSentAtRef.current = now;
+      const senderDisplayName =
+        viewerRole === "agent"
+          ? (form.agentName || form.guestName || "Agent")
+          : (form.stayingGuestName || form.guestName || "Guest");
       const payload = {
         booking_id: booking.id,
         resort_id: booking.resort_id,
         sender_role: "client",
-        sender_name: form.guestName || "Client",
+        sender_name: senderDisplayName,
         message: chatMessage.trim(),
         visibility: viewerRole === "agent" ? true : false,
         idempotency_key: buildMessageIdempotencyKey(chatMessage, "client"),

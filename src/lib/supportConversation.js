@@ -15,6 +15,7 @@ export function buildSupportConversationItems({
       createdAt: msg.created_at,
       senderRole: msg.sender_role,
       senderName: msg.sender_name,
+      visibility: msg.visibility,
       body: msg.message,
     })),
     ...(issues || []).map((issue) => ({

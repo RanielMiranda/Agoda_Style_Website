@@ -43,6 +43,8 @@ export default function BookingModernEditor({
   issues,
   ownerReply,
   setOwnerReply,
+  ownerReplyTarget,
+  setOwnerReplyTarget,
   onSendReply,
   onRefreshMessages,
   refreshingMessages = false,
@@ -461,6 +463,8 @@ export default function BookingModernEditor({
               refreshingMessages={refreshingMessages}
               ownerReply={ownerReply}
               setOwnerReply={setOwnerReply}
+              ownerReplyTarget={ownerReplyTarget}
+              setOwnerReplyTarget={setOwnerReplyTarget}
               onSendReply={onSendReply}
               inquirerType={draft.inquirerType}
             />

@@ -61,7 +61,7 @@ alter table public.bookings
   add column if not exists pax integer not null default 0,
   add column if not exists sleeping_guests integer not null default 0,
   add column if not exists room_count integer not null default 1,
-  add column if not exists inquirer_type text not null default 'client';
+  add column if not exists inquirer_type boolean not null default false;
 
 create table if not exists public.booking_transactions (
   id bigint generated always as identity primary key,
@@ -117,7 +117,7 @@ set
   ),
   sleeping_guests = coalesce((booking_form->>'sleepingGuests')::int, sleeping_guests),
   room_count = coalesce((booking_form->>'roomCount')::int, room_count),
-  inquirer_type = coalesce((booking_form->>'inquirerType'), inquirer_type)
+  inquirer_type = coalesce((booking_form->>'inquirerType') = 'agent', inquirer_type)
 where booking_form <> '{}'::jsonb;
 
 -- ==========================================

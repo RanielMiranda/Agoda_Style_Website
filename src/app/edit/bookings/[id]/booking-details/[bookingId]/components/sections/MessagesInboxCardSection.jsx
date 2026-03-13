@@ -14,6 +14,8 @@ export default function MessagesInboxCardSection({
   setOwnerReply,
   onSendReply,
   inquirerType,
+  ownerReplyTarget,
+  setOwnerReplyTarget,
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const hasAgent = String(inquirerType || "").toLowerCase() === "agent"
@@ -95,6 +97,14 @@ export default function MessagesInboxCardSection({
               item.kind === "message" &&
               item.senderRole === "client" &&
               item.id === earliestClientMessageId;
+            const ownerTargetLabel =
+              isOwner && item.kind === "message"
+                ? item.visibility === true
+                  ? "To Agent"
+                  : item.visibility === false
+                    ? "To Client"
+                    : "To All"
+                : "";
             return (
               <div
                 key={item.id}
@@ -112,6 +122,11 @@ export default function MessagesInboxCardSection({
                   <p className="font-black uppercase text-[9px]">
                     {isInitialInquiryNote ? "Initial Inquiry Note" : getSupportConversationLabel(item)}
                   </p>
+                  {ownerTargetLabel ? (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-500">
+                      {ownerTargetLabel}
+                    </span>
+                  ) : null}
                   {isIssue && !resolved ? (
                     <Button
                       type="button"
@@ -124,11 +139,38 @@ export default function MessagesInboxCardSection({
                   ) : null}
                 </div>
                 <p>{item.body}</p>
+                {item.createdAt ? (
+                  <p className="mt-1 text-[10px] text-slate-400">
+                    {new Date(item.createdAt).toLocaleString()}
+                  </p>
+                ) : null}
               </div>
             );
           })
         )}
       </div>
+      {hasAgent ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {[
+            { id: "all", label: "All" },
+            { id: "client", label: "Client" },
+            { id: "agent", label: "Agent" },
+          ].map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setOwnerReplyTarget?.(option.id)}
+              className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest border ${
+                ownerReplyTarget === option.id
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              Reply to {option.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="flex gap-2">
         <input
           className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"

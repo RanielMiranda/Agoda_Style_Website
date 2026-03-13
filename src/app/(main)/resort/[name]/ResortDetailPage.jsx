@@ -201,7 +201,7 @@ const handleSubmitInquiry = async (submittedData) => {
         check_in_time: submittedData.checkInTime || "14:00",
         check_out_time: submittedData.checkOutTime || "11:00",
         status: "Inquiry",
-        inquirer_type: submittedData.inquirerType || "client",
+        inquirer_type: submittedData.inquirerType === "agent",
         adult_count: adultCount,
         children_count: childrenCount,
         pax,

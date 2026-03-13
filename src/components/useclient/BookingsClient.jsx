@@ -37,7 +37,7 @@ function toModel(row) {
     checkInTime: row.check_in_time || "14:00",
     checkOutTime: row.check_out_time || "11:00",
     bookingForm: row.booking_form || {},
-    inquirerType: row.inquirer_type || row.booking_form?.inquirerType || "client",
+    inquirerType: row.inquirer_type === true || row.booking_form?.inquirerType === "agent" ? "agent" : "client",
     status: row.status || row.booking_form?.status || "Inquiry",
     adultCount: Number(row.adult_count ?? row.booking_form?.adultCount ?? 0),
     childrenCount: Number(row.children_count ?? row.booking_form?.childrenCount ?? 0),
@@ -68,7 +68,7 @@ function toRow(booking, resortId) {
     pax,
     sleeping_guests: Number(form.sleepingGuests ?? booking.sleepingGuests ?? 0),
     room_count: Number(form.roomCount ?? booking.roomCount ?? booking.roomIds?.length ?? 1),
-    inquirer_type: form.inquirerType || booking.inquirerType || "client",
+    inquirer_type: (form.inquirerType || booking.inquirerType) === "agent",
     payment_deadline: booking.paymentDeadline || booking.bookingForm?.paymentDeadline || null,
     booking_form: {
       ...form,
