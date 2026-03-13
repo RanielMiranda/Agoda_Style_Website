@@ -13,6 +13,7 @@ export async function middleware(request) {
   const isOwnerRoute = pathname.startsWith("/owner");
   const isEditRoute = pathname.startsWith("/edit");
   const isLoginPage = pathname === "/auth/login";
+{/*
   const isAssetRoute =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
@@ -34,7 +35,8 @@ export async function middleware(request) {
     const target = appRole === "admin" ? "/admin/dashboard" : "/owner/dashboard";
     return NextResponse.redirect(new URL(target, request.url));
   }
-
+  
+*/}
   if (isAdminRoute || isOwnerRoute || isEditRoute) {
     if (!appAuth) {
       return NextResponse.redirect(new URL("/", request.url));
