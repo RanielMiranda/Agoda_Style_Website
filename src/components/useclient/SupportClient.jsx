@@ -88,18 +88,7 @@ export function SupportProvider({ children }) {
     };
   }, []);
 
-  const listResortConcerns = useCallback(async (resortId, options = {}) => {
-    const pruneDays = Number(options.pruneResolvedOlderThanDays || 0);
-    if (pruneDays > 0) {
-      const cutoffIso = new Date(Date.now() - pruneDays * 24 * 60 * 60 * 1000).toISOString();
-      await supabase
-        .from("ticket_issues_archive")
-        .delete()
-        .eq("resort_id", resortId)
-        .eq("status", "resolved")
-        .lt("resolved_at", cutoffIso);
-    }
-
+  const listResortConcerns = useCallback(async (resortId) => {
     const [{ data, error }, { data: archivedData, error: archivedError }] = await Promise.all([
       supabase
         .from("ticket_issues")

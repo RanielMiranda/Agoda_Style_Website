@@ -118,7 +118,7 @@ export default function BookingManagementPage() {
     if (!resortId) return;
     setLoadingConcerns(true);
     try {
-      const rows = await listResortConcerns(resortId, { pruneResolvedOlderThanDays: 10 });
+      const rows = await listResortConcerns(resortId);
       setConcerns(rows);
     } catch (error) {
       console.error("Concerns load error:", error.message);
