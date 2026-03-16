@@ -91,7 +91,7 @@ export default function BookingManagementPage() {
     () =>
       (bookings || []).filter((entry) => {
         const status = (entry.status || entry.bookingForm?.status || "").toLowerCase();
-        return status.includes("checked out") || status.includes("cancelled");
+        return status.includes("checked out") || status.includes("checked-out") || status.includes("cancelled");
       }),
     [bookings]
   );
@@ -256,16 +256,8 @@ export default function BookingManagementPage() {
     const confirmed = window.confirm("Resolve and permanently delete this concern?");
     if (!confirmed) return;
     try {
-      const isArchivedId = typeof issueId === "string" && issueId.startsWith("arch:");
-      const archiveId = isArchivedId ? issueId.slice(5) : null;
-
-      if (isArchivedId) {
-        const { error } = await supabase.from("ticket_issues_archive").delete().eq("id", archiveId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("ticket_issues").delete().eq("id", issueId);
-        if (error) throw error;
-      }
+      const { error } = await supabase.from("ticket_issues").delete().eq("id", issueId);
+      if (error) throw error;
 
       setConcerns((prev) => prev.filter((entry) => entry.id !== issueId));
     } catch (error) {
@@ -315,13 +307,63 @@ export default function BookingManagementPage() {
       window.alert("Resolve blocked: this booking has unresolved issues.");
       return;
     }
-    const confirmed = window.confirm("Resolve and permanently delete this booking?");
+    const confirmed = window.confirm("Resolve and archive this booking permanently?");
     if (!confirmed) return;
     try {
+      const source = (bookings || []).find((entry) => entry.id?.toString() === bookingId?.toString());
+      if (!source) {
+        await deleteBookingById(bookingId);
+        return;
+      }
+
+      const form = source.bookingForm || {};
+      const archiveForm = {
+        stayingGuestName: form.stayingGuestName || form.guestName || "",
+        guestName: form.guestName || "",
+        agentName: form.agentName || "",
+        roomName: form.roomName || "",
+        checkInDate: source.startDate || form.checkInDate || null,
+        checkOutDate: source.endDate || form.checkOutDate || null,
+        checkInTime: source.checkInTime || form.checkInTime || "14:00",
+        checkOutTime: source.checkOutTime || form.checkOutTime || "11:00",
+        roomCount: Number(source.roomCount || form.roomCount || 1),
+        inquirerType: source.inquirerType || form.inquirerType || "client",
+        email: form.email || "",
+        phoneNumber: form.phoneNumber || "",
+        address: form.address || "",
+        status: "Checked Out",
+      };
+
+      const { error: archiveError } = await supabase.from("booking_archive").insert({
+        resort_id: resortId,
+        booking_form: archiveForm,
+        start_date: archiveForm.checkInDate,
+        end_date: archiveForm.checkOutDate,
+        check_in_time: archiveForm.checkInTime,
+        check_out_time: archiveForm.checkOutTime,
+        room_count: archiveForm.roomCount,
+        archived_at: new Date().toISOString(),
+        reopen_deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      if (archiveError) throw archiveError;
+
       await deleteBookingById(bookingId);
+      await loadArchivedBookings();
       await loadAudits();
     } catch (error) {
       console.error("Delete checked-out booking error:", error.message);
+    }
+  };
+
+  const handleDeleteArchivedBooking = async (archiveId) => {
+    const confirmed = window.confirm("Remove this archived booking permanently?");
+    if (!confirmed) return;
+    try {
+      const { error } = await supabase.from("booking_archive").delete().eq("id", archiveId);
+      if (error) throw error;
+      setArchivedBookings((prev) => prev.filter((entry) => entry.id?.toString() !== archiveId?.toString()));
+    } catch (error) {
+      console.error("Delete archived booking error:", error.message);
     }
   };
 
@@ -513,6 +555,7 @@ export default function BookingManagementPage() {
                 onReopenDeclined={handleReopenDeclined}
                 onDeleteDeclined={handleDeleteDeclined}
                 onResolveCheckedOut={handleResolveCheckedOut}
+                onDeleteArchived={handleDeleteArchivedBooking}
                 unresolvedIssueBookingIds={unresolvedIssueBookingIds}
               />
             </div>

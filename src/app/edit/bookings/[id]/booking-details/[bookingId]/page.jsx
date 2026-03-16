@@ -19,7 +19,7 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { resort, loadResort, setResort, loading } = useResort();
-  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction } = useBookings();
+  const { bookings, updateBookingById, deleteBookingById, loadingBookings, createSignedProofUrl, createBookingTransaction, refreshBookings } = useBookings();
   const { loadBookingSupport, updateConcernStatus, sendTicketMessage, isMissingSupportTableError } = useSupport();
   const [messages, setMessages] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -139,13 +139,9 @@ export default function BookingDetailsPage() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "ticket_issues_archive", filter: `booking_id=eq.${booking.id}` },
-        () => loadSupportData(booking.id)
-      )
-      .on(
-        "postgres_changes",
         { event: "*", schema: "public", table: "bookings", filter: `id=eq.${booking.id}` },
         () => {
+          refreshBookings();
           loadProofData(booking.id);
         }
       )

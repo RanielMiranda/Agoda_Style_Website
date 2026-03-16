@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Archive, RefreshCw, Clock3, ArrowRightLeft, Search } from "lucide-react";
+import { Archive, RefreshCw, Clock3, ArrowRightLeft, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function AuditArchivePanel({
@@ -14,6 +14,7 @@ export default function AuditArchivePanel({
   onReopenDeclined,
   onDeleteDeclined,
   onResolveCheckedOut,
+  onDeleteArchived,
   unresolvedIssueBookingIds = new Set(),
 }) {
   const [activeTab, setActiveTab] = useState("all");
@@ -38,7 +39,7 @@ export default function AuditArchivePanel({
     () =>
       (checkedOutBookings || []).filter((item) => {
         const status = String(item.status || item.bookingForm?.status || "").toLowerCase();
-        return status.includes("checked out") && !status.includes("cancel");
+        return (status.includes("checked out") || status.includes("checked-out")) && !status.includes("cancel");
       }),
     [checkedOutBookings]
   );
@@ -149,6 +150,11 @@ export default function AuditArchivePanel({
           />
         </div>
       </div>
+      {filteredCheckedOut.length > 0 ? (
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+          Bookings stored here for up to 7 days can be archived forever. Use Resolve to archive and strip extra data.
+        </div>
+      ) : null}
 
       {filteredArchived.length === 0 &&
       filteredDeclined.length === 0 &&
@@ -211,6 +217,17 @@ export default function AuditArchivePanel({
                                 {inquirerType === "agent" ? "Agent" : "Client"}
                               </span>
                             </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-wrap lg:justify-end">
+                            <Button
+                              variant="outline"
+                              className="h-8 w-8 p-0 flex items-center justify-center text-rose-600 border-rose-200 hover:bg-rose-50"
+                              onClick={() => onDeleteArchived?.(item.id)}
+                              aria-label="Delete archived booking"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -508,6 +525,17 @@ export default function AuditArchivePanel({
                         {inquirerType === "agent" ? "Agent" : "Client"}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap lg:justify-end">
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0 flex items-center justify-center text-rose-600 border-rose-200 hover:bg-rose-50"
+                      onClick={() => onDeleteArchived?.(item.id)}
+                      aria-label="Delete archived booking"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
                 </div>
               </div>

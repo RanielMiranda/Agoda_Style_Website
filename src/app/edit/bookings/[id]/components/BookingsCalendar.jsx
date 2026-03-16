@@ -36,7 +36,7 @@ function getStatusLabel(booking) {
 function shouldShowOnCalendar(booking) {
   if (booking?.isArchived) return true;
   const normalizedStatus = getNormalizedStatus(booking);
-  return !["pending checkout", "checked out", "cancelled", "declined"].includes(normalizedStatus);
+  return !["pending checkout", "checked out", "checked-out", "cancelled", "declined"].includes(normalizedStatus);
 }
 
 function isConfirmedStatus(booking) {
